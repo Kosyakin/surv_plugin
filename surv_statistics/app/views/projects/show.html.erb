@@ -1,0 +1,74 @@
+<h2><%= @query.new_record? ? l(:label_spent_time) : @query.name %></h2>
+<%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
+
+<%= form_tag(project_path(@project), :method => :get, :id => 'query_form') do %>
+<%= render :partial => 'timelog/date_range' %>
+<% end %>
+
+<% if @query.valid? %>
+  <%# Compute aggregation in the view to simplify controller %>
+  <% activity_table = Enumeration.table_name %>
+  <% time_entries_table = TimeEntry.table_name %>
+  <% scope = @query.results_scope %>
+  <% aggregated = scope.joins(:activity).group("#{activity_table}.name").reorder(nil).pluck("#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+  <% labels = aggregated.map { |name, _sum| name } %>
+  <% values = aggregated.map { |_, sum| sum.to_f } %>
+
+  <div id="echart" style="width:100%;height:420px;"></div>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script>
+    (function() {
+      var el = document.getElementById('echart');
+      if (!el) { return; }
+      var chart = echarts.init(el);
+      var labels = <%= raw(labels.to_json) %>;
+      var values = <%= raw(values.to_json) %>;
+      var option = {
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: labels },
+        yAxis: { type: 'value', name: 'hours' },
+        series: [{ type: 'bar', data: values }]
+      };
+      chart.setOption(option);
+      window.addEventListener('resize', function(){ chart.resize(); });
+    })();
+  </script>
+
+  <%# Additional charts for each directly linked child project %>
+  <% child_projects = @project.children.visible.to_a %>
+  <% child_projects.each do |child_project| %>
+    <% child_ids = child_project.self_and_descendants.pluck(:id) %>
+    <% child_aggregated = scope.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.name").reorder(nil).pluck("#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+    <% child_labels = child_aggregated.map { |name, _sum| name } %>
+    <% child_values = child_aggregated.map { |_, sum| sum.to_f } %>
+
+    <h3 style="margin-top:24px;"><%= h(child_project.name) %></h3>
+    <div id="echart-<%= child_project.id %>" style="width:100%;height:360px;"></div>
+    <script>
+      (function() {
+        var el = document.getElementById('echart-<%= child_project.id %>');
+        if (!el) { return; }
+        var chart = echarts.init(el);
+        var labels = <%= raw(child_labels.to_json) %>;
+        var values = <%= raw(child_values.to_json) %>;
+        var option = {
+          tooltip: { trigger: 'axis' },
+          xAxis: { type: 'category', data: labels },
+          yAxis: { type: 'value', name: 'hours' },
+          series: [{ type: 'bar', data: values }]
+        };
+        chart.setOption(option);
+        var targetUrl = '<%= project_path(child_project) %>';
+        chart.getZr().on('click', function(e){
+          var pointInPixel = [e.offsetX, e.offsetY];
+          if (chart.containPixel('grid', pointInPixel)) {
+            window.location.href = targetUrl;
+          }
+        });
+        window.addEventListener('resize', function(){ chart.resize(); });
+      })();
+    </script>
+  <% end %>
+<% else %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
