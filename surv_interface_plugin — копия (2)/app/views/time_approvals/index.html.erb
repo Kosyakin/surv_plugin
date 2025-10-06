@@ -1,0 +1,267 @@
+<h1>Согласование трудозатрат</h1>
+
+
+<% if @query.valid? %>
+<% if @entries.empty? %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+<%= render_query_totals(@query) %>
+
+<div style="display:flex; gap:16px; align-items:flex-start;">
+  <div style="flex:1 1 60%; min-width:0;">
+    <%= render :partial => 'list', :locals => { :entries => @entries }%>
+    <span class="pagination"><%= pagination_links_full @entry_pages, @entry_count %></span>
+  </div>
+
+  <div style="flex:1 1 40%; min-width:0;">
+    <!-- Статистика трудозатрат по пользователям -->
+    <% if @user_charts.empty? %>
+      <p class="nodata">Нет данных для отображения графиков</p>
+    <% else %>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <% @user_charts.each_with_index do |user_chart, index| %>
+          <div class="chart-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa; cursor: pointer; transition: all 0.3s ease;" 
+               onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" 
+               onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
+               onclick="handleChartContainerClick(<%= index %>)">
+            <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">
+              <%= user_chart[:user_name] %>
+              <small style="display: block; font-size: 11px; color: #666; font-weight: normal; margin-top: 3px;">Нажмите для просмотра в таблице</small>
+            </h3>
+            <div id="userChart<%= index %>" style="width: 100%; height: 200px;"></div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+</div>
+
+<% other_formats_links do |f| %>
+  <%= f.link_to_with_query_parameters 'CSV', {}, :onclick => "showModal('csv-export-options', '330px'); return false;" %>
+  <%= f.link_to_with_query_parameters 'Atom', :key => User.current.atom_key %>
+<% end %>
+
+<div id="csv-export-options" style="display:none;">
+  <h3 class="title"><%= l(:label_export_options, :export_format => 'CSV') %></h3>
+  <%= form_tag(time_entries_approval_path(:format => 'csv'), :method => :get, :id => 'csv-export-form') do %>
+  <%= query_as_hidden_field_tags @query %>
+  <%= hidden_field_tag('query_name', @query.name) %>
+  <p>
+    <label><%= radio_button_tag 'c[]', '', true %> <%= l(:description_selected_columns) %></label><br />
+    <label><%= radio_button_tag 'c[]', 'all_inline' %> <%= l(:description_all_columns) %></label>
+  </p>
+  <% if @query.available_block_columns.any? %>
+    <fieldset id="csv-export-block-columns">
+      <legend>
+        <%= toggle_checkboxes_link('#csv-export-block-columns input[type=checkbox]') %>
+      </legend>
+      <% @query.available_block_columns.each do |column| %>
+        <label><%= check_box_tag 'c[]', column.name, @query.has_column?(:column), :id => nil %> <%= column.caption %></label>
+      <% end %>
+    </fieldset>
+  <% end %>
+  <%= export_csv_encoding_select_tag %>
+  <%= export_csv_separator_select_tag %>
+  <p class="buttons">
+    <%= submit_tag l(:button_export), :name => nil, :onclick => "hideModal(this);", :data => { :disable_with => false } %>
+    <%= link_to_function l(:button_cancel), "hideModal(this);" %>
+  </p>
+  <% end %>
+</div>
+<% end %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <%= render :partial => 'timelog/sidebar' %>
+<% end %>
+
+<% html_title(@query.new_record? ? l(:label_spent_time) : @query.name, l(:label_details)) %>
+
+<% content_for :header_tags do %>
+    <%= auto_discovery_link_tag(:atom, {:issue_id => @issue, :format => 'atom', :key => User.current.atom_key}, :title => l(:label_spent_time)) %>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<% end %>
+
+<% unless @entries.empty? || @user_charts.empty? %>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  var userCharts = <%= raw @user_charts.to_json %>;
+  var charts = [];
+  
+  // Find global max hours for consistent opacity calculation across all charts
+  var globalMaxHours = 0;
+  userCharts.forEach(function(userChart) {
+    userChart.chart_data.forEach(function(dayData) {
+      dayData.entries.forEach(function(entry) {
+        if (entry.hours > globalMaxHours) globalMaxHours = entry.hours;
+      });
+    });
+  });
+  
+  // Create a chart for each user
+  userCharts.forEach(function(userChart, userIndex) {
+    var chartDom = document.getElementById('userChart' + userIndex);
+    if (chartDom) {
+      var myChart = echarts.init(chartDom);
+      charts.push(myChart);
+      
+      var dates = userChart.dates;
+      var chartData = userChart.chart_data;
+      var series = [];
+      
+      // Create series for each time entry with red color and opacity based on hours
+      chartData.forEach(function(dayData, dayIndex) {
+        dayData.entries.forEach(function(entry, entryIndex) {
+          var seriesName = 'ID: ' + entry.id + ' (' + entry.hours + 'ч)';
+          var data = new Array(dates.length).fill(0);
+          data[dayIndex] = entry.hours;
+          
+          // Use single color for all entries - no color variation
+          
+          series.push({
+            name: seriesName,
+            type: 'bar',
+            stack: 'total',
+            data: data,
+            itemStyle: {
+              color: 'rgba(229, 57, 53, 0.7)',
+              borderColor: 'rgba(0,0,0,0.08)',
+              borderWidth: 1
+            }
+          });
+        });
+      });
+      
+      var option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          },
+          formatter: function(params) {
+            var dateIndex = params[0].dataIndex;
+            var dayInfo = chartData[dateIndex];
+            
+            var result = '<strong>' + userChart.user_name + '</strong><br/>';
+            result += '<strong>Дата: ' + dayInfo.date + '</strong><br/>';
+            result += 'Не согласовано: <strong>' + dayInfo.total_hours + 'ч</strong><br/><br/>';
+            
+            dayInfo.entries.forEach(function(entry) {
+              result += entry.hours + 'ч<br/>';
+              result += entry.activity;
+              if (entry.comments) {
+                result += ' : ' + entry.comments + '<br/>';
+              }
+              result += '<br/>';
+            });
+            
+            return result;
+          }
+        },
+        legend: {
+          show: false  // Hide legend as there might be too many entries
+        },
+        grid: {
+          left: '20%',
+          right: '5%',
+          bottom: '5%',
+          top: '5%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'value',
+          name: 'Часы',
+          axisLabel: {
+            formatter: '{value}ч',
+            fontSize: 9
+          }
+        },
+        yAxis: {
+          type: 'category',
+          data: dates,
+          axisLabel: {
+            interval: 0,
+            fontSize: 9
+          }
+        },
+        series: series
+      };
+      
+      myChart.setOption(option);
+    }
+  });
+  
+  // Resize all charts when window is resized
+  window.addEventListener('resize', function() {
+    charts.forEach(function(chart) {
+      chart.resize();
+    });
+  });
+  
+  // Initialize table groups as collapsed - REMOVED to keep all groups expanded
+  
+  // Add click handlers to charts for table interaction
+  charts.forEach(function(chart, index) {
+    chart.on('click', function(params) {
+      var userName = userCharts[index].user_name;
+      expandUserGroup(userName);
+      highlightChart(index);
+    });
+  });
+});
+
+// Function to collapse all table groups initially
+function initializeTableGroups() {
+  var groupRows = document.querySelectorAll('tr.group.open');
+  groupRows.forEach(function(row) {
+    var expander = row.querySelector('.expander');
+    if (expander && expander.classList.contains('icon-expanded')) {
+      toggleRowGroup(expander);
+    }
+  });
+}
+
+// Function to expand specific user group in table
+function expandUserGroup(userName) {
+  var groupRows = document.querySelectorAll('tr.group');
+  groupRows.forEach(function(row) {
+    var nameElement = row.querySelector('.name a');
+    if (nameElement && nameElement.textContent.trim() === userName) {
+      var expander = row.querySelector('.expander');
+      if (expander && expander.classList.contains('icon-collapsed')) {
+        toggleRowGroup(expander);
+      }
+      // Scroll to the group
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
+// Function to highlight active chart
+function highlightChart(activeIndex) {
+  document.querySelectorAll('.chart-container').forEach(function(container, index) {
+    if (index === activeIndex) {
+      container.style.border = '3px solid #d73925';
+      container.style.boxShadow = '0 0 15px rgba(215, 57, 37, 0.4)';
+      container.style.background = '#fff5f5';
+    } else {
+      container.style.border = '1px solid #ddd';
+      container.style.boxShadow = 'none';
+      container.style.background = '#fafafa';
+    }
+  });
+}
+
+// Function to handle chart container click
+function handleChartContainerClick(index) {
+  var userCharts = <%= raw @user_charts.to_json %>;
+  var userName = userCharts[index].user_name;
+  expandUserGroup(userName);
+  highlightChart(index);
+}
+
+</script>
+<% end %>
+
+

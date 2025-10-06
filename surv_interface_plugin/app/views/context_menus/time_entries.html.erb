@@ -1,0 +1,33 @@
+<ul>
+  <%= call_hook(:view_time_entries_context_menu_start, {:time_entries => @time_entries, :can => @can, :back => @back }) %>
+
+  <% if @activities.present? -%>
+  <li class="folder">
+    <a href="#" class="submenu"><%= l(:field_activity) %></a>
+    <span class="icon-only">›</span>
+    <ul>
+    <% @activities.each do |u| -%>
+        <li><%= context_menu_link u.name, {:controller => 'timelog', :action => 'bulk_update', :ids => @time_entries.collect(&:id), :time_entry => {'activity_id' => u}, :back_url => @back}, :method => :post,
+                                  :selected => (@time_entry && u == @time_entry.activity), :disabled => !@can[:edit] %></li>
+    <% end -%>
+    </ul>
+  </li>
+  <% end %>
+
+  <% @options_by_custom_field.each do |field, options| %>
+    <li class="folder <%= field.css_classes %>">
+      <a href="#" class="submenu"><%= field.name %></a>
+      <span class="icon-only">›</span>
+      <ul>
+      <% options.each do |text, value| %>
+        <li><%= bulk_update_time_entry_custom_field_context_menu_link(field, text, value || text) %></li>
+      <% end %>
+      <% unless field.is_required? %>
+        <li><%= bulk_update_time_entry_custom_field_context_menu_link(field, l(:label_none), '__none__') %></li>
+      <% end %>
+      </ul>
+    </li>
+  <% end %>
+
+  <%= call_hook(:view_time_entries_context_menu_end, {:time_entries => @time_entries, :can => @can, :back => @back }) %>
+</ul>
