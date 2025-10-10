@@ -24,21 +24,32 @@
         return Number(hours).toFixed(2);
       }
 
-      // Функция для расчета плановых часов по дню недели
-      function getPlanHoursForDate(dateString) {
-        if (!dateString) return 0;
-        var date = new Date(dateString);
-        var dayOfWeek = date.getDay(); // 0-воскресенье, 1-понедельник, ..., 6-суббота
-        
-        // Пн-Чт: 8ч 40мин = 8.67ч, Пт: 5ч 20мин = 5.33ч, Сб-Вс: 0ч
-        switch(dayOfWeek) {
-          case 1: case 2: case 3: case 4: // Пн-Чт
-            return 8.67;
-          case 5: // Пт
-            return 5.33;
-          default: // Сб-Вс
-            return 0.0;
+      // Упрощенный расчет плана по дню недели из строки YYYY-MM-DD (локально)
+      function getPlanHours(dateString) {
+        var date;
+        if (dateString && typeof dateString === 'string') {
+          var m = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (m) {
+            date = new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+          }
         }
+        if (!date) { return 0.0; }
+        var w = date.getDay(); // 0..6 (Вс..Сб)
+        if (w === 1 || w === 2 || w === 3 || w === 4) return 8.67; // Пн-Чт
+        if (w === 5) return 5.33; // Пт
+        return 0.0; // Сб-Вс
+      }
+
+      // Нормализуем входящую дату к формату YYYY-MM-DD. Поддержка 'YYYY-MM-DD' и 'DD.MM.YYYY'.
+      function normalizeDateString(input) {
+        if (!input || typeof input !== 'string') return null;
+        var iso = input.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (iso) return input;
+        var ru = input.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+        if (ru) {
+          return ru[3] + '-' + ru[2] + '-' + ru[1];
+        }
+        return null;
       }
 
       // Загрузка ECharts один раз
@@ -77,7 +88,7 @@
         }, 0);
 
         // Получаем плановые часы для текущей даты
-        var planHours = getPlanHoursForDate(data && data.date);
+        var planHours = getPlanHours(data && data.date);
         
         // Рассчитываем оставшиеся часы для распределения
         var remainingHours = Math.max(0, planHours - totalLoggedHours);
@@ -87,7 +98,7 @@
         var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
 
         // Формируем серии для распределенных часов
-        var series = entries.map(function(e, idx){
+        var dataSeries = entries.map(function(e, idx){
           var actId = e.activity_id;
           var color = colorById[actId] || fallback[idx % fallback.length];
           var val = Number((Number(e.hours) || 0).toFixed(2));
@@ -122,9 +133,23 @@
           };
         });
 
+        // Фоновая серия плана (теневой бар), чтобы график не был пустым и план всегда был виден
+        var planShadowSeries = {
+          name: 'План',
+          type: 'bar',
+          data: [planHours > 0 ? planHours : 0],
+          barGap: '-100%', // накладываем на остальные бары
+          itemStyle: {
+            color: 'rgba(0,0,0,0.08)'
+          },
+          silent: true, // не влияет на ховер
+          z: 0,
+          zlevel: 0
+        };
+
         // Добавляем серию для оставшихся часов (красным цветом)
         if (remainingHours > 0) {
-          series.push({
+          dataSeries.push({
             name: 'Осталось распределить',
             type: 'bar',
             stack: 'total',
@@ -151,6 +176,9 @@
             }
           });
         }
+
+        // Итоговый список серий: сначала тень плана, затем реальные данные
+        var series = [planShadowSeries].concat(dataSeries);
 
         var option = {
           tooltip: {
@@ -244,7 +272,14 @@
               color: '#000000' // Черный цвет подписей оси X
             }, 
             min: 0,
-            max: planHours > 0 ? planHours : null // Устанавливаем максимум по плану если есть план
+            // Устанавливаем максимум как максимум из плана и распределенных часов,
+            // чтобы график был информативным даже при отсутствии плана в данных
+            max: (function(){
+              var maxByData = totalLoggedHours;
+              var maxByPlan = planHours > 0 ? planHours : 0;
+              var m = Math.max(maxByData, maxByPlan);
+              return m > 0 ? m : null; // null позволит ECharts автоподобрать
+            })()
           },
           yAxis: { 
             type: 'category', 
@@ -274,11 +309,26 @@
         var params = new URLSearchParams({ date: date || '', user_id: userId || '', project_id: projectId || '' });
         var urlPrimary = '/timelog/for_date?' + params.toString();
         var urlFallback = '/time_entries/for_date?' + params.toString();
+        var requestedDate = normalizeDateString(date);
+        if (!requestedDate) {
+          var now = new Date();
+          var y = now.getFullYear();
+          var m = (now.getMonth() + 1).toString().padStart(2,'0');
+          var dd = now.getDate().toString().padStart(2,'0');
+          requestedDate = y + '-' + m + '-' + dd;
+        }
         return fetch(urlPrimary, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }})
           .then(function(r){ if (r.ok) return r.json(); if (r.status === 404) return fetch(urlFallback, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }}); throw new Error('HTTP ' + r.status); })
           .then(function(resOrData){ return resOrData && (typeof resOrData.json === 'function' ? resOrData.json() : resOrData); })
-          .then(function(data){ if (!data || data.error) { renderChart({ entries: [], date: '' }); return; } renderChart(data); })
-          .catch(function(){ renderChart({ entries: [], date: '' }); });
+          .then(function(data){
+            var respEntries = (data && Array.isArray(data.entries)) ? data.entries : [];
+            var respDate = (data && typeof data.date === 'string') ? normalizeDateString(data.date) : null;
+            var finalDate = respDate || requestedDate;
+            renderChart({ entries: respEntries, date: finalDate });
+          })
+          .catch(function(){
+            renderChart({ entries: [], date: requestedDate });
+          });
       }
 
       // Переопределяем глобальную функцию, чтобы отключить alert из assets JS
