@@ -6,69 +6,210 @@
 <% end %>
 
 <% if @query.valid? %>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <%# Compute aggregation in the view to simplify controller %>
   <% activity_table = Enumeration.table_name %>
   <% time_entries_table = TimeEntry.table_name %>
   <% scope = @query.results_scope %>
-  <% aggregated = scope.joins(:activity).group("#{activity_table}.name").reorder(nil).pluck("#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
-  <% labels = aggregated.map { |name, _sum| name } %>
-  <% values = aggregated.map { |_, sum| sum.to_f } %>
+  <% aggregated = scope.joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+  <% chart_data = aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
 
-  <div id="echart" style="width:100%;height:420px;"></div>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <div style="display:flex; gap:16px; align-items:flex-start;">
+    <div style="flex:0 0 40%; max-width:40%; min-width:280px;">
+      <div id="echart" style="width:100%;height:520px;"></div>
+    </div>
+    <div style="flex:1 1 60%; max-width:60%;">
+      <%# Right side: show child projects charts if present; otherwise show employee tiles %>
+      <% child_projects = @project.children.visible.to_a %>
+      <% if child_projects.any? %>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <% child_projects.each do |child_project| %>
+            <% child_ids = child_project.self_and_descendants.pluck(:id) %>
+            <% child_aggregated = scope.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+            <% child_chart_data = child_aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
+            <% preserved = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
+
+            <div class="chart-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa; cursor: pointer; transition: all 0.3s ease;"
+                 onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
+                 onclick="window.location.href='<%= project_path(child_project, preserved) %>'">
+              <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">
+                <%= h(child_project.name) %>
+                <small style="display: block; font-size: 11px; color: #666; font-weight: normal; margin-top: 3px;">Нажмите для перехода в проект</small>
+              </h3>
+              <div id="echart-<%= child_project.id %>" style="width:100%;height:320px;"></div>
+            </div>
+            <script>
+              (function() {
+                var el = document.getElementById('echart-<%= child_project.id %>');
+                if (!el) { return; }
+                var chart = echarts.init(el);
+                var data = <%= raw(child_chart_data.to_json) %>;
+                var colorById = {
+                  1: 'rgba(46, 125, 50, 0.7)',
+                  2: 'rgba(46, 125, 50, 0.4)',
+                  3: 'rgba(249, 168, 37, 0.7)',
+                  4: 'rgba(176, 190, 197, 0.7)'
+                };
+                var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
+                var colored = data.map(function(item, idx){
+                  var id = item.activity_id;
+                  var color = colorById[id] || fallback[idx % fallback.length];
+                  return Object.assign({}, item, { itemStyle: { color: color } });
+                });
+                function formatHours(val){ return (Math.round(val * 100) / 100) + ' h'; }
+                var option = {
+                  tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
+                  legend: { show: false },
+                  series: [{
+                    name: '<%= l(:label_spent_time) %>',
+                    type: 'pie',
+                    radius: ['30%','70%'],
+                    center: ['50%','50%'],
+                    avoidLabelOverlap: true,
+                    itemStyle: { borderColor: '#fff', borderWidth: 1 },
+                    label: { show: true, position: 'outside', formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); }, color: '#333', fontSize: 14 },
+                    emphasis: { scale: true },
+                    labelLine: { show: true, length: 16, length2: 10, lineStyle: { width: 2 } },
+                    data: colored
+                  }]
+                };
+                chart.setOption(option);
+                var targetUrl = '<%= project_path(child_project, preserved) %>';
+                chart.on('click', function(params){
+                  if (params && params.componentType === 'series' && params.seriesType === 'pie') {
+                    window.location.href = targetUrl;
+                  }
+                });
+                window.addEventListener('resize', function(){ chart.resize(); });
+              })();
+            </script>
+          <% end %>
+        </div>
+      <% else %>
+        <%# No child projects: show employees tiles with total hours %>
+        <% users_table = User.table_name %>
+        <% user_rows = scope.joins(:user).group("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname").reorder(nil).pluck("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname", "SUM(#{time_entries_table}.hours)") %>
+        <% user_rows = user_rows.sort_by { |(_, fn, ln, h)| [-h.to_f, ln.to_s, fn.to_s] } %>
+        <%# Build per-user activity distribution %>
+        <% per_user_activity_rows = scope.joins(:user).joins(:activity).group("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+        <% per_user_activity = Hash.new { |h, k| h[k] = [] } %>
+        <% per_user_activity_rows.each do |uid, aid, aname, sum| %>
+          <% per_user_activity[uid] << { activity_id: aid, name: aname, hours: sum.to_f } %>
+        <% end %>
+        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px;">
+          <% user_rows.each do |uid, firstname, lastname, hours| %>
+            <% full_name = [firstname, lastname].compact.join(' ') %>
+            <% preserved_user = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
+            <% user_params = (preserved_user.deep_dup rescue preserved_user.dup) %>
+            <% user_params['set_filter'] = '1' %>
+            <% user_params['op'] ||= {} %>
+            <% user_params['v'] ||= {} %>
+            <% user_params['op']['author_id'] = '=' %>
+            <% user_params['v']['author_id'] = [uid.to_s] %>
+            <% current_f = Array(user_params['f']).map(&:to_s) %>
+            <% unless current_f.include?('author_id') %>
+              <% user_params['f'] = (current_f + ['author_id']).reject(&:blank?) %>
+            <% end %>
+            <div class="chart-container" style="border:1px solid #ddd; border-radius:8px; padding:10px; background:#fafafa; cursor:pointer; transition: all 0.3s ease;"
+                 onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
+                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
+                 onclick="window.location.href='<%= project_time_entries_path(@project, user_params) %>'">
+              <div style="font-weight:bold; color:#d73925; margin-bottom:6px;">
+                <%= h(full_name) %>
+              </div>
+              <div style="font-size:12px; color:#555; margin-bottom:6px;">Итого: <strong><%= sprintf('%.1f', hours.to_f.round(1)) %> ч</strong></div>
+              <div id="user-chart-<%= uid %>" style="width:100%; height:120px;"></div>
+              <script>
+                (function(){
+                  var el = document.getElementById('user-chart-<%= uid %>');
+                  if (!el) { return; }
+                  var chart = echarts.init(el);
+                  var activityData = <%= raw((per_user_activity[uid] || []).to_json) %>;
+                  var targetUrl = '<%= project_time_entries_path(@project, user_params) %>';
+                  var colorById = {
+                    1: 'rgba(46, 125, 50, 0.7)',
+                    2: 'rgba(46, 125, 50, 0.4)',
+                    3: 'rgba(249, 168, 37, 0.7)',
+                    4: 'rgba(176, 190, 197, 0.7)'
+                  };
+                  var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
+                  var series = [];
+                  (activityData || []).forEach(function(item, idx){
+                    var color = colorById[item.activity_id] || fallback[idx % fallback.length];
+                    series.push({
+                      name: item.name,
+                      type: 'bar',
+                      stack: 'total',
+                      data: [item.hours],
+                      label: { show: true, position: 'inside', formatter: function(p){ return (p && typeof p.value === 'number' && p.value > 0) ? (p.value.toFixed(1) + 'ч') : ''; }, color: '#fff', fontSize: 11 },
+                      itemStyle: { color: color, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }
+                    });
+                  });
+                  var option = {
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                    legend: { show: false },
+                    grid: { left: '3%', right: '3%', top: '8%', bottom: '8%', containLabel: true },
+                    xAxis: { type: 'value', axisLabel: { formatter: '{value} ч', fontSize: 11 } },
+                    yAxis: { type: 'category', data: [''], axisLabel: { show: false }, axisTick: { show: false } },
+                    series: series
+                  };
+                  chart.setOption(option);
+                  chart.on('click', function(){ window.location.href = targetUrl; });
+                  window.addEventListener('resize', function(){ chart.resize(); });
+                })();
+              </script>
+            </div>
+          <% end %>
+          <% if user_rows.empty? %>
+            <p class="nodata">Нет данных по сотрудникам</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
   <script>
     (function() {
       var el = document.getElementById('echart');
       if (!el) { return; }
       var chart = echarts.init(el);
-      var labels = <%= raw(labels.to_json) %>;
-      var values = <%= raw(values.to_json) %>;
+      var data = <%= raw(chart_data.to_json) %>;
+      // Fixed colors by activity_id (semi-transparent)
+      var colorById = {
+        1: 'rgba(46, 125, 50, 0.7)',
+        2: 'rgba(46, 125, 50, 0.4)',
+        3: 'rgba(249, 168, 37, 0.7)',
+        4: 'rgba(176, 190, 197, 0.7)'
+      };
+      // Fallback palette
+      var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
+      var colored = data.map(function(item, idx){
+        var id = item.activity_id;
+        var color = colorById[id] || fallback[idx % fallback.length];
+        return Object.assign({}, item, { itemStyle: { color: color } });
+      });
+      function formatHours(val){ return (Math.round(val * 100) / 100) + ' h'; }
       var option = {
-        tooltip: { trigger: 'axis' },
-        xAxis: { type: 'category', data: labels },
-        yAxis: { type: 'value', name: 'hours' },
-        series: [{ type: 'bar', data: values }]
+        tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
+        legend: { show: true, orient: 'vertical', left: 10, top: 20, itemGap: 10, textStyle: { fontSize: 14 } },
+        series: [{
+          name: '<%= l(:label_spent_time) %>',
+          type: 'pie',
+          radius: ['30%','70%'],
+          center: ['50%','50%'],
+          avoidLabelOverlap: true,
+          itemStyle: { borderColor: '#fff', borderWidth: 1 },
+          label: { show: true, position: 'outside', formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); }, color: '#333', fontSize: 14 },
+          emphasis: { scale: true },
+          labelLine: { show: true, length: 16, length2: 10, lineStyle: { width: 2 } },
+          data: colored
+        }]
       };
       chart.setOption(option);
       window.addEventListener('resize', function(){ chart.resize(); });
     })();
   </script>
-
-  <%# Additional charts for each directly linked child project %>
-  <% child_projects = @project.children.visible.to_a %>
-  <% child_projects.each do |child_project| %>
-    <% child_ids = child_project.self_and_descendants.pluck(:id) %>
-    <% child_aggregated = scope.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.name").reorder(nil).pluck("#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
-    <% child_labels = child_aggregated.map { |name, _sum| name } %>
-    <% child_values = child_aggregated.map { |_, sum| sum.to_f } %>
-
-    <h3 style="margin-top:24px;"><%= h(child_project.name) %></h3>
-    <div id="echart-<%= child_project.id %>" style="width:100%;height:360px;"></div>
-    <script>
-      (function() {
-        var el = document.getElementById('echart-<%= child_project.id %>');
-        if (!el) { return; }
-        var chart = echarts.init(el);
-        var labels = <%= raw(child_labels.to_json) %>;
-        var values = <%= raw(child_values.to_json) %>;
-        var option = {
-          tooltip: { trigger: 'axis' },
-          xAxis: { type: 'category', data: labels },
-          yAxis: { type: 'value', name: 'hours' },
-          series: [{ type: 'bar', data: values }]
-        };
-        chart.setOption(option);
-        var targetUrl = '<%= project_path(child_project) %>';
-        chart.getZr().on('click', function(e){
-          var pointInPixel = [e.offsetX, e.offsetY];
-          if (chart.containPixel('grid', pointInPixel)) {
-            window.location.href = targetUrl;
-          }
-        });
-        window.addEventListener('resize', function(){ chart.resize(); });
-      })();
-    </script>
-  <% end %>
 <% else %>
   <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
+

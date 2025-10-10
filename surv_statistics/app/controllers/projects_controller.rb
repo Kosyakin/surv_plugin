@@ -176,6 +176,7 @@ class ProjectsController < ApplicationController
 
     respond_to do |format|
       format.html do
+        apply_default_time_filters
         retrieve_time_entry_query
         render :action => 'show', :layout => !request.xhr?
       end
@@ -336,6 +337,28 @@ class ProjectsController < ApplicationController
   def query_error(exception)
     session.delete(:time_entry_query)
     super
+  end
+
+  # Initialize default filters/columns for TimeEntryQuery if none provided
+  def apply_default_time_filters
+    return if params[:set_filter].present? || params[:f].present?
+
+    params[:set_filter] = '1'
+    params[:sort] = 'spent_on:desc'
+
+    params[:f] = ['spent_on', 'activity_id', 'cf_1', 'author_id', '']
+    params[:op] ||= {}
+    params[:op][:spent_on] = 'lm'
+    params[:op][:activity_id] = '='
+    params[:op][:cf_1] = '*'
+    params[:op][:author_id] = '*'
+
+    params[:v] ||= {}
+    params[:v][:activity_id] = ['1','2','3','4']
+
+    # Columns and totals
+    params[:c] = ['activity','cf_1','comments','cf_2','hours']
+    params[:t] = ['hours']
   end
 
   def retrieve_project_query

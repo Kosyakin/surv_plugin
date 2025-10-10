@@ -1,0 +1,7 @@
+ru:
+  permission_view_own_time_entries: Видимость только своих трудозатрат (Admin Settings)
+  label_surv_admin_settings_closed_period_date: Дата закрытого периода
+  label_surv_admin_settings_menu: Настройки СУРВ
+  surv_admin_settings:
+    errors:
+      closed_period: Нельзя создавать или изменять трудозатраты в закрытом периоде

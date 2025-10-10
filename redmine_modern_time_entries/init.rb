@@ -7,5 +7,6 @@ Redmine::Plugin.register :redmine_modern_time_entries do
 
   # Применяем патчи и хуки
   require_relative 'lib/redmine_modern_time_entries/hooks'
+  require_relative 'lib/redmine_modern_time_entries/timelog_controller_patch'
 
  end

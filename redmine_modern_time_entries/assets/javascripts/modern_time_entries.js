@@ -527,9 +527,105 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Функция для получения трудозатрат по дате
+    function getTimeEntriesForDate(date, userId, projectId) {
+        if (!date) return;
+        
+        const params = new URLSearchParams({
+            date: date,
+            user_id: userId || '',
+            project_id: projectId || ''
+        });
+        
+        // Пробуем сначала timelog/for_date (более стабильно для Redmine), затем fallback на time_entries/for_date
+        const urlPrimary = `/timelog/for_date?${params}`;
+        const urlFallback = `/time_entries/for_date?${params}`;
+
+        fetch(urlPrimary, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Если 404 на первичном пути, пробуем fallback
+                if (response.status === 404) {
+                    return fetch(urlFallback, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(resOrData => resOrData && (typeof resOrData.json === 'function' ? resOrData.json() : resOrData))
+        .then(data => {
+            if (data.error) {
+                alert(`Ошибка: ${data.error}`);
+                return;
+            }
+            
+            // Формируем сообщение для alert
+            let message = `Трудозатраты на ${data.date}:\n`;
+            message += `Всего часов: ${data.total_hours}\n`;
+            message += `Количество записей: ${data.entries_count}\n\n`;
+            
+            if (data.entries && data.entries.length > 0) {
+                message += 'Детали:\n';
+                data.entries.forEach((entry, index) => {
+                    message += `${index + 1}. ${entry.hours}ч - ${entry.activity_name} (ID: ${entry.activity_id})\n`;
+                    if (entry.comments) {
+                        message += `   Комментарий: ${entry.comments}\n`;
+                    }
+                    if (entry.project_name) {
+                        message += `   Проект: ${entry.project_name}\n`;
+                    }
+                    if (entry.issue_subject) {
+                        message += `   Задача: ${entry.issue_subject}\n`;
+                    }
+                    message += `   Время создания: ${entry.created_on}\n\n`;
+                });
+            } else {
+                message += 'На эту дату трудозатрат не найдено.';
+            }
+            
+            alert(message);
+        })
+        .catch(error => {
+            console.error('Ошибка при получении трудозатрат:', error);
+            alert('Ошибка при получении информации о трудозатратах');
+        });
+    }
+
     // Функция для обработки конкретной формы
     function enhanceForm(form) {
         if (!form) return;
+
+        // Добавляем обработчик изменения даты
+        const dateField = form.querySelector('#time_entry_spent_on');
+        if (dateField) {
+            dateField.addEventListener('change', function() {
+                const selectedDate = this.value;
+                if (selectedDate) {
+                    // Получаем ID пользователя
+                    const userIdField = form.querySelector('#time_entry_user_id');
+                    const userId = userIdField ? userIdField.value : '';
+                    
+                    // Получаем ID проекта
+                    const projectIdField = form.querySelector('#time_entry_project_id');
+                    const projectId = projectIdField ? projectIdField.value : '';
+                    
+                    // Получаем трудозатраты для выбранной даты
+                    getTimeEntriesForDate(selectedDate, userId, projectId);
+                }
+            });
+        }
 
         // Функционал скрытия/показа полей удален; используем только enable/disable + фильтрацию ниже
         const activitySelect = form.querySelector('#time_entry_activity_id');
