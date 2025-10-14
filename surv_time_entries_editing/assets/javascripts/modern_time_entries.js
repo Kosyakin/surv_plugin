@@ -1,21 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Конфигурируемые параметры ---
-    // ID активности, при выборе которой отображается поле "Подтип трудозатрат"
-    const ACTIVITY_ID_FOR_CONTRACT_FIELD = '1'; // <-- Измените этот ID!
-
-    // ID пользовательского поля "Подтип трудозатрат"
+    // Основной модуль улучшений формы трудозатрат (селект с поиском, барабан часов и др.)
+    // Конфигурация идентификаторов пользовательских полей Redmine.
+    // ID пользовательского поля "Подтип трудозатрат" — преобразуется в комбинированное поле
     const CUSTOM_FIELD_CONTRACT_ID = 'time_entry_custom_field_values_1';
 
-    // ID пользовательского поля "Статус" (скрыто через CSS, но полезно для справки)
-    const CUSTOM_FIELD_STATUS_ID = 'time_entry_custom_field_values_53';
-
-    // ID пользовательского поля "Рабочая неделя" (скрыто через CSS, но полезно для справки)
-    const CUSTOM_FIELD_WEEK_ID = 'time_entry_custom_field_values_56';
-
-    // ID пользовательского поля "Месяц" (скрыто через CSS, но полезно для справки)
-    const CUSTOM_FIELD_MONTH_ID = 'time_entry_custom_field_values_57';
-    // --- Конец конфигурируемых параметров ---
-
+    // Отключает стили плагина на страницах со списком трудозатрат, чтобы не ломать таблицы
     function disableStylesOnListPages() {
         // Если на странице есть таблица списка трудозатрат, отключаем стили плагина
         const hasListTable = document.querySelector('table.list.time-entries');
@@ -23,13 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const links = document.querySelectorAll('link[rel="stylesheet"]');
             links.forEach(link => {
                 const href = link.getAttribute('href') || '';
-                if (href.indexOf('/plugin_assets/redmine_modern_time_entries/stylesheets/modern_time_entries.css') !== -1) {
+                if (
+                    href.indexOf('/plugin_assets/redmine_modern_time_entries/stylesheets/modern_time_entries.css') !== -1 ||
+                    href.indexOf('/plugin_assets/surv_time_entries_editing/stylesheets/modern_time_entries.css') !== -1
+                ) {
                     try { link.disabled = true; } catch(e) { link.setAttribute('media', 'not all'); }
                 }
             });
         }
     }
 
+    // Инициализация улучшений на страницах создания/редактирования
     function initEnhancements() {
         // Сначала обработаем условие отключения стилей на страницах со списком
         disableStylesOnListPages();
@@ -53,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         enhanceForm(editTimeEntryForm);
     }
 
-    // Функции для обработки текста со скобками
+    // Парсинг текста вида "Название (подсказка)" для раздельного отображения
     function extractParenthesesContent(text) {
         const match = text.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
         if (match) {
@@ -70,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // Функция для преобразования select в комбинированное поле
+    // Преобразует обычный <select> в комбинированное поле с фильтрацией, подсказкой и группами
     function convertSelectToCombo(selectElement) {
         if (!selectElement) return;
 
@@ -139,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let allowedGroups = null; // null = без фильтра, иначе массив имен групп
 
+        // Перестраивает список опций с учетом фильтра и разрешенных групп
         function updateDropdown(filter = '') {
             dropdown.innerHTML = '';
             let hasVisibleOptions = false;
@@ -192,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         updateDropdown();
 
-        // Открываем список по клику, а не по фокусу, чтобы не раскрываться при загрузке страницы с выбранным значением
+        // Открываем список по клику, чтобы не раскрываться при загрузке страницы с выбранным значением
         input.addEventListener('click', () => {
             container.classList.add('expanded');
             updateDropdown(input.value);
@@ -226,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Клавиатурная навигация по выпадающему списку
         input.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
                 e.preventDefault();
@@ -287,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectElement.parentNode.insertBefore(fieldWrapper, selectElement);
         selectElement.remove();
 
-        // API для управления видимостью/фильтрацией
+        // Публичный API комбополя для управления извне
         function setEnabled(enabled) {
             input.readOnly = !enabled;
             container.classList.toggle('disabled', !enabled);
@@ -340,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return { container, fieldWrapper, input, dropdown, tooltip, originalSelect, setEnabled, setAllowedGroups, clearSelection, setValueByOptionValue };
     }
 
-    // Вспомогательные функции для барабана часов/минут
+    // Вспомогательные функции для барабана выбора часов/минут
     function clampTime(hours, minutes) {
         let h = Math.max(0, Math.min(8, hours));
         let m = Math.max(0, Math.min(50, minutes));
@@ -373,6 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${hours}:${mm}`;
     }
 
+    // Создает одну колонку барабана (часы или минуты)
     function buildDrumColumn(values, initial, onChange) {
         const col = document.createElement('div');
         col.className = 'drum-column';
@@ -428,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateActive();
         });
 
-        // Инициализация после вставки в DOM (чтобы была высота элементов)
+        // Инициализация после вставки в DOM (чтобы корректно вычислить высоту элементов)
         setTimeout(updateActive, 0);
 
         return {
@@ -438,6 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
+    // Подключает барабан выбора времени к полю часов
     function attachDrumPickerToHours(form) {
         const hoursInput = form.querySelector('#time_entry_hours');
         if (!hoursInput) return;
@@ -517,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const initLimited = clampTime(current.hours, current.minutes);
         hoursInput.value = formatTimeString(initLimited.hours, initLimited.minutes);
 
-        // При сабмите переносим выбранное значение в поле часов
+        // При сабмите переносим выбранное значение в скрытое поле часов
         const formEl = form.tagName === 'FORM' ? form : form.closest('form');
         if (formEl) {
             formEl.addEventListener('submit', function() {
@@ -527,80 +524,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Функция для получения трудозатрат по дате
+    // Делегат для получения трудозатрат по дате: вызывает глобальный обработчик, если он определен во вьюхе
+    // Никаких alert — визуализация и сообщения реализуются на уровне страницы (например, через ECharts)
     function getTimeEntriesForDate(date, userId, projectId) {
         if (!date) return;
-        
-        const params = new URLSearchParams({
-            date: date,
-            user_id: userId || '',
-            project_id: projectId || ''
-        });
-        
-        // Пробуем сначала timelog/for_date (более стабильно для Redmine), затем fallback на time_entries/for_date
-        const urlPrimary = `/timelog/for_date?${params}`;
-        const urlFallback = `/time_entries/for_date?${params}`;
-
-        fetch(urlPrimary, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
+        try {
+            if (typeof window.getTimeEntriesForDate === 'function') {
+                window.getTimeEntriesForDate(date, userId, projectId);
             }
-        })
-        .then(response => {
-            if (!response.ok) {
-                // Если 404 на первичном пути, пробуем fallback
-                if (response.status === 404) {
-                    return fetch(urlFallback, {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    });
-                }
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(resOrData => resOrData && (typeof resOrData.json === 'function' ? resOrData.json() : resOrData))
-        .then(data => {
-            if (data.error) {
-                alert(`Ошибка: ${data.error}`);
-                return;
-            }
-            
-            // Формируем сообщение для alert
-            let message = `Трудозатраты на ${data.date}:\n`;
-            message += `Всего часов: ${data.total_hours}\n`;
-            message += `Количество записей: ${data.entries_count}\n\n`;
-            
-            if (data.entries && data.entries.length > 0) {
-                message += 'Детали:\n';
-                data.entries.forEach((entry, index) => {
-                    message += `${index + 1}. ${entry.hours}ч - ${entry.activity_name} (ID: ${entry.activity_id})\n`;
-                    if (entry.comments) {
-                        message += `   Комментарий: ${entry.comments}\n`;
-                    }
-                    if (entry.project_name) {
-                        message += `   Проект: ${entry.project_name}\n`;
-                    }
-                    if (entry.issue_subject) {
-                        message += `   Задача: ${entry.issue_subject}\n`;
-                    }
-                    message += `   Время создания: ${entry.created_on}\n\n`;
-                });
-            } else {
-                message += 'На эту дату трудозатрат не найдено.';
-            }
-            
-            alert(message);
-        })
-        .catch(error => {
-            console.error('Ошибка при получении трудозатрат:', error);
-            alert('Ошибка при получении информации о трудозатратах');
-        });
+        } catch(e) {
+            // Безопасный no-op: страница может не подключать график
+        }
     }
 
     // Функция для обработки конкретной формы

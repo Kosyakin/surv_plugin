@@ -1,7 +1,7 @@
-# plugins/redmine_modern_time_entries/lib/redmine_modern_time_entries/timelog_controller_patch.rb
+# plugins/surv_time_entries_editing/lib/surv_time_entries_editing/timelog_controller_patch.rb
 require_dependency 'timelog_controller'
 
-module RedmineModernTimeEntries
+module SurvTimeEntriesEditing
   module TimelogControllerPatch
     def self.included(base)
       base.extend(ClassMethods)
@@ -96,6 +96,4 @@ module RedmineModernTimeEntries
 end
 
 # Применяем патч
-TimelogController.send(:include, RedmineModernTimeEntries::TimelogControllerPatch)
-
-
+TimelogController.send(:include, SurvTimeEntriesEditing::TimelogControllerPatch)
