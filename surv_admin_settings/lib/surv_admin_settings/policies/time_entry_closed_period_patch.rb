@@ -21,6 +21,7 @@ module SurvAdminSettings
             end
 
             if date_value <= closed_date
+              Rails.logger.warn "[SURV_ADMIN_SETTINGS] User #{User.current.login} (ID: #{User.current.id}) attempted to #{new_record? ? 'create' : 'modify'} time entry #{new_record? ? '(new)' : id} for date #{date_value} in closed period (closed_date: #{closed_date}) in project #{project&.identifier || 'unknown'}"
               errors.add(:base, I18n.t('surv_admin_settings.errors.closed_period'))
             end
           end

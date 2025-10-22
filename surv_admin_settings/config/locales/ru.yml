@@ -8,6 +8,7 @@ ru:
       closed_period: Нельзя создавать или изменять трудозатраты в закрытом периоде
       insufficient_permissions_for_approval_field: Недостаточно прав для изменения поля 'Согласовано'
       insufficient_permissions_for_non_author: Недостаточно прав для изменения чужих записей трудозатрат
+      author_cannot_approve_own_entries: Автор не может изменять поле 'Согласовано' в своих записях
   
   # Переопределение переводов для СУРВ
   label_project: Подразделение

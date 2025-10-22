@@ -29,106 +29,40 @@ body, html {
   margin: 0;
 }
 
-/* Filter table styling */
-.surv-filters-left #filters-table {
-  width: 100%;
-  border-collapse: collapse;
+.surv-filters-left .form-group {
+  margin-bottom: 16px;
 }
 
-.surv-filters-left #filters-table tr.filter {
+.surv-filters-left label {
   display: block;
-  margin-bottom: 15px;
-  padding: 0;
-  background: transparent;
-  border: none;
-}
-
-.surv-filters-left #filters-table tr.filter td {
-  display: block;
-  padding: 0;
-  border: none;
-}
-
-/* Field column - checkbox and label */
-.surv-filters-left #filters-table tr.filter td.field {
-  margin-bottom: 8px;
-}
-
-.surv-filters-left #filters-table tr.filter td.field input[type="checkbox"] {
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.surv-filters-left #filters-table tr.filter td.field label {
-  display: inline;
   font-weight: bold;
+  margin-bottom: 4px;
   color: #333;
   font-size: 13px;
-  margin: 0;
-  vertical-align: middle;
 }
 
-/* Operator column - filter type */
-.surv-filters-left #filters-table tr.filter td.operator {
-  margin-bottom: 8px;
-}
-
-.surv-filters-left #filters-table tr.filter td.operator select {
-  width: 100%;
-  padding: 4px 6px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 11px;
-  background: white;
-}
-
-/* Values column - filter values */
-.surv-filters-left #filters-table tr.filter td.values {
-  margin-bottom: 0;
-}
-
-.surv-filters-left #filters-table tr.filter td.values select,
-.surv-filters-left #filters-table tr.filter td.values input {
-  width: 100%;
-  padding: 4px 6px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 11px;
-  background: white;
-}
-
-.surv-filters-left #filters-table tr.filter td.values span {
-  display: block;
-  margin-bottom: 4px;
-}
-
-/* Add filter section */
-.surv-filters-left .add-filter {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #ddd;
-}
-
-.surv-filters-left .add-filter label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 6px;
-  color: #333;
-  font-size: 12px;
-}
-
-.surv-filters-left .add-filter select {
-  width: 100%;
+.surv-filters-left select,
+.surv-filters-left input {
+  width: 10%;
   padding: 6px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
+.surv-filters-left .btn {
+  background: #d73925;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  width: 100%;
+}
 
-/* Hide tabs (Подробности|Отчет) */
-.surv-filters-left .tabs {
-  display: none;
+.surv-filters-left .btn:hover {
+  background: #c02d1a;
 }
 
 /* Left side chart container */

@@ -49,6 +49,21 @@ module SurvAdminSettings
             approval_field_value = params[:time_entry][:custom_field_values]&.dig('2')
             return true unless approval_field_value
 
+            # При создании новых записей - авторы могут устанавливать поле "Согласовано" в своих записях
+            if action_name == 'create'
+              return true # Автор может создавать записи с любыми значениями полей
+            end
+
+            # При обновлении - авторы НЕ могут изменять поле "Согласовано" в своих записях
+            if action_name == 'update' && @time_entry && @time_entry.user_id == User.current.id
+              current_value = approval_field_value.to_s
+              original_value = @time_entry.custom_field_values.find { |cfv| cfv.custom_field_id == 2 }&.value.to_s
+              if current_value != original_value
+                Rails.logger.warn "[SURV_ADMIN_SETTINGS] User #{User.current.login} (ID: #{User.current.id}) attempted to modify approval field in own time entry #{@time_entry.id} in project #{@project.identifier} - blocked at controller level"
+                return false # Автор не может изменять поле "Согласовано" в своих записях
+              end
+            end
+
             # Для обновления проверяем, действительно ли значение изменилось
             if action_name == 'update' && @time_entry
               current_value = approval_field_value.to_s
@@ -89,8 +104,13 @@ module SurvAdminSettings
           def sas_handle_approval_permission_error
             # Определяем тип ошибки на основе контекста
             if action_name == 'update' && @time_entry && @time_entry.user_id != User.current.id && User.current.allowed_to?(:approve_time_entries, @project)
+              Rails.logger.warn "[SURV_ADMIN_SETTINGS] User #{User.current.login} (ID: #{User.current.id}) attempted to modify non-approval fields in time entry #{@time_entry.id} (author: #{@time_entry.user_id}) in project #{@project.identifier} - blocked at controller level"
               flash[:error] = I18n.t('surv_admin_settings.errors.insufficient_permissions_for_non_author')
+            elsif action_name == 'update' && @time_entry && @time_entry.user_id == User.current.id
+              Rails.logger.warn "[SURV_ADMIN_SETTINGS] User #{User.current.login} (ID: #{User.current.id}) attempted to modify approval field in own time entry #{@time_entry.id} in project #{@project.identifier} - blocked at controller level"
+              flash[:error] = I18n.t('surv_admin_settings.errors.author_cannot_approve_own_entries')
             else
+              Rails.logger.warn "[SURV_ADMIN_SETTINGS] User #{User.current.login} (ID: #{User.current.id}) attempted to modify approval field without permission in project #{@project.identifier} - blocked at controller level"
               flash[:error] = I18n.t('surv_admin_settings.errors.insufficient_permissions_for_approval_field')
             end
             
