@@ -11,6 +11,8 @@ Redmine::Plugin.register :surv_admin_settings do
   project_module :time_tracking do
     # Оставляем существующее право, чтобы сохранить обратную совместимость
     permission :view_own_time_entries, {}, :require => :member
+    # Право на согласование трудозатрат
+    permission :approve_time_entries, {}, :require => :member
   end
 
   # Настройки плагина: дата закрытого периода
@@ -44,3 +46,14 @@ MemberRole.send(:include, SurvAdminSettings::Hierarchy::MemberRolePatch)
 # Политики/ограничения администрирования (закрытый период для трудозатрат)
 require_dependency File.expand_path('../lib/surv_admin_settings/policies/time_entry_closed_period_patch', __FILE__)
 TimeEntry.send(:include, SurvAdminSettings::Policies::TimeEntryClosedPeriodPatch)
+
+# Право на согласование трудозатрат
+require_dependency File.expand_path('../lib/surv_admin_settings/policies/time_entry_approval_patch', __FILE__)
+TimeEntry.send(:include, SurvAdminSettings::Policies::TimeEntryApprovalPatch)
+
+require_dependency File.expand_path('../lib/surv_admin_settings/controllers/timelog_controller_approval_patch', __FILE__)
+TimelogController.send(:include, SurvAdminSettings::Controllers::TimelogControllerApprovalPatch)
+
+# Удаление вкладки "Действия" из контроллера проектов
+require_dependency File.expand_path('../lib/surv_admin_settings/controllers/projects_controller_patch', __FILE__)
+ProjectsController.send(:include, SurvAdminSettings::Controllers::ProjectsControllerPatch)

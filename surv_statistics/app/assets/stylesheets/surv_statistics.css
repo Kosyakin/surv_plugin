@@ -1,0 +1,275 @@
+/* SURV Statistics Plugin Styles */
+
+/* Ensure full width for the page */
+body, html {
+  width: 100%;
+}
+
+/* Main container layout */
+.surv-main-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Left side filters container */
+.surv-filters-left {
+  flex: 0 0 15%;
+  max-width: 20%;
+  min-width: 200px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.surv-filters-left form {
+  margin: 0;
+}
+
+.surv-filters-left .form-group {
+  margin-bottom: 16px;
+}
+
+.surv-filters-left label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
+  font-size: 13px;
+}
+
+.surv-filters-left select,
+.surv-filters-left input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.surv-filters-left .btn {
+  background: #d73925;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  width: 100%;
+}
+
+.surv-filters-left .btn:hover {
+  background: #c02d1a;
+}
+
+/* Left side chart container */
+.surv-chart-left {
+  flex: 0 0 30%;
+  max-width: 300%;
+  min-width: 300px;
+}
+
+.surv-main-chart {
+  width: 100%;
+  height: 520px;
+}
+
+/* Right side container */
+.surv-chart-right {
+  flex: 1 1 50%;
+  max-width: 50%;
+}
+
+/* Child projects grid */
+.surv-child-projects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Chart container base styles */
+.surv-chart-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.surv-chart-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Child project chart title */
+.surv-child-project-title {
+  text-align: center;
+  margin: 0 0 10px 0;
+  color: #d73925;
+  font-size: 16px;
+  font-weight: bold;
+  border-bottom: 2px solid #d73925;
+  padding-bottom: 5px;
+}
+
+.surv-child-project-subtitle {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  font-weight: normal;
+  margin-top: 3px;
+}
+
+/* Child project chart */
+.surv-child-chart {
+  width: 100%;
+  height: 320px;
+}
+
+/* Employee tiles grid */
+.surv-employee-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Employee tile styles */
+.surv-employee-name {
+  font-weight: bold;
+  color: #d73925;
+  margin-bottom: 6px;
+}
+
+.surv-employee-hours {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.surv-employee-chart {
+  width: 100%;
+  height: 120px;
+}
+
+/* No data message */
+.surv-nodata {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+
+/* Time Approvals Page Styles */
+
+/* Main layout container */
+.surv-approvals-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+/* Left side - entries list */
+.surv-approvals-list {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+
+/* Right side - charts */
+.surv-approvals-charts {
+  flex: 1 1 40%;
+  min-width: 0;
+}
+
+/* Charts grid */
+.surv-approvals-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* Chart container for user charts */
+.surv-approvals-chart-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.surv-approvals-chart-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* User chart title */
+.surv-approvals-user-title {
+  text-align: center;
+  margin: 0 0 10px 0;
+  color: #d73925;
+  font-size: 16px;
+  font-weight: bold;
+  border-bottom: 2px solid #d73925;
+  padding-bottom: 5px;
+}
+
+/* User chart subtitle */
+.surv-approvals-user-subtitle {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  font-weight: normal;
+  margin-top: 3px;
+}
+
+/* User chart */
+.surv-approvals-user-chart {
+  width: 100%;
+  height: 200px;
+}
+
+/* CSV export modal */
+.surv-csv-export-modal {
+  display: none;
+}
+
+/* CSV export modal title */
+.surv-csv-export-title {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+/* CSV export form */
+.surv-csv-export-form {
+  margin: 0;
+}
+
+/* CSV export fieldset */
+.surv-csv-export-fieldset {
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* CSV export legend */
+.surv-csv-export-legend {
+  font-weight: bold;
+  padding: 0 5px;
+}
+
+/* CSV export buttons */
+.surv-csv-export-buttons {
+  margin-top: 15px;
+  text-align: right;
+}
+
+/* CSV export button */
+.surv-csv-export-button {
+  margin-left: 10px;
+}

@@ -1,0 +1,45 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\plugins\\surv_statistics\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\plugins\\surv_statistics\\app\\views\\projects\\show.html.erb||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\views\\projects\\show.html.erb||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "show.html.erb",
+              "DocumentMoniker": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\plugins\\surv_statistics\\app\\views\\projects\\show.html.erb",
+              "RelativeDocumentMoniker": "app\\views\\projects\\show.html.erb",
+              "ToolTip": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\plugins\\surv_statistics\\app\\views\\projects\\show.html.erb",
+              "RelativeToolTip": "app\\views\\projects\\show.html.erb",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAUwEQAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-21T12:06:56.335Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{228e1580-0ef9-329a-bf07-81ebc3dcbf7e}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

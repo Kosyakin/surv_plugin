@@ -61,7 +61,12 @@ class ProjectsController < ApplicationController
         if @query.display_type == 'board'
           @entries = project_scope.to_a
         else
-          @entry_count = @query.result_count
+          @entry_count = if @query.respond_to?(:project_count)
+                 @query.project_count
+               else
+                 # Fallback для обратной совместимости
+                 project_scope.count
+               end
           @entry_pages = Paginator.new @entry_count, per_page_option, params['page']
           @entries = project_scope(:offset => @entry_pages.offset, :limit => @entry_pages.per_page).to_a
         end

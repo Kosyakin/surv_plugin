@@ -8,7 +8,7 @@ module SurvTimeEntriesEditing
       base.class_eval do
         unloadable
 
-        # Возвращает трудозатраты за дату с возможной фильтрацией по пользователю/проекту
+        # Возвращает трудозатраты за дату с возможной фильтрацией по пользователю/подразделению
         def get_time_entries_for_date
           date_str = params[:date]
           user_id_param = params[:user_id]
@@ -38,15 +38,15 @@ module SurvTimeEntriesEditing
           # Проверка прав:
           # - Сам пользователь всегда может видеть свои записи
           # - Администратор всегда может видеть
-          # - Если указан проект, проверяем право log_time_for_other_users в проекте
-          # - Если проект не указан, допускаем глобальное право
+          # - Если указано подразделение, проверяем право log_time_for_other_users в подразделении
+          # - Если подразделение не указано, допускаем глобальное право
           allowed = (User.current.id == user.id) || User.current.admin?
           project = nil
           if project_id
             begin
               project = Project.find(project_id)
             rescue ActiveRecord::RecordNotFound
-              render json: { error: 'Проект не найден' }, status: 404
+              render json: { error: 'Подразделение не найдено' }, status: 404
               return
             end
             allowed ||= User.current.allowed_to?(:log_time_for_other_users, project)

@@ -1,12 +1,26 @@
 <h2><%= @query.new_record? ? l(:label_spent_time) : @query.name %></h2>
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
 
-<%= form_tag(project_path(@project), :method => :get, :id => 'query_form') do %>
-<%= render :partial => 'timelog/date_range' %>
-<% end %>
-
 <% if @query.valid? %>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  
+  <script>
+    // Функция для конвертации десятичных часов в формат Чч ММмин
+    function formatHoursMinutes(decimalHours) {
+      if (!decimalHours || decimalHours <= 0) return '0мин';
+      var hours = Math.floor(decimalHours);
+      var minutes = Math.round((decimalHours - hours) * 60);
+      if (minutes === 60) { hours += 1; minutes = 0; }
+      if (hours > 0 && minutes > 0) {
+        return hours + 'ч ' + minutes + 'мин';
+      } else if (hours > 0) {
+        return hours + 'ч';
+      } else {
+        return minutes + 'мин';
+      }
+    }
+  </script>
+  
   <%# Compute aggregation in the view to simplify controller %>
   <% activity_table = Enumeration.table_name %>
   <% time_entries_table = TimeEntry.table_name %>
@@ -14,30 +28,33 @@
   <% aggregated = scope.joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
   <% chart_data = aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
 
-  <div style="display:flex; gap:16px; align-items:flex-start;">
-    <div style="flex:0 0 40%; max-width:40%; min-width:280px;">
-      <div id="echart" style="width:100%;height:520px;"></div>
+  <div class="surv-main-container">
+    <div class="surv-filters-left">
+      <%= form_tag(project_path(@project), :method => :get, :id => 'query_form') do %>
+        <%= render :partial => 'timelog/date_range' %>
+      <% end %>
     </div>
-    <div style="flex:1 1 60%; max-width:60%;">
+    <div class="surv-chart-left">
+      <div id="echart" class="surv-main-chart"></div>
+    </div>
+    <div class="surv-chart-right">
       <%# Right side: show child projects charts if present; otherwise show employee tiles %>
       <% child_projects = @project.children.visible.to_a %>
       <% if child_projects.any? %>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="surv-child-projects-grid">
           <% child_projects.each do |child_project| %>
             <% child_ids = child_project.self_and_descendants.pluck(:id) %>
             <% child_aggregated = scope.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
             <% child_chart_data = child_aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
             <% preserved = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
 
-            <div class="chart-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa; cursor: pointer; transition: all 0.3s ease;"
-                 onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
+            <div class="surv-chart-container"
                  onclick="window.location.href='<%= project_path(child_project, preserved) %>'">
-              <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">
+              <h3 class="surv-child-project-title">
                 <%= h(child_project.name) %>
-                <small style="display: block; font-size: 11px; color: #666; font-weight: normal; margin-top: 3px;">Нажмите для перехода в проект</small>
+                <small class="surv-child-project-subtitle">Нажмите для перехода в подразделение</small>
               </h3>
-              <div id="echart-<%= child_project.id %>" style="width:100%;height:320px;"></div>
+              <div id="echart-<%= child_project.id %>" class="surv-child-chart"></div>
             </div>
             <script>
               (function() {
@@ -57,7 +74,7 @@
                   var color = colorById[id] || fallback[idx % fallback.length];
                   return Object.assign({}, item, { itemStyle: { color: color } });
                 });
-                function formatHours(val){ return (Math.round(val * 100) / 100) + ' h'; }
+                function formatHours(val){ return formatHoursMinutes(val); }
                 var option = {
                   tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
                   legend: { show: false },
@@ -68,9 +85,18 @@
                     center: ['50%','50%'],
                     avoidLabelOverlap: true,
                     itemStyle: { borderColor: '#fff', borderWidth: 1 },
-                    label: { show: true, position: 'outside', formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); }, color: '#333', fontSize: 14 },
+                    label: {
+                      show: true,
+                      position: 'inside',
+                      color: '#ffffff',
+                      formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); },
+                      fontSize: 20,
+                      lineHeight: 20,
+                      width: 50,
+                      overflow: 'break'
+                    },                    
                     emphasis: { scale: true },
-                    labelLine: { show: true, length: 16, length2: 10, lineStyle: { width: 2 } },
+                    labelLine: { show: false },
                     data: colored
                   }]
                 };
@@ -97,7 +123,7 @@
         <% per_user_activity_rows.each do |uid, aid, aname, sum| %>
           <% per_user_activity[uid] << { activity_id: aid, name: aname, hours: sum.to_f } %>
         <% end %>
-        <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px;">
+        <div class="surv-employee-grid">
           <% user_rows.each do |uid, firstname, lastname, hours| %>
             <% full_name = [firstname, lastname].compact.join(' ') %>
             <% preserved_user = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
@@ -111,15 +137,13 @@
             <% unless current_f.include?('author_id') %>
               <% user_params['f'] = (current_f + ['author_id']).reject(&:blank?) %>
             <% end %>
-            <div class="chart-container" style="border:1px solid #ddd; border-radius:8px; padding:10px; background:#fafafa; cursor:pointer; transition: all 0.3s ease;"
-                 onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';"
-                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
+            <div class="surv-chart-container"
                  onclick="window.location.href='<%= project_time_entries_path(@project, user_params) %>'">
-              <div style="font-weight:bold; color:#d73925; margin-bottom:6px;">
+              <div class="surv-employee-name">
                 <%= h(full_name) %>
               </div>
-              <div style="font-size:12px; color:#555; margin-bottom:6px;">Итого: <strong><%= sprintf('%.1f', hours.to_f.round(1)) %> ч</strong></div>
-              <div id="user-chart-<%= uid %>" style="width:100%; height:120px;"></div>
+              <div class="surv-employee-hours">Итого: <strong><script>document.write(formatHoursMinutes(<%= hours.to_f %>));</script></strong></div>
+              <div id="user-chart-<%= uid %>" class="surv-employee-chart"></div>
               <script>
                 (function(){
                   var el = document.getElementById('user-chart-<%= uid %>');
@@ -142,15 +166,30 @@
                       type: 'bar',
                       stack: 'total',
                       data: [item.hours],
-                      label: { show: true, position: 'inside', formatter: function(p){ return (p && typeof p.value === 'number' && p.value > 0) ? (p.value.toFixed(1) + 'ч') : ''; }, color: '#fff', fontSize: 11 },
+                      label: { show: true, position: 'inside', formatter: function(p){ return (p && typeof p.value === 'number' && p.value > 0) ? formatHoursMinutes(p.value) : ''; }, color: '#fff', fontSize: 11 },
                       itemStyle: { color: color, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }
                     });
                   });
                   var option = {
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                    tooltip: { 
+                      trigger: 'axis', 
+                      axisPointer: { type: 'shadow' },
+                      formatter: function(params) {
+                        if (params && params.length > 0) {
+                          var result = '';
+                          params.forEach(function(item) {
+                            if (item.value > 0) {
+                              result += item.seriesName + ': ' + formatHoursMinutes(item.value) + '<br/>';
+                            }
+                          });
+                          return result;
+                        }
+                        return '';
+                      }
+                    },
                     legend: { show: false },
                     grid: { left: '3%', right: '3%', top: '8%', bottom: '8%', containLabel: true },
-                    xAxis: { type: 'value', axisLabel: { formatter: '{value} ч', fontSize: 11 } },
+                    xAxis: { type: 'value', axisLabel: { formatter: function(value) { return formatHoursMinutes(value); }, fontSize: 11 } },
                     yAxis: { type: 'category', data: [''], axisLabel: { show: false }, axisTick: { show: false } },
                     series: series
                   };
@@ -162,7 +201,7 @@
             </div>
           <% end %>
           <% if user_rows.empty? %>
-            <p class="nodata">Нет данных по сотрудникам</p>
+            <p class="surv-nodata">Нет данных по сотрудникам</p>
           <% end %>
         </div>
       <% end %>
@@ -188,7 +227,7 @@
         var color = colorById[id] || fallback[idx % fallback.length];
         return Object.assign({}, item, { itemStyle: { color: color } });
       });
-      function formatHours(val){ return (Math.round(val * 100) / 100) + ' h'; }
+      function formatHours(val){ return formatHoursMinutes(val); }
       var option = {
         tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
         legend: { show: true, orient: 'vertical', left: 10, top: 20, itemGap: 10, textStyle: { fontSize: 14 } },
@@ -197,11 +236,21 @@
           type: 'pie',
           radius: ['30%','70%'],
           center: ['50%','50%'],
+
           avoidLabelOverlap: true,
           itemStyle: { borderColor: '#fff', borderWidth: 1 },
-          label: { show: true, position: 'outside', formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); }, color: '#333', fontSize: 14 },
+          label: {
+            show: true,
+            position: 'inside',
+            color: '#ffffff',
+            formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); },
+            fontSize: 20,
+            lineHeight: 20,
+            width: 50,
+            overflow: 'break'
+          },
           emphasis: { scale: true },
-          labelLine: { show: true, length: 16, length2: 10, lineStyle: { width: 2 } },
+          labelLine: { show: false },
           data: colored
         }]
       };
@@ -210,6 +259,6 @@
     })();
   </script>
 <% else %>
-  <p class="nodata"><%= l(:label_no_data) %></p>
+  <p class="surv-nodata"><%= l(:label_no_data) %></p>
 <% end %>
 

@@ -1,0 +1,62 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\stylesheets\\application.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:stylesheets\\application.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\src\\sass\\components\\_context-menu.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\sass\\components\\_context-menu.scss||{181FE41B-5A5D-479F-9F8F-BF665F4EBC2A}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "application.css",
+              "DocumentMoniker": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\stylesheets\\application.css",
+              "RelativeDocumentMoniker": "stylesheets\\application.css",
+              "ToolTip": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\stylesheets\\application.css",
+              "RelativeToolTip": "stylesheets\\application.css",
+              "ViewState": "AgIAAOEGAAAAAAAAAAArwOMGAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-10-21T09:28:24.088Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "_context-menu.scss",
+              "DocumentMoniker": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\src\\sass\\components\\_context-menu.scss",
+              "RelativeDocumentMoniker": "src\\sass\\components\\_context-menu.scss",
+              "ToolTip": "H:\\\u041F\u0420\u041E\u0415\u041A\u0422\u042B\\\u0421\u0423\u0420\u0412\\themes\\SURV\\src\\sass\\components\\_context-menu.scss",
+              "RelativeToolTip": "src\\sass\\components\\_context-menu.scss",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002663|",
+              "WhenOpened": "2025-10-21T09:26:17.671Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{228e1580-0ef9-329a-bf07-81ebc3dcbf7e}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

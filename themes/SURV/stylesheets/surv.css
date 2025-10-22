@@ -1,0 +1,382 @@
+/* Жирный шрифт для столбца комментариев в трудозатратах */
+table.time-entries td.comments {
+    font-weight: bold !important;
+}
+/* Скрыть вкладку Действия в проектах */
+#main-menu a.activity,
+li.activity {
+    display: none !important;
+}
+
+/* Кнопка 33 (красная версия) */
+.button-33-red {
+  background-color: transparent !important;
+  border: 2px solid #c53030 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 4px rgba(197, 80, 48, 0.2) !important;
+  color: #c53030 !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  font-family: CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif !important;
+  padding: 8px 20px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  transition: all 300ms ease !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  touch-action: manipulation !important;
+}
+
+.button-33-red:hover {
+  background-color: #c53030 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(197, 80, 48, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Стили шапки таблицы */
+table.list th {
+    font-size: 20px !important;
+    background: #c53030 !important;
+    color: #fff !important;
+    text-align: center !important;
+}
+
+table.list th a {
+    color: #fff !important;
+    font-size: 20px !important;
+}
+
+/* Размер шрифтов для строк трудозатрат */
+tr.time-entry {
+  white-space: normal !important;
+  font-size: 18px !important;
+}
+
+/* Боковые фильтры для трудозатрат */
+#time_entries_scope_form {
+  margin-bottom: 20px;
+}
+
+#time_entries_scope_form h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#time_entries_scope_form p {
+  margin-bottom: 10px;
+}
+
+#time_entries_scope_form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #555;
+}
+
+#time_entries_scope_form input[type="date"],
+#time_entries_scope_form input[type="text"],
+#time_entries_scope_form select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+#time_entries_scope_form input[type="date"]:focus,
+#time_entries_scope_form input[type="text"]:focus,
+#time_entries_scope_form select:focus {
+  border-color: #c53030;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(197, 48, 48, 0.1);
+}
+
+#time_entries_scope_form ul {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0;
+}
+
+#time_entries_scope_form li {
+  margin-bottom: 8px;
+}
+
+#time_entries_scope_form li input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+#time_entries_scope_form li label {
+  display: inline;
+  margin-bottom: 0;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+#time_entries_scope_form li label a {
+  color: #c53030;
+  text-decoration: none;
+}
+
+#time_entries_scope_form li label a:hover {
+  text-decoration: underline;
+}
+
+#time_entries_scope_form input[type="submit"] {
+  background: #c53030;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+#time_entries_scope_form input[type="submit"]:hover {
+  background: #a02626;
+}
+
+/* Скрытие стандартных фильтров сверху для трудозатрат */
+.controller-time_entries fieldset#filters {
+  display: none !important;
+}
+
+/* Обеспечиваем правильное отображение боковой панели для трудозатрат */
+.controller-time_entries #sidebar {
+  display: block !important;
+}
+
+.controller-time_entries #content {
+  margin-left: 270px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media screen and (max-width: 768px) {
+  .controller-time_entries #sidebar {
+    display: none;
+  }
+  
+  .controller-time_entries #content {
+    margin-left: 0;
+  }
+}
+
+/* Modern Redmine Dashboard Style */
+:root {
+    --primary-bg: #f8f9fa;
+    --header-bg: #ffffff;
+    --header-border: #e9ecef;
+    --header-text: #212529;
+    --table-header-bg: #ffffff;
+    --table-header-text: #495057;
+    --table-border: #e9ecef;
+    --table-zebra: #f8f9fa;
+    --table-hover: #e9ecef;
+    --accent-color: #C53030;
+}
+
+/* Основная шапка сайта */
+#header {
+    background: var(--header-bg) !important;
+    border-bottom: 1px solid var(--header-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    color: var(--header-text) !important;
+}
+
+/* Заголовок проекта */
+#header h1,
+#header h1 .root,
+#header h1 .ancestor,
+#header h1 .current-project {
+    color: var(--header-text) !important;
+    font-weight: 600 !important;
+}
+
+/* Главное меню навигации */
+#main-menu {
+    background: var(--header-bg) !important;
+    border-bottom: 1px solid var(--header-border) !important;
+}
+
+#main-menu > ul > li > a {
+    color: var(--header-text) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+#main-menu > ul > li > a:hover,
+#main-menu > ul > li > a:focus {
+    color: var(--accent-color) !important;
+    background: transparent !important;
+}
+
+#main-menu > ul > li > a.selected {
+    color: var(--accent-color) !important;
+    border-bottom: 3px solid var(--accent-color) !important;
+    background: transparent !important;
+}
+
+/* Стилизация таблиц */
+table.list {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+    background: white !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+
+
+/* Поле поиска и элементы управления */
+#quick-search input[type="text"] {
+    border: 1px solid var(--table-border) !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+    background: white !important;
+}
+
+#project-jump .drdn-trigger {
+    border: 1px solid var(--table-border) !important;
+    border-radius: 4px !important;
+    background: white !important;
+}
+
+#main-menu li a:hover {
+  background: none;
+  color: #000;
+  border-bottom: 3px solid #c53030 !important;
+}
+#main-menu li a:hover {
+  border-bottom: 3px solid #c53030 !important;
+
+}
+#main-menu li a:hover {
+  background: none;
+  color: #000;
+  border-bottom: 3px solid #c53030 !important;;
+}
+
+/* Red focus/hover styles for inputs/selects/textareas across the site */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+select,
+textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+input[type="search"]:hover,
+input[type="url"]:hover,
+input[type="tel"]:hover,
+input[type="number"]:hover,
+input[type="date"]:hover,
+input[type="datetime"]:hover,
+input[type="datetime-local"]:hover,
+input[type="month"]:hover,
+input[type="time"]:hover,
+input[type="week"]:hover,
+select:hover,
+textarea:hover,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="search"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="time"]:focus,
+input[type="week"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #c53030 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(197, 48, 48, 0.15) !important;
+}
+
+/* Explicitly target the provided project name input */
+#project_name:hover,
+#project_name:focus {
+  border-color: #c53030 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(197, 48, 48, 0.15) !important;
+}
+
+/* jQuery UI focus states (dialogs, datepickers, etc.) */
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus,
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+  border-color: #c53030 !important;
+  background: #c53030 !important;
+  color: #fff !important;
+}
+
+/* Semi-transparent red for table row hover/selection */
+table.list tr:hover,
+table.list tr.selected,
+table.list tr.highlighted,
+table.list tr.ui-state-hover,
+table.list tr.ui-state-active,
+table.list tr.ui-state-focus {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Table row selection with semi-transparent red */
+table.list tr.selected td,
+table.list tr.highlighted td,
+table.list tr.ui-state-hover td,
+table.list tr.ui-state-active td,
+table.list tr.ui-state-focus td {
+  background-color: rgba(197, 48, 48, 0.1) !important;
+}
+
+/* Alternative table row hover styles */
+table tr:hover,
+table tr.selected,
+table tr.highlighted {
+  background-color: rgba(197, 48, 48, 0.1) !important;
+}
+
+/* Soft red for context menu selection (checkbox selection) */
+tr.context-menu-selection,
+tr.context-menu-selection td {
+  background-color: rgba(197, 48, 48, 0.08) !important;
+}
+
+/* Stronger specificity to override core rule */
+#wrapper .context-menu-selection,
+#wrapper .context-menu-selection > td {
+  background-color: rgba(70, 70, 69, 0.7) !important;
+}

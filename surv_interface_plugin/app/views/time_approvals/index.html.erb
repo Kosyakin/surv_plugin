@@ -1,4 +1,4 @@
-<h1>Согласование трудозатрат</h1>
+<h2>Согласование трудозатрат</h2>
 
 
 <% if @query.valid? %>
@@ -7,28 +7,25 @@
 <% else %>
 <%= render_query_totals(@query) %>
 
-<div style="display:flex; gap:16px; align-items:flex-start;">
-  <div style="flex:1 1 60%; min-width:0;">
+<div class="surv-approvals-container">
+  <div class="surv-approvals-list">
     <%= render :partial => 'list', :locals => { :entries => @entries }%>
     <span class="pagination"><%= pagination_links_full @entry_pages, @entry_count %></span>
   </div>
 
-  <div style="flex:1 1 40%; min-width:0;">
+  <div class="surv-approvals-charts">
     <!-- Статистика трудозатрат по пользователям -->
     <% if @user_charts.empty? %>
       <p class="nodata">Нет данных для отображения графиков</p>
     <% else %>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <div class="surv-approvals-charts-grid">
         <% @user_charts.each_with_index do |user_chart, index| %>
-          <div class="chart-container" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa; cursor: pointer; transition: all 0.3s ease;" 
-               onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" 
-               onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';"
-               onclick="handleChartContainerClick(<%= index %>)">
-            <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">
+          <div class="surv-approvals-chart-container" onclick="handleChartContainerClick(<%= index %>)">
+            <h3 class="surv-approvals-user-title">
               <%= user_chart[:user_name] %>
-              <small style="display: block; font-size: 11px; color: #666; font-weight: normal; margin-top: 3px;">Нажмите для просмотра в таблице</small>
+              <small class="surv-approvals-user-subtitle">Нажмите для просмотра в таблице</small>
             </h3>
-            <div id="userChart<%= index %>" style="width: 100%; height: 200px;"></div>
+            <div id="userChart<%= index %>" class="surv-approvals-user-chart"></div>
           </div>
         <% end %>
       </div>
@@ -42,9 +39,9 @@
   <%= f.link_to_with_query_parameters 'Atom', :key => User.current.atom_key %>
 <% end %>
 
-<div id="csv-export-options" style="display:none;">
-  <h3 class="title"><%= l(:label_export_options, :export_format => 'CSV') %></h3>
-  <%= form_tag(time_entries_approval_path(:format => 'csv'), :method => :get, :id => 'csv-export-form') do %>
+<div id="csv-export-options" class="surv-csv-export-modal">
+  <h3 class="surv-csv-export-title"><%= l(:label_export_options, :export_format => 'CSV') %></h3>
+  <%= form_tag(time_entries_approval_path(:format => 'csv'), :method => :get, :id => 'csv-export-form', :class => 'surv-csv-export-form') do %>
   <%= query_as_hidden_field_tags @query %>
   <%= hidden_field_tag('query_name', @query.name) %>
   <p>
@@ -52,8 +49,8 @@
     <label><%= radio_button_tag 'c[]', 'all_inline' %> <%= l(:description_all_columns) %></label>
   </p>
   <% if @query.available_block_columns.any? %>
-    <fieldset id="csv-export-block-columns">
-      <legend>
+    <fieldset id="csv-export-block-columns" class="surv-csv-export-fieldset">
+      <legend class="surv-csv-export-legend">
         <%= toggle_checkboxes_link('#csv-export-block-columns input[type=checkbox]') %>
       </legend>
       <% @query.available_block_columns.each do |column| %>
@@ -63,9 +60,9 @@
   <% end %>
   <%= export_csv_encoding_select_tag %>
   <%= export_csv_separator_select_tag %>
-  <p class="buttons">
-    <%= submit_tag l(:button_export), :name => nil, :onclick => "hideModal(this);", :data => { :disable_with => false } %>
-    <%= link_to_function l(:button_cancel), "hideModal(this);" %>
+  <p class="surv-csv-export-buttons">
+    <%= submit_tag l(:button_export), :name => nil, :onclick => "hideModal(this);", :data => { :disable_with => false }, :class => 'surv-csv-export-button' %>
+    <%= link_to_function l(:button_cancel), "hideModal(this);", :class => 'surv-csv-export-button' %>
   </p>
   <% end %>
 </div>
@@ -274,7 +271,7 @@ function expandUserGroup(userName) {
 
 // Function to highlight active chart
 function highlightChart(activeIndex) {
-  document.querySelectorAll('.chart-container').forEach(function(container, index) {
+  document.querySelectorAll('.surv-approvals-chart-container').forEach(function(container, index) {
     if (index === activeIndex) {
       container.style.border = '3px solid #d73925';
       container.style.boxShadow = '0 0 15px rgba(215, 57, 37, 0.4)';

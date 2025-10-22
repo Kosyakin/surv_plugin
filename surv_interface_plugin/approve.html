@@ -1,0 +1,794 @@
+<html lang="ru"><head>
+    <meta charset="utf-8">
+    <title>Трудозатраты - Подробности - Лаборатория внедрения и сопровождения цифровых продуктов - Система учета рабочего времени ЛИНК</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Redmine">
+    <meta name="keywords" content="issue,bug,tracker">
+    <meta name="csrf-param" content="authenticity_token">
+    <meta name="csrf-token" content="LJI4aC1SEgr62DdpdSgth7l2tl50O+ARHXaw6Wzd8/AEWQTKPYBXuyxy48xUSqD7Wzw5TGGV1MQnq0ukgekhwg==">
+    <link rel="shortcut icon" href="/favicon.ico?1745133901">
+    <link rel="stylesheet" media="all" href="/stylesheets/jquery/jquery-ui-1.13.2.css?1745133901">
+    <link rel="stylesheet" media="all" href="/stylesheets/tribute-5.1.3.css?1745133901">
+    <link rel="stylesheet" media="all" href="/themes/flatly_light_redmine-master/stylesheets/application.css?1758793628">
+    <link rel="stylesheet" media="all" href="/stylesheets/responsive.css?1745133901">
+    
+    <script src="/javascripts/jquery-3.6.1-ui-1.13.2-ujs-6.1.7.6.js?1745133901"></script>
+    <script src="/javascripts/tribute-5.1.3.min.js?1745133901"></script>
+    <script src="/javascripts/tablesort-5.2.1.min.js?1745133901"></script>
+    <script src="/javascripts/tablesort-5.2.1.number.min.js?1745133901"></script>
+    <script src="/javascripts/application.js?1745133901"></script>
+    <script src="/javascripts/responsive.js?1745133901"></script>
+    <script>
+    //<![CDATA[
+    $(window).on('load', function(){ warnLeavingUnsaved('Текущая страница содержит несохранённый текст, который будет потерян, если вы покинете эту страницу.'); });
+    //]]>
+    </script>
+    <script src="/themes/flatly_light_redmine-master/javascripts/theme.js?1573208867"></script>
+    <script>
+    //<![CDATA[
+    rm = window.rm || {};rm.AutoComplete = rm.AutoComplete || {};rm.AutoComplete.dataSources = JSON.parse('{"issues":"/issues/auto_complete?project_id=p5\u0026q=","wiki_pages":"/wiki_pages/auto_complete?project_id=p5\u0026q="}');
+    //]]>
+    </script>
+    
+    <!-- page specific tags -->
+    <script>
+    //<![CDATA[
+    var datepickerOptions={dateFormat: 'yy-mm-dd', firstDay: 1, showOn: 'button', buttonImageOnly: true, buttonImage: '/images/calendar.png?1745133901', showButtonPanel: true, showWeek: true, showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, beforeShow: beforeShowDatePicker};
+    //]]>
+    </script><script src="/javascripts/i18n/datepicker-ru.js?1745133901"></script><script src="/javascripts/context_menu.js?1745133901"></script><link rel="stylesheet" media="screen" href="/stylesheets/context_menu.css?1745133901">    <link rel="alternate" type="application/atom+xml" title="Трудозатраты" href="http://surv.01l.ru/approvals/time_entries.atom?key=f657e1f45ec98395f0d810667b540ce0f02ba332">
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    </head>
+    <body class="theme-Flatly light redmine-master project-p5 has-main-menu controller-time_approvals action-index avatars-off">
+    
+    <div id="wrapper">
+    
+    <div class="flyout-menu js-flyout-menu">
+    
+            <div class="flyout-menu__search">
+                <form action="/projects/p5/search" accept-charset="UTF-8" name="form-e26b1901" method="get"><input name="utf8" type="hidden" value="✓" autocomplete="off">
+                
+                <label class="search-magnifier search-magnifier--flyout" for="flyout-search">⚲</label>
+                <input type="text" name="q" id="flyout-search" class="small js-search-input" placeholder="Поиск">
+    </form>        </div>
+    
+            <div class="flyout-menu__avatar flyout-menu__avatar--no-avatar">
+                <a class="user active" href="/users/6">GlukhovAV</a>
+            </div>
+    
+            <h3>Проект</h3>
+            <span class="js-project-menu"></span>
+    
+        <h3>Общее</h3>
+        <span class="js-general-menu"></span>
+    
+        <span class="js-sidebar flyout-menu__sidebar"></span>
+    
+        <h3>Профиль</h3>
+        <span class="js-profile-menu"></span>
+    
+    </div>
+    
+    
+    <div id="menu"><div class="burger"><div class="one"></div><div class="two"></div><div class="three"></div></div><div class="circle"></div></div><div id="top-menu">
+        <div id="account">
+            <ul><li><a class="my-account" href="/my/account">Моя учётная запись</a></li><li><a class="logout" rel="nofollow" data-method="post" href="/logout">Выйти</a></li></ul>    </div>
+        <div id="loggedas"><div class="redmine-logo"></div>Вошли как <a class="user active" href="/users/6">GlukhovAV</a></div>
+        <ul><li><a class="projects" href="/projects">Проекты</a></li><li><a class="my-time-entries" href="/my/time_entries">Мои трудозатраты</a></li><li><a class="time-entries-approval" href="/approvals/time_entries">Согласование трудозатрат</a></li><li><a target="_blank" rel="noopener" class="help" href="https://www.redmine.org/guide">Помощь</a></li></ul></div>
+    
+    <div id="header">
+    
+        <a href="#" class="mobile-toggle-button js-flyout-menu-toggle-button"></a>
+    
+        <div id="quick-search">
+            <form action="/projects/p5/search" accept-charset="UTF-8" name="form-6ebed38e" method="get"><input name="utf8" type="hidden" value="✓" autocomplete="off">
+            <input type="hidden" name="scope" autocomplete="off">
+            
+            <label for="q">
+              <a accesskey="4" href="/projects/p5/search">Поиск</a>:
+            </label>
+            <input type="text" name="q" id="q" size="20" class="small" accesskey="f" data-auto-complete="true">
+    </form>        <div id="project-jump" class="drdn"><span class="drdn-trigger">Лаборатория внедрения и сопровождения цифровых продуктов</span><div class="drdn-content"><div class="quick-search"><input type="text" name="q" id="projects-quick-search" value="" class="autocomplete" data-automcomplete-url="/projects/autocomplete.js?jump=time_approvals" autocomplete="off" data-value-was=""></div><div class="drdn-items projects selection"><strong>Последние</strong><a title="Центр цифрового моделирования" href="/projects/p2?jump=time_approvals"><span style="padding-left:0px;">Центр цифрового моделирования</span></a><a title="Лаборатория внедрения и сопровождения цифровых продуктов" class="selected" href="/projects/p5?jump=time_approvals"><span style="padding-left:0px;">Лаборатория внедрения и сопровождения цифровых продуктов</span></a><strong>Все проекты</strong><a title="Центр цифрового моделирования" href="/projects/p2?jump=time_approvals"><span style="padding-left:0px;">Центр цифрового моделирования</span></a><a title="Лаборатория внедрения и сопровождения цифровых продуктов" class="selected" href="/projects/p5?jump=time_approvals"><span style="padding-left:16px;">Лаборатория внедрения и сопровождения цифровых продуктов</span></a></div><div class="drdn-items all-projects selection"><a href="/projects?jump=time_approvals">Все проекты</a></div></div></div>
+        </div>
+    
+        <h1><span class="breadcrumbs"><a class="root" href="/projects/p2?jump=time_approvals">Центр цифрового моделирования</a><span class="separator"> » </span></span><span class="current-project">Лаборатория внедрения и сопровождения цифровых продуктов</span></h1>
+    
+        <div id="main-menu" class="tabs">
+            <ul><li>
+    <a onclick="toggleNewObjectDropdown(); return false;" id="new-object" class="new-object" href="#"> + </a>
+    <ul class="menu-children"><li><a class="new-timelog" href="/projects/p5/time_entries/new">Добавить трудозатраты</a></li></ul>
+    </li><li><a class="overview" href="/projects/p5">Обзор</a></li><li><a class="activity" href="/projects/p5/activity">Действия</a></li><li><a class="time-entries" href="/projects/p5/time_entries">Трудозатраты</a></li></ul>
+            <div class="tabs-buttons" style="display: none;">
+                <button class="tab-left" onclick="moveTabLeft(this); return false;"></button>
+                <button class="tab-right" onclick="moveTabRight(this); return false;"></button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="main" class="nosidebar">
+        <div id="sidebar">
+            
+    
+            
+        </div>
+    
+        <div id="content">
+            
+            <h1>Согласование трудозатрат</h1>
+    <h1>В разработке</h1>
+    <div class="contextual">
+    <a class="icon icon-time-add" href="/projects/p5/time_entries/new">Добавить трудозатраты</a>
+    </div>
+    
+    <h2>Трудозатраты</h2>
+    
+    
+    <form id="query_form" action="/approvals/time_entries" accept-charset="UTF-8" name="query_form-d4671f0e" method="get"><input name="utf8" type="hidden" value="✓" autocomplete="off">
+    <input type="hidden" name="set_filter" id="set_filter" value="1" autocomplete="off">
+    <input type="hidden" name="type" id="query_type" value="TimeEntryQuery" disabled="disabled" autocomplete="off">
+    <input type="hidden" name="sort" value="spent_on:desc" autocomplete="off">
+    
+    <div id="query_form_with_buttons" class="hide-when-print">
+    <div id="query_form_content">
+      <fieldset id="filters" class="collapsible ">
+        <legend onclick="toggleFieldset(this);" class="icon icon-expanded">Фильтры</legend>
+        <div style="">
+          <script>
+    //<![CDATA[
+    
+    var operatorLabels = {"=":"соответствует","!":"не соответствует","o":"открыто","c":"закрыто","!*":"отсутствует","*":"все","\u003e=":"\u003e=","\u003c=":"\u003c=","\u003e\u003c":"между","\u003ct+":"менее чем","\u003et+":"более чем","\u003e\u003ct+":"в следующие дни","t+":"в","nd":"завтра","t":"сегодня","ld":"вчера","nw":"следующая неделя","w":"на этой неделе","lw":"прошлая неделя","l2w":"прошлые 2 недели","nm":"следующий месяц","m":"этот месяц","lm":"прошлый месяц","y":"этот год","\u003et-":"менее, чем дней(я) назад","\u003ct-":"более, чем дней(я) назад","\u003e\u003ct-":"в прошлые дни","t-":"дней(я) назад","~":"содержит","!~":"не содержит","*~":"содержит любой из","^":"начинается с","$":"заканчивается на","=p":"любые задачи в проекте","=!p":"любые задачи не в проекте","!p":"нет задач в проекте","*o":"любые открытые задачи","!o":"нет открытых задач","ev":"был","!ev":"никогда не был","cf":"изменено с"};
+    var operatorByType = {"list":["=","!"],"list_with_history":["=","!","ev","!ev","cf"],"list_status":["o","=","!","ev","!ev","cf","c","*"],"list_optional":["=","!","!*","*"],"list_optional_with_history":["=","!","ev","!ev","cf","!*","*"],"list_subprojects":["*","!*","=","!"],"date":["=","\u003e=","\u003c=","\u003e\u003c","\u003ct+","\u003et+","\u003e\u003ct+","t+","nd","t","ld","nw","w","lw","l2w","nm","m","lm","y","\u003et-","\u003ct-","\u003e\u003ct-","t-","!*","*"],"date_past":["=","\u003e=","\u003c=","\u003e\u003c","\u003et-","\u003ct-","\u003e\u003ct-","t-","t","ld","w","lw","l2w","m","lm","y","!*","*"],"string":["~","*~","=","!~","!","^","$","!*","*"],"text":["~","*~","!~","^","$","!*","*"],"search":["~","*~","!~"],"integer":["=","\u003e=","\u003c=","\u003e\u003c","!*","*"],"float":["=","\u003e=","\u003c=","\u003e\u003c","!*","*"],"relation":["=","!","=p","=!p","!p","*o","!o","!*","*"],"tree":["=","~","!*","*"]};
+    var availableFilters = {"spent_on":{"type":"date_past","name":"Дата","values":null},"issue_id":{"type":"tree","name":"Задача","values":null},"issue.tracker_id":{"type":"list","name":"Задача Трекер","remote":true},"issue.parent_id":{"type":"tree","name":"Задача Родительская задача","values":null},"issue.status_id":{"type":"list","name":"Задача Статус","remote":true},"issue.fixed_version_id":{"type":"list","name":"Задача Версия","remote":true},"issue.category_id":{"type":"list_optional","name":"Задача Категория","remote":true},"issue.subject":{"type":"text","name":"Задача Тема","values":null},"user_id":{"type":"list_optional","name":"Пользователь","remote":true},"author_id":{"type":"list_optional","name":"Автор","remote":true},"activity_id":{"type":"list","name":"Деятельность","values":[["По заявкам и договорам","1"],["Внепроектная для заказчика","2"],["Обеспечивающая ","3"],["Согласованное отсутствие","4"]]},"comments":{"type":"text","name":"Комментарий","values":null},"hours":{"type":"float","name":"час(а,ов)","values":null},"cf_2":{"type":"list_optional","name":"Согласовано","remote":true,"values":[["Да","1"],["Нет","0"]]}};
+    var labelDayPlural = "дней(я)";
+    
+    var filtersUrl = "\/queries\/filter?project_id=5\u0026type=TimeEntryQuery";
+    
+    $(document).ready(function(){
+      initFilters();
+      addFilter("cf_2", "!", ["1"]);
+    });
+    
+    //]]>
+    </script>
+    <table id="filters-table">
+    <tr class="filter" id="tr_cf_2"><td class="field"><input checked="checked" id="cb_cf_2" name="f[]" value="cf_2" type="checkbox"><label for="cb_cf_2"> Согласовано</label></td><td class="operator"><select id="operators_cf_2" name="op[cf_2]"><option value="=">соответствует</option><option value="!">не соответствует</option><option value="!*">отсутствует</option><option value="*">все</option></select></td><td class="values"><span style=""><select class="value" id="values_cf_2_1" name="v[cf_2][]"><option value="1">Да</option><option value="0">Нет</option></select> <span class="toggle-multiselect icon-only icon-toggle-plus">&nbsp;</span></span></td></tr></table>
+    
+    <div class="add-filter">
+    <label for="add_filter_select">Добавить фильтр</label>
+    <select id="add_filter_select"><option value="">&nbsp;</option>
+    <option value="issue_id">Задача</option>
+    <option value="user_id">Пользователь</option>
+    <option value="author_id">Автор</option>
+    <option value="activity_id">Деятельность</option>
+    <option value="hours">час(а,ов)</option>
+    <option value="cf_2" disabled="disabled">Согласовано</option>
+    <option value="spent_on">Дата</option><optgroup label="Текст"><option value="comments">Комментарий</option></optgroup><optgroup label="Задача"><option value="issue.tracker_id">Задача Трекер</option>
+    <option value="issue.parent_id">Задача Родительская задача</option>
+    <option value="issue.status_id">Задача Статус</option>
+    <option value="issue.fixed_version_id">Задача Версия</option>
+    <option value="issue.category_id">Задача Категория</option>
+    <option value="issue.subject">Задача Тема</option></optgroup></select>
+    </div>
+    
+    <input type="hidden" name="f[]" id="f_" value="" autocomplete="off">
+    
+        </div>
+      </fieldset>
+    
+        <fieldset id="options" class="collapsible collapsed">
+          <legend onclick="toggleFieldset(this);" class="icon icon-collapsed">Опции</legend>
+            <div class="hidden">
+              <table id="list-definition" class="">
+                <tbody><tr>
+                  <td class="field">Столбцы</td>
+                  <td>
+    <span class="query-columns">
+      <span>
+          <label for="available_c">Доступные столбцы</label>
+          <select name="available_columns[]" id="available_c" multiple="multiple" size="10" ondblclick="moveOptions(this.form.available_c, this.form.selected_c);"><option value="project">Проект</option>
+    <option value="created_on">Создано</option>
+    <option value="tweek">Неделя</option>
+    <option value="author">Автор</option>
+    <option value="user">Пользователь</option>
+    <option value="issue">Задача</option>
+    <option value="issue.tracker">Трекер</option>
+    <option value="issue.parent">Родительская задача</option>
+    <option value="issue.status">Статус</option>
+    <option value="issue.category">Категория</option>
+    <option value="issue.fixed_version">Версия</option></select>
+      </span>
+      <span class="buttons">
+          <input type="button" value="→" class="move-right" onclick="moveOptions(this.form.available_c, this.form.selected_c);">
+          <input type="button" value="←" class="move-left" onclick="moveOptions(this.form.selected_c, this.form.available_c);">
+      </span>
+      <span>
+          <label for="selected_c">Выбранные столбцы</label>
+          <select name="c[]" id="selected_c" multiple="multiple" size="10" ondblclick="moveOptions(this.form.selected_c, this.form.available_c);"><option value="spent_on">Дата</option>
+    <option value="activity">Деятельность</option>
+    <option value="cf_1">Подтип деятельности</option>
+    <option value="comments">Комментарий</option>
+    <option value="cf_2">Согласовано</option>
+    <option value="hours">час(а,ов)</option></select>
+      </span>
+      <span class="buttons">
+          <input type="button" value="⇈" onclick="moveOptionTop(this.form.selected_c);">
+          <input type="button" value="↑" onclick="moveOptionUp(this.form.selected_c);">
+          <input type="button" value="↓" onclick="moveOptionDown(this.form.selected_c);">
+          <input type="button" value="⇊" onclick="moveOptionBottom(this.form.selected_c);">
+      </span>
+    </span>
+    
+    <script>
+    //<![CDATA[
+    
+    $(document).ready(function(){
+      $('.query-columns').closest('form').submit(function(){
+        $('#selected_c option:not(:disabled)').prop('selected', true);
+      });
+    });
+    
+    //]]>
+    </script></td>
+                </tr>
+                <tr>
+                  <td class="field"><label for="group_by">Группировать результаты по</label></td>
+                  <td><select name="group_by" id="group_by"><option value="">&nbsp;</option>
+    <option value="project">Проект</option>
+    <option value="spent_on">Дата</option>
+    <option value="created_on">Создано</option>
+    <option selected="selected" value="user">Пользователь</option>
+    <option value="activity">Деятельность</option>
+    <option value="issue">Задача</option>
+    <option value="cf_1">Подтип деятельности</option>
+    <option value="cf_2">Согласовано</option></select></td>
+                </tr>
+                <tr>
+                  <td>Итоги</td>
+                  <td><label class="inline"><input type="checkbox" name="t[]" value="hours" checked="checked"> час(а,ов)</label><input type="hidden" name="t[]" id="t_" value="" autocomplete="off"></td>
+                </tr>
+            </tbody></table>
+          </div>
+        </fieldset>
+    </div>
+    
+    <p class="buttons">
+      <a href="#" onclick="$(&quot;#query_form&quot;).submit(); return false;" class="icon icon-checked">Применить</a>
+      <a class="icon icon-reload" href="/approvals/time_entries?project_id=p5&amp;set_filter=1&amp;sort=">Очистить</a>
+    </p>
+    </div>
+    
+    
+    
+    <script>
+    //<![CDATA[
+    
+    $(function ($) {
+      $('input[name=display_type]').change(function (e) {
+        if ($("#display_type_list").is(':checked')) {
+          $('table#list-definition').show();
+        } else {
+          $('table#list-definition').hide();
+        }
+    
+      })
+    });
+    
+    
+    //]]>
+    </script>
+    
+    <div class="tabs hide-when-print">
+    <ul>
+        <li><a class="selected" href="/projects/p5/time_entries">Подробности</a></li>
+        <li><a href="/projects/p5/time_entries/report">Отчёт</a></li>
+    </ul>
+    </div>
+    
+    </form>
+    <p class="query-totals"><span class="total-for-hours"><span>час(а,ов):</span> <span class="value">70:50</span></span></p>
+    
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex:1 1 60%; min-width:0;">
+        <form data-cm-url="/time_entries/context_menu" action="/approvals/time_entries" accept-charset="UTF-8" name="form-6cfdada9" method="post"><input name="utf8" type="hidden" value="✓" autocomplete="off"><input type="hidden" name="authenticity_token" value="LJI4aC1SEgr62DdpdSgth7l2tl50O+ARHXaw6Wzd8/AEWQTKPYBXuyxy48xUSqD7Wzw5TGGV1MQnq0ukgekhwg==" autocomplete="off"><input type="hidden" name="back_url" value="/approvals/time_entries" autocomplete="off">
+    <div class="autoscroll">
+    <table class="list odd-even time-entries">
+    <thead>
+      <tr>
+        <th class="checkbox hide-when-print">
+          <input type="checkbox" name="check_all" id="check_all" value="" class="toggle-selection" title="Отметить все / Очистить">
+        </th>
+          <th class="spent_on"><a title="Сортировать по &quot;Дата&quot;" class="sort desc icon icon-sorted-asc" href="/approvals/time_entries?sort=spent_on">Дата</a></th>
+          <th class="activity"><a title="Сортировать по &quot;Деятельность&quot;" href="/approvals/time_entries?sort=activity%2Cspent_on%3Adesc">Деятельность</a></th>
+          <th class="cf_1 list"><a title="Сортировать по &quot;Подтип деятельности&quot;" href="/approvals/time_entries?sort=cf_1%2Cspent_on%3Adesc">Подтип деятельности</a></th>
+          <th class="comments">Комментарий</th>
+          <th class="cf_2 bool"><a title="Сортировать по &quot;Согласовано&quot;" href="/approvals/time_entries?sort=cf_2%2Cspent_on%3Adesc">Согласовано</a></th>
+          <th class="hours"><a title="Сортировать по &quot;час(а,ов)&quot;" href="/approvals/time_entries?sort=hours%2Cspent_on%3Adesc">час(а,ов)</a></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr class="group open">
+          <td colspan="8">
+            <span class="expander icon icon-expanded" onclick="toggleRowGroup(this);">&nbsp;</span>
+            <span class="name"><a class="user active" href="/users/9">Калатур Ирина Олгеговна</a></span>
+            <span class="badge badge-count count">2</span>
+            <span class="totals"><span class="total-for-hours"><span>час(а,ов):</span> <span class="value">8:40</span></span></span>
+            <a href="#" onclick="toggleAllRowGroups(this); return false;" class="toggle-all">Свернуть все/Развернуть все</a>
+          </td>
+        </tr>
+      <tr id="time-entry-7" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="7"></td>
+        <td class="spent_on">21.08.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">ННОС-119 "Создание онлайн мониторинга зон критичных параметров основного ТО (дашборды) и оповещений"</td>
+        <td class="comments">asdasd</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">2:00</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/7/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/7">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-6" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="6"></td>
+        <td class="spent_on">21.08.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">ННОС-119 "Создание онлайн мониторинга зон критичных параметров основного ТО (дашборды) и оповещений"</td>
+        <td class="comments">asdasd</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">6:40</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/6/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/6">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+        <tr class="group open">
+          <td colspan="8">
+            <span class="expander icon icon-expanded" onclick="toggleRowGroup(this);">&nbsp;</span>
+            <span class="name"><a class="user active" href="/users/5">Косякин Владимир Владиславович</a></span>
+            <span class="badge badge-count count">10</span>
+            <span class="totals"><span class="total-for-hours"><span>час(а,ов):</span> <span class="value">37:00</span></span></span>
+            <a href="#" onclick="toggleAllRowGroups(this); return false;" class="toggle-all">Свернуть все/Развернуть все</a>
+          </td>
+        </tr>
+      <tr id="time-entry-32" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="32"></td>
+        <td class="spent_on">24.09.2025</td>
+        <td class="activity">Согласованное отсутствие</td>
+        <td class="cf_1 list">Прочее (государственные праздники, прочие отсутствия)</td>
+        <td class="comments">Ходил в больницу</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">1:00</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/32/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/32">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-30" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="30"></td>
+        <td class="spent_on">24.09.2025</td>
+        <td class="activity">Внепроектная для заказчика</td>
+        <td class="cf_1 list">ННОС</td>
+        <td class="comments">Проверка работоспособности прилож "МОБИТЕХ" на роли "Технадзор"</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">1:00</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/30/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/30">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-29" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="29"></td>
+        <td class="spent_on">23.09.2025</td>
+        <td class="activity">Обеспечивающая </td>
+        <td class="cf_1 list">Задачи стратегического характера, развитие, улучшения(разработка новых направлений и внутренних проектов ООО «ЛИНК», LSS, ППУ)</td>
+        <td class="comments">Совещание по порталу заявок 2.0</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">1:00</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/29/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/29">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-28" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="28"></td>
+        <td class="spent_on">23.09.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">№ИТС 31-24 от 03.10.2024 (ВНП) "ИТО и супервайзинг во время ОКР на ВНП"</td>
+        <td class="comments">Подготовка отчетной документации по ремонтам на установке 58</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">2:20</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/28/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/28">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-27" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="27"></td>
+        <td class="spent_on">23.09.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">№ИТС 36-24 от 13.12.2024 (ПНОС) "ИТО и супервайзинг во время ОКР на ПНОС"</td>
+        <td class="comments">Работа с супервайзерами, подготовка данных ксг для экспорта в систему</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">5:50</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/27/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/27">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-26" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="26"></td>
+        <td class="spent_on">22.09.2025</td>
+        <td class="activity">Обеспечивающая </td>
+        <td class="cf_1 list">Задачи стратегического характера, развитие, улучшения(разработка новых направлений и внутренних проектов ООО «ЛИНК», LSS, ППУ)</td>
+        <td class="comments">Разработка СУРВ</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">4:30</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/26/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/26">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-25" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="25"></td>
+        <td class="spent_on">22.09.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">ВНП-44 "Разработка и внедрение автоматизированной системы мониторинга катализаторов гидроочистки"</td>
+        <td class="comments">Работал по заявке</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">2:30</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/25/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/25">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-24" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="24"></td>
+        <td class="spent_on">22.09.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">ННОС-41 "Создание онлайн мониторинга зон критичных параметров основного ТО предприятия (дашборды)"</td>
+        <td class="comments">Работал по заявке</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">2:20</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/24/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/24">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-38" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="38"></td>
+        <td class="spent_on">16.09.2025</td>
+        <td class="activity">Обеспечивающая </td>
+        <td class="cf_1 list">Задачи стратегического характера, развитие, улучшения(разработка новых направлений и внутренних проектов ООО «ЛИНК», LSS, ППУ)</td>
+        <td class="comments">Тестирование</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">7:50</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/38/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/38">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-37" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="37"></td>
+        <td class="spent_on">15.09.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">ННОС-119 "Создание онлайн мониторинга зон критичных параметров основного ТО (дашборды) и оповещений"</td>
+        <td class="comments">Тест</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">8:40</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/37/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/37">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+        <tr class="group open">
+          <td colspan="8">
+            <span class="expander icon icon-expanded" onclick="toggleRowGroup(this);">&nbsp;</span>
+            <span class="name"><a class="user active" href="/users/10">Чиненков Тимур Анатольевич</a></span>
+            <span class="badge badge-count count">6</span>
+            <span class="totals"><span class="total-for-hours"><span>час(а,ов):</span> <span class="value">25:10</span></span></span>
+            <a href="#" onclick="toggleAllRowGroups(this); return false;" class="toggle-all">Свернуть все/Развернуть все</a>
+          </td>
+        </tr>
+      <tr id="time-entry-54" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="54"></td>
+        <td class="spent_on">02.10.2025</td>
+        <td class="activity">Согласованное отсутствие</td>
+        <td class="cf_1 list">Больничный/Посещение медицинского учреждения</td>
+        <td class="comments">Ходил ко врачу</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">1:00</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/54/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/54">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-55" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="55"></td>
+        <td class="spent_on">01.10.2025</td>
+        <td class="activity">Внепроектная для заказчика</td>
+        <td class="cf_1 list">ПАО «ЛУКОЙЛ» БННГ</td>
+        <td class="comments">Общался с коллегами по стратегическим вопросам развития инфраструктуры в цод</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">3:40</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/55/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/55">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-53" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="53"></td>
+        <td class="spent_on">01.10.2025</td>
+        <td class="activity">По заявкам и договорам</td>
+        <td class="cf_1 list">ВНП-44 "Разработка и внедрение автоматизированной системы мониторинга катализаторов гидроочистки"</td>
+        <td class="comments">Профессионально думал о работе по заявке</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">3:10</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/53/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/53">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-52" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="52"></td>
+        <td class="spent_on">30.09.2025</td>
+        <td class="activity">Обеспечивающая </td>
+        <td class="cf_1 list">Работа по кадровому обеспечению(подбор персонала, работа в рамках кадрового документооборота)</td>
+        <td class="comments">Читал новые приказы</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">3:40</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/52/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/52">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-51" class="time-entry odd hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="51"></td>
+        <td class="spent_on">30.09.2025</td>
+        <td class="activity">Обеспечивающая </td>
+        <td class="cf_1 list">Профессиональное развитие (обучения, конференции, подготовка статей, наставничество, подготовка обучающих материалов)</td>
+        <td class="comments">Профессионально развивался</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">5:00</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/51/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/51">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+      <tr id="time-entry-50" class="time-entry even hascontextmenu">
+        <td class="checkbox hide-when-print"><input type="checkbox" name="ids[]" value="50"></td>
+        <td class="spent_on">29.09.2025</td>
+        <td class="activity">Обеспечивающая </td>
+        <td class="cf_1 list">Самоанализ, целеполагание, планирование работы, подготовка отчетов о работе(постановка целей, квартальные отчеты, презентации, совещания общего характера, анализ и планирование рабочего дня)</td>
+        <td class="comments">Самоанализировался</td>
+        <td class="cf_2 bool"></td>
+        <td class="hours">8:40</td>
+        <td class="buttons">
+            <a title="Редактировать" class="icon-only icon-edit" href="/time_entries/50/edit">Редактировать</a>
+            <a data-confirm="Вы уверены?" title="Удалить" class="icon-only icon-del" rel="nofollow" data-method="delete" href="/time_entries/50">Удалить</a>
+            <a title="Действия" class="icon-only icon-actions js-contextmenu" href="#">Действия</a>
+        </td>
+      </tr>
+    
+    </tbody>
+    </table>
+    </div>
+    </form>
+    
+    
+        <span class="pagination"><ul class="pages"></ul><span><span class="items">(1-18/18)</span> </span></span>
+      </div>
+    
+      <div style="flex:1 1 40%; min-width:0;">
+        <!-- Статистика трудозатрат по пользователям -->
+        <div style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:150%;">Статистика по пользователям</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa;">
+                <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">Калатур Ирина Олгеговна</h3>
+                <div id="userChart0" style="width: 100%; height: 200px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); position: relative;" _echarts_instance_="ec_1759395040410"><div style="position: relative; width: 424px; height: 200px; padding: 0px; margin: 0px; border-width: 0px; cursor: default;"><canvas data-zr-dom-id="zr_0" width="699" height="330" style="position: absolute; left: 0px; top: 0px; width: 424px; height: 200px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas></div><div class="" style="position: absolute; display: block; border-style: solid; white-space: nowrap; z-index: 9999999; box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 10px; transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); background-color: rgb(255, 255, 255); border-width: 1px; border-radius: 4px; color: rgb(102, 102, 102); font: 14px / 21px &quot;Microsoft YaHei&quot;; padding: 10px; top: 0px; left: 0px; transform: translate3d(95px, -252px, 0px); border-color: rgb(255, 255, 255); pointer-events: none; visibility: hidden; opacity: 0;"><strong>Калатур Ирина Олгеговна</strong><br><strong>Дата: 21.08.2025</strong><br>Всего часов: <strong>8.67ч</strong><br><br>ID: 7 - 2ч<br>Активность: По заявкам и договорам<br>Комментарий: asdasd<br><br>ID: 6 - 6.67ч<br>Активность: По заявкам и договорам<br>Комментарий: asdasd<br><br></div></div>
+              </div>
+              <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa;">
+                <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">Косякин Владимир Владиславович</h3>
+                <div id="userChart1" style="width: 100%; height: 200px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); position: relative;" _echarts_instance_="ec_1759395040411"><div style="position: relative; width: 118px; height: 200px; padding: 0px; margin: 0px; border-width: 0px; cursor: default;"><canvas data-zr-dom-id="zr_0" width="194" height="330" style="position: absolute; left: 0px; top: 0px; width: 118px; height: 200px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas></div><div class="" style="position: absolute; display: block; border-style: solid; white-space: nowrap; z-index: 9999999; box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 10px; transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); background-color: rgb(255, 255, 255); border-width: 1px; border-radius: 4px; color: rgb(102, 102, 102); font: 14px / 21px &quot;Microsoft YaHei&quot;; padding: 10px; top: 0px; left: 0px; transform: translate3d(-146px, -43px, 0px); border-color: rgb(255, 255, 255); pointer-events: none; visibility: hidden; opacity: 0;"><strong>Косякин Владимир Владиславович</strong><br><strong>Дата: 15.09.2025</strong><br>Всего часов: <strong>8.67ч</strong><br><br>ID: 37 - 8.67ч<br>Активность: По заявкам и договорам<br>Комментарий: Тест<br><br></div></div>
+              </div>
+              <div style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #fafafa;">
+                <h3 style="text-align:center; margin: 0 0 10px 0; color:#d73925; font-size: 16px; font-weight: bold; border-bottom: 2px solid #d73925; padding-bottom: 5px;">Чиненков Тимур Анатольевич</h3>
+                <div id="userChart2" style="width: 100%; height: 200px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); position: relative;" _echarts_instance_="ec_1759395040412"><div style="position: relative; width: 424px; height: 200px; padding: 0px; margin: 0px; border-width: 0px; cursor: default;"><canvas data-zr-dom-id="zr_0" width="699" height="330" style="position: absolute; left: 0px; top: 0px; width: 424px; height: 200px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas></div><div class="" style="position: absolute; display: block; border-style: solid; white-space: nowrap; z-index: 9999999; box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 10px; transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), visibility 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.4s cubic-bezier(0.23, 1, 0.32, 1); background-color: rgb(255, 255, 255); border-width: 1px; border-radius: 4px; color: rgb(102, 102, 102); font: 14px / 21px &quot;Microsoft YaHei&quot;; padding: 10px; top: 0px; left: 0px; transform: translate3d(-146px, -219px, 0px); border-color: rgb(255, 255, 255); pointer-events: none; visibility: hidden; opacity: 0;"><strong>Чиненков Тимур Анатольевич</strong><br><strong>Дата: 01.10.2025</strong><br>Всего часов: <strong>6.84ч</strong><br><br>ID: 55 - 3.67ч<br>Активность: Внепроектная для заказчика<br>Комментарий: Общался с коллегами по стратегическим вопросам ...<br><br>ID: 53 - 3.17ч<br>Активность: По заявкам и договорам<br>Комментарий: Профессионально думал о работе по заявке<br><br></div></div>
+              </div>
+          </div>
+      </div>
+    </div>
+    
+    <p class="other-formats">Экспортировать в  <span><a class="csv" rel="nofollow" onclick="showModal('csv-export-options', '330px'); return false;" href="/approvals/time_entries.csv">CSV</a></span>
+      <span><a class="atom" rel="nofollow" href="/approvals/time_entries.atom?key=f657e1f45ec98395f0d810667b540ce0f02ba332">Atom</a></span>
+    </p>
+    <div id="csv-export-options" style="display:none;">
+      <h3 class="title">CSV параметры экспорта</h3>
+      <form id="csv-export-form" action="/approvals/time_entries.csv" accept-charset="UTF-8" name="csv-export-form-11d06dda" method="get"><input name="utf8" type="hidden" value="✓" autocomplete="off">
+      <input type="hidden" name="set_filter" value="1" autocomplete="off"><input type="hidden" name="f[]" value="cf_2" autocomplete="off"><input type="hidden" name="op[cf_2]" value="!" autocomplete="off"><input type="hidden" name="v[cf_2][]" value="1" autocomplete="off"><input type="hidden" name="c[]" value="spent_on" autocomplete="off"><input type="hidden" name="c[]" value="activity" autocomplete="off"><input type="hidden" name="c[]" value="cf_1" autocomplete="off"><input type="hidden" name="c[]" value="comments" autocomplete="off"><input type="hidden" name="c[]" value="cf_2" autocomplete="off"><input type="hidden" name="c[]" value="hours" autocomplete="off"><input type="hidden" name="t[]" value="hours" autocomplete="off"><input type="hidden" name="group_by" value="user" autocomplete="off"><input type="hidden" name="sort" value="spent_on:desc" autocomplete="off">
+      <input type="hidden" name="query_name" id="query_name" value="_" autocomplete="off">
+      <p>
+        <label><input type="radio" name="c[]" id="c__" value="" checked="checked"> Выбранные столбцы</label><br>
+        <label><input type="radio" name="c[]" id="c__all_inline" value="all_inline"> Все столбцы</label>
+      </p>
+      
+      <p><label>Разделитель <select name="field_separator" id="field_separator"><option value=",">Запятая</option>
+    <option selected="selected" value=";">Точка с запятой</option></select></label></p>
+      <p class="buttons">
+        <input type="submit" value="Экспорт" onclick="hideModal(this);">
+        <a href="#" onclick="hideModal(this);; return false;">Отмена</a>
+      </p>
+    </form></div>
+    
+    
+    
+    
+    <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      var userCharts = [{"user_name":"Калатур Ирина Олгеговна","dates":["21.08.2025"],"chart_data":[{"date":"21.08.2025","total_hours":8.67,"entries":[{"id":7,"hours":2.0,"activity":"По заявкам и договорам","spent_on":"21.08.2025","comments":"asdasd"},{"id":6,"hours":6.67,"activity":"По заявкам и договорам","spent_on":"21.08.2025","comments":"asdasd"}]}]},{"user_name":"Косякин Владимир Владиславович","dates":["15.09.2025","16.09.2025","22.09.2025","23.09.2025","24.09.2025"],"chart_data":[{"date":"15.09.2025","total_hours":8.67,"entries":[{"id":37,"hours":8.67,"activity":"По заявкам и договорам","spent_on":"15.09.2025","comments":"Тест"}]},{"date":"16.09.2025","total_hours":7.83,"entries":[{"id":38,"hours":7.83,"activity":"Обеспечивающая ","spent_on":"16.09.2025","comments":"Тестирование"}]},{"date":"22.09.2025","total_hours":9.33,"entries":[{"id":26,"hours":4.5,"activity":"Обеспечивающая ","spent_on":"22.09.2025","comments":"Разработка СУРВ"},{"id":25,"hours":2.5,"activity":"По заявкам и договорам","spent_on":"22.09.2025","comments":"Работал по заявке"},{"id":24,"hours":2.33,"activity":"По заявкам и договорам","spent_on":"22.09.2025","comments":"Работал по заявке"}]},{"date":"23.09.2025","total_hours":9.16,"entries":[{"id":29,"hours":1.0,"activity":"Обеспечивающая ","spent_on":"23.09.2025","comments":"Совещание по порталу заявок 2.0"},{"id":28,"hours":2.33,"activity":"По заявкам и договорам","spent_on":"23.09.2025","comments":"Подготовка отчетной документации по ремонтам на..."},{"id":27,"hours":5.83,"activity":"По заявкам и договорам","spent_on":"23.09.2025","comments":"Работа с супервайзерами, подготовка данных ксг ..."}]},{"date":"24.09.2025","total_hours":2.0,"entries":[{"id":32,"hours":1.0,"activity":"Согласованное отсутствие","spent_on":"24.09.2025","comments":"Ходил в больницу"},{"id":30,"hours":1.0,"activity":"Внепроектная для заказчика","spent_on":"24.09.2025","comments":"Проверка работоспособности прилож \"МОБИТЕХ\" на ..."}]}]},{"user_name":"Чиненков Тимур Анатольевич","dates":["29.09.2025","30.09.2025","01.10.2025","02.10.2025"],"chart_data":[{"date":"29.09.2025","total_hours":8.67,"entries":[{"id":50,"hours":8.67,"activity":"Обеспечивающая ","spent_on":"29.09.2025","comments":"Самоанализировался"}]},{"date":"30.09.2025","total_hours":8.67,"entries":[{"id":52,"hours":3.67,"activity":"Обеспечивающая ","spent_on":"30.09.2025","comments":"Читал новые приказы"},{"id":51,"hours":5.0,"activity":"Обеспечивающая ","spent_on":"30.09.2025","comments":"Профессионально развивался"}]},{"date":"01.10.2025","total_hours":6.84,"entries":[{"id":55,"hours":3.67,"activity":"Внепроектная для заказчика","spent_on":"01.10.2025","comments":"Общался с коллегами по стратегическим вопросам ..."},{"id":53,"hours":3.17,"activity":"По заявкам и договорам","spent_on":"01.10.2025","comments":"Профессионально думал о работе по заявке"}]},{"date":"02.10.2025","total_hours":1.0,"entries":[{"id":54,"hours":1.0,"activity":"Согласованное отсутствие","spent_on":"02.10.2025","comments":"Ходил ко врачу"}]}]}];
+      var charts = [];
+      
+      // Find global max hours for consistent opacity calculation across all charts
+      var globalMaxHours = 0;
+      userCharts.forEach(function(userChart) {
+        userChart.chart_data.forEach(function(dayData) {
+          dayData.entries.forEach(function(entry) {
+            if (entry.hours > globalMaxHours) globalMaxHours = entry.hours;
+          });
+        });
+      });
+      
+      // Create a chart for each user
+      userCharts.forEach(function(userChart, userIndex) {
+        var chartDom = document.getElementById('userChart' + userIndex);
+        if (chartDom) {
+          var myChart = echarts.init(chartDom);
+          charts.push(myChart);
+          
+          var dates = userChart.dates;
+          var chartData = userChart.chart_data;
+          var series = [];
+          
+          // Create series for each time entry with red color and opacity based on hours
+          chartData.forEach(function(dayData, dayIndex) {
+            dayData.entries.forEach(function(entry, entryIndex) {
+              var seriesName = 'ID: ' + entry.id + ' (' + entry.hours + 'ч)';
+              var data = new Array(dates.length).fill(0);
+              data[dayIndex] = entry.hours;
+              
+              // Calculate opacity: minimum 0.3, maximum 0.9 based on hours
+              var opacity = 0.3 + (entry.hours / globalMaxHours) * 0.6;
+              
+              series.push({
+                name: seriesName,
+                type: 'bar',
+                stack: 'total',
+                data: data,
+                itemStyle: {
+                  color: 'rgba(229, 57, 53, ' + opacity + ')',
+                  borderColor: 'rgba(0,0,0,0.08)',
+                  borderWidth: 1
+                }
+              });
+            });
+          });
+          
+          var option = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              },
+              formatter: function(params) {
+                var dateIndex = params[0].dataIndex;
+                var dayInfo = chartData[dateIndex];
+                
+                var result = '<strong>' + userChart.user_name + '</strong><br/>';
+                result += '<strong>Дата: ' + dayInfo.date + '</strong><br/>';
+                result += 'Всего часов: <strong>' + dayInfo.total_hours + 'ч</strong><br/><br/>';
+                
+                dayInfo.entries.forEach(function(entry) {
+                  result += 'ID: ' + entry.id + ' - ' + entry.hours + 'ч<br/>';
+                  result += 'Активность: ' + entry.activity + '<br/>';
+                  if (entry.comments) {
+                    result += 'Комментарий: ' + entry.comments + '<br/>';
+                  }
+                  result += '<br/>';
+                });
+                
+                return result;
+              }
+            },
+            legend: {
+              show: false  // Hide legend as there might be too many entries
+            },
+            grid: {
+              left: '20%',
+              right: '5%',
+              bottom: '5%',
+              top: '5%',
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              name: 'Часы',
+              axisLabel: {
+                formatter: '{value}ч',
+                fontSize: 9
+              }
+            },
+            yAxis: {
+              type: 'category',
+              data: dates,
+              axisLabel: {
+                interval: 0,
+                fontSize: 9
+              }
+            },
+            series: series
+          };
+          
+          myChart.setOption(option);
+        }
+      });
+      
+      // Resize all charts when window is resized
+      window.addEventListener('resize', function() {
+        charts.forEach(function(chart) {
+          chart.resize();
+        });
+      });
+    });
+    </script>
+    
+    
+    
+            
+            <div style="clear:both;"></div>
+        <div id="context-menu" style="display:none;"></div></div>
+    </div>
+    <div id="footer">
+        Powered by <a target="_blank" rel="noopener" href="https://www.redmine.org/">Redmine</a> © 2006-2025 Jean-Philippe Lang
+    </div>
+    
+    <div id="ajax-indicator" style="display:none;"><span>Загрузка...</span></div>
+    <div id="ajax-modal" style="display:none;"></div>
+    
+    </div>
+    
+    
+    
+    <div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"><div>Сортировать по "Согласовано"</div></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"><div>Сортировать по "час(а,ов)"</div></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div role="log" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div></body></html>
