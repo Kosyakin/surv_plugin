@@ -5,6 +5,7 @@ class MyTimelogController < TimelogController
   skip_before_action :authorize, only: :index
   skip_before_action :find_optional_project, only: :index
   before_action :require_login, only: :index
+  before_action :find_project, only: :index
   before_action :apply_default_filters, only: :index
 
   def index
@@ -154,6 +155,11 @@ class MyTimelogController < TimelogController
   end
 
   private
+
+  def find_project
+    # @project variable must be set before calling the authorize filter
+    @project = Project.find(params[:project_id]) if params[:project_id].present?
+  end
 
   def apply_default_filters
     return if params[:set_filter].present? || params[:f].present?

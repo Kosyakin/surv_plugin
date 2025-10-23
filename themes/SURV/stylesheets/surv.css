@@ -2,11 +2,7 @@
 table.time-entries td.comments {
     font-weight: bold !important;
 }
-/* Скрыть вкладку Действия в проектах */
-#main-menu a.activity,
-li.activity {
-    display: none !important;
-}
+
 
 /* Кнопка 33 (красная версия) */
 .button-33-red {
