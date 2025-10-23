@@ -44,6 +44,9 @@ class ProjectsController < ApplicationController
   helper :repositories
   helper :members
   helper :trackers
+  # Подключаем helper для фильтрации трудозатрат по правам пользователя
+  # Обеспечивает доступ к методу time_entry_scope_with_visibility в представлениях
+  helper :surv_statistics
 
   # Lists visible projects
   def index
@@ -332,7 +335,18 @@ class ProjectsController < ApplicationController
 
   # --- Helpers to use TimeEntryQuery within ProjectsController#show ---
   def time_entry_scope(options={})
-    @query.results_scope(options)
+    scope = @query.results_scope(options)
+    if should_restrict_to_own_entries?
+      scope = scope.where(user_id: User.current.id)
+    end
+    scope
+  end
+
+  private
+
+  def should_restrict_to_own_entries?
+    return false unless @project
+    User.current.allowed_to?(:view_own_time_entries, @project)
   end
 
   def retrieve_time_entry_query

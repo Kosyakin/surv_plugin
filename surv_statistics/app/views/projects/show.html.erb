@@ -24,7 +24,7 @@
   <%# Compute aggregation in the view to simplify controller %>
   <% activity_table = Enumeration.table_name %>
   <% time_entries_table = TimeEntry.table_name %>
-  <% scope = @query.results_scope %>
+  <% scope = time_entry_scope_with_visibility %>
   <% aggregated = scope.joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
   <% chart_data = aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
 
@@ -44,7 +44,7 @@
         <div class="surv-child-projects-grid">
           <% child_projects.each do |child_project| %>
             <% child_ids = child_project.self_and_descendants.pluck(:id) %>
-            <% child_aggregated = scope.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+            <% child_aggregated = time_entry_scope_with_visibility.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
             <% child_chart_data = child_aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
             <% preserved = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
 
@@ -115,10 +115,10 @@
       <% else %>
         <%# No child projects: show employees tiles with total hours %>
         <% users_table = User.table_name %>
-        <% user_rows = scope.joins(:user).group("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname").reorder(nil).pluck("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname", "SUM(#{time_entries_table}.hours)") %>
+        <% user_rows = time_entry_scope_with_visibility.joins(:user).group("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname").reorder(nil).pluck("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname", "SUM(#{time_entries_table}.hours)") %>
         <% user_rows = user_rows.sort_by { |(_, fn, ln, h)| [-h.to_f, ln.to_s, fn.to_s] } %>
         <%# Build per-user activity distribution %>
-        <% per_user_activity_rows = scope.joins(:user).joins(:activity).group("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+        <% per_user_activity_rows = time_entry_scope_with_visibility.joins(:user).joins(:activity).group("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
         <% per_user_activity = Hash.new { |h, k| h[k] = [] } %>
         <% per_user_activity_rows.each do |uid, aid, aname, sum| %>
           <% per_user_activity[uid] << { activity_id: aid, name: aname, hours: sum.to_f } %>

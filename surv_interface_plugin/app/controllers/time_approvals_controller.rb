@@ -17,6 +17,10 @@ class TimeApprovalsController < TimelogController
       if membership_with_role4&.project
         @project = membership_with_role4.project
         params[:project_id] = @project.id
+      else
+        # Если не найден проект с правами на согласование, возвращаем обратно с уведомлением
+        redirect_back(fallback_location: home_path, flash: { error: 'У вас нет прав на согласование трудозатрат, если есть такая необходимость, обратитесь к администратору' })
+        return
       end
     end
 
