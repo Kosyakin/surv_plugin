@@ -37,7 +37,7 @@ body, html {
 
 .surv-filters-left #filters-table tr.filter {
   display: block;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   padding: 0;
   background: transparent;
   border: none;
@@ -104,7 +104,7 @@ body, html {
 
 /* Add filter section */
 .surv-filters-left .add-filter {
-  margin-top: 15px;
+  margin-top: 10px;
   padding-top: 15px;
   border-top: 1px solid #ddd;
 }
@@ -175,10 +175,10 @@ body, html {
 .surv-child-project-title {
   text-align: center;
   margin: 0 0 10px 0;
-  color: #d73925;
+  color: #C53030;
   font-size: 16px;
   font-weight: bold;
-  border-bottom: 2px solid #d73925;
+  border-bottom: 2px solid #C53030;
   padding-bottom: 5px;
 }
 
@@ -206,7 +206,7 @@ body, html {
 /* Employee tile styles */
 .surv-employee-name {
   font-weight: bold;
-  color: #d73925;
+  color: #C53030;
   margin-bottom: 6px;
 }
 
@@ -277,10 +277,10 @@ body, html {
 .surv-approvals-user-title {
   text-align: center;
   margin: 0 0 10px 0;
-  color: #d73925;
+  color: #C53030;
   font-size: 16px;
   font-weight: bold;
-  border-bottom: 2px solid #d73925;
+  border-bottom: 2px solid #C53030;
   padding-bottom: 5px;
 }
 
@@ -338,4 +338,143 @@ body, html {
 /* CSV export button */
 .surv-csv-export-button {
   margin-left: 10px;
+}
+
+/* Timelog page specific styles */
+.timelog .surv-main-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.timelog .surv-filters-left {
+  flex: 0 0 15%;
+  max-width: 20%;
+  min-width: 200px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  align-self: flex-start;
+}
+
+.timelog .surv-filters-left form {
+  margin: 0;
+}
+
+.timelog .surv-chart-left {
+  flex: 1 1 80%;
+  min-width: 0;
+  align-self: flex-start;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Сброс отступов для элементов внутри таблицы */
+.timelog .surv-chart-left > *:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.timelog .surv-chart-left .nodata {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Ensure filters work properly on timelog page */
+.timelog .surv-filters-left #filters-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter {
+  display: block;
+  margin-bottom: 10px;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td {
+  display: block;
+  padding: 0;
+  border: none;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.field {
+  margin-bottom: 8px;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.field input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.field label {
+  display: inline;
+  font-weight: bold;
+  color: #333;
+  font-size: 13px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.operator {
+  margin-bottom: 8px;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.operator select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.values {
+  margin-bottom: 0;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.values select,
+.timelog .surv-filters-left #filters-table tr.filter td.values input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.values span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.timelog .surv-filters-left .add-filter {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.timelog .surv-filters-left .add-filter label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #333;
+  font-size: 12px;
+}
+
+.timelog .surv-filters-left .add-filter select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.timelog .surv-filters-left .tabs {
+  display: none;
 }

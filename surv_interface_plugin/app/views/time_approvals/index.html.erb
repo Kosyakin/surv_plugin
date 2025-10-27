@@ -9,7 +9,7 @@
 
 <div class="surv-approvals-container">
   <div class="surv-approvals-list">
-    <%= render :partial => 'list', :locals => { :entries => @entries }%>
+    <%= render :partial => 'timelog/list', :locals => { :entries => @entries }%>
     <span class="pagination"><%= pagination_links_full @entry_pages, @entry_count %></span>
   </div>
 
