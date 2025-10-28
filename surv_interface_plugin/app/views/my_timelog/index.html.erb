@@ -1,7 +1,5 @@
-
 <h2>Мои трудозатраты</h2>
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
-
 
 <% if @query.valid? %>
 
@@ -64,8 +62,6 @@
 <% unapproved_raw = week_dates.map { |d| (unapproved_by_date[d] || 0.0).round(2) } %>
 <% total_raw = approved_raw.each_with_index.map { |v, i| (v + unapproved_raw[i]).round(2) } %>
 <% deficit = total_raw.each_with_index.map { |v, i| [plan[i] - v, 0.0].max.round(2) } %>
-<% approved_for_series = approved_raw.map { |v| { value: v, itemStyle: { color: 'rgba(46, 125, 50, 0.7)', borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 } } } %>
-<% unapproved_for_series = unapproved_raw.map { |v| { value: v, itemStyle: { color: 'rgba(176, 190, 197, 0.7)', borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 } } } %>
 
 <div style="display:flex; gap:16px; align-items:flex-start;">
   <div style="flex:1 1 60%; min-width:0;align-items:stretch;">
@@ -92,7 +88,6 @@
         :class => 'icon icon-next' %>
       </div>
     </div>
-
 
     <% if @entries.blank? %>
       <p class="nodata"><%= l(:label_no_data) %></p>
@@ -152,14 +147,52 @@
               return minutes + 'мин';
             }
           }
+
+          // Функция для получения цвета из CSS классов
+          function getColorFromCSS(className) {
+            // Создаем временный элемент для получения цвета из CSS
+            var tempEl = document.createElement('div');
+            tempEl.className = className;
+            tempEl.style.display = 'none';
+            document.body.appendChild(tempEl);
+            
+            // Получаем вычисленные стили
+            var computedStyle = window.getComputedStyle(tempEl);
+            var color = computedStyle.backgroundColor;
+            
+            // Удаляем временный элемент
+            document.body.removeChild(tempEl);
+            
+            return color || 'rgba(0, 0, 0, 0.7)'; // fallback цвет
+          }
           
           ready(function(){
             var el = document.getElementById('date-hours-chart');
             if (!el || typeof echarts === 'undefined') return;
             var labels = <%= raw(labels.to_json) %>;
-            var approved = <%= raw(approved_for_series.to_json) %>;
-            var unapproved = <%= raw(unapproved_for_series.to_json) %>;
+            var approved_raw = <%= raw(approved_raw.to_json) %>;
+            var unapproved_raw = <%= raw(unapproved_raw.to_json) %>;
             var deficit = <%= raw(deficit.to_json) %>;
+            
+            // Получаем цвета из CSS
+            var approvedColor = getColorFromCSS('chart-approved');
+            var unapprovedColor = getColorFromCSS('chart-unapproved');
+            var deficitColor = getColorFromCSS('chart-deficit');
+            
+            // Создаем серии с цветами из CSS
+            var approved = approved_raw.map(function(v) { 
+              return { 
+                value: v, 
+                itemStyle: { color: approvedColor, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 } 
+              }; 
+            });
+            var unapproved = unapproved_raw.map(function(v) { 
+              return { 
+                value: v, 
+                itemStyle: { color: unapprovedColor, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 } 
+              }; 
+            });
+            
             var chart = echarts.init(el);
             var option = {
               tooltip: {
@@ -186,9 +219,30 @@
               yAxis: { type: 'value' },
               grid: { left: 40, right: 20, bottom: 60, top: 50 },
               series: [
-                { name: 'Согласовано', type: 'bar', stack: 'plan', data: approved, itemStyle: { color: 'rgba(46, 125, 50, 0.7)', borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }, label: { show: true, position: 'inside', formatter: function(p) { return p.value > 0 ? formatHoursMinutes(p.value) : ''; } } },
-                { name: 'Распределено', type: 'bar', stack: 'plan', data: unapproved, itemStyle: { color: 'rgba(176, 190, 197, 0.7)', borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }, label: { show: true, position: 'inside', formatter: function(p) { return p.value > 0 ? formatHoursMinutes(p.value) : ''; } } },
-                { name: 'Осталось распределить', type: 'bar', stack: 'plan', data: deficit, itemStyle: { color: 'rgba(229, 57, 53, 0.7)', borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }, label: { show: true, position: 'inside', formatter: function(p) { return p.value > 0 ? formatHoursMinutes(p.value) : ''; } } }
+                { 
+                  name: 'Согласовано', 
+                  type: 'bar', 
+                  stack: 'plan', 
+                  data: approved, 
+                  itemStyle: { color: approvedColor, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }, 
+                  label: { show: true, position: 'inside', formatter: function(p) { return p.value > 0 ? formatHoursMinutes(p.value) : ''; } } 
+                },
+                { 
+                  name: 'Распределено', 
+                  type: 'bar', 
+                  stack: 'plan', 
+                  data: unapproved, 
+                  itemStyle: { color: unapprovedColor, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }, 
+                  label: { show: true, position: 'inside', formatter: function(p) { return p.value > 0 ? formatHoursMinutes(p.value) : ''; } } 
+                },
+                { 
+                  name: 'Осталось распределить', 
+                  type: 'bar', 
+                  stack: 'plan', 
+                  data: deficit, 
+                  itemStyle: { color: deficitColor, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }, 
+                  label: { show: true, position: 'inside', formatter: function(p) { return p.value > 0 ? formatHoursMinutes(p.value) : ''; } } 
+                }
               ]
             };
             chart.setOption(option);
@@ -222,26 +276,54 @@
                 }
               }
               
+              // Функция для получения цвета активности из CSS
+              function getActivityColor(activityId) {
+                // Создаем временный элемент для получения цвета из CSS
+                var tempEl = document.createElement('div');
+                tempEl.className = 'activity-color-' + activityId;
+                tempEl.style.display = 'none';
+                document.body.appendChild(tempEl);
+                
+                // Получаем вычисленные стили
+                var computedStyle = window.getComputedStyle(tempEl);
+                var color = computedStyle.backgroundColor;
+                
+                // Удаляем временный элемент
+                document.body.removeChild(tempEl);
+                
+                // Если цвет не найден, используем fallback
+                if (!color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent') {
+                  tempEl.className = 'activity-color-default';
+                  document.body.appendChild(tempEl);
+                  color = window.getComputedStyle(tempEl).backgroundColor;
+                  document.body.removeChild(tempEl);
+                }
+                
+                return color;
+              }
+              
               ready(function(){
                 var el = document.getElementById('activity-pie-chart');
                 if (!el || typeof echarts === 'undefined') return;
                 var data = <%= raw(@activity_pie_series.to_json) %>;
-                // Fixed colors by activity_id (semi-transparent)
-                var colorById = {
-                  1: 'rgba(46, 125, 50, 0.7)',   // заявки и договоры
-                  2: 'rgba(46, 125, 50, 0.4)',   // внепроектная для заказчика
-                  3: 'rgba(249, 168, 37, 0.7)',  // обеспечивающая
-                  4: 'rgba(176, 190, 197, 0.7)'  // согласованное отсутствие
-                };
-                // Map data with itemStyle colors (fallback palette if id unknown)
+                
+                // Map data with colors from CSS
                 var colored = data.map(function(item, idx){
                   var id = item.activity_id;
-                  var color = colorById[id] || ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'][idx % 7];
-                  return Object.assign({}, item, { itemStyle: { color: color } });
+                  var color = getActivityColor(id);
+                  return Object.assign({}, item, { 
+                    itemStyle: { color: color }
+                  });
                 });
+                
                 var chart = echarts.init(el);
                 var option = {
-                  tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHoursMinutes(p.value || 0) + ' (' + (p.percent || 0) + '%)'; } },
+                  tooltip: { 
+                    trigger: 'item', 
+                    formatter: function(p){ 
+                      return (p.name || '') + ': ' + formatHoursMinutes(p.value || 0) + ' (' + (p.percent || 0) + '%)'; 
+                    } 
+                  },
                   legend: { 
                     show: true,
                     orient: 'vertical',
@@ -264,7 +346,10 @@
                         show: true,
                         color: '#ffffff',
                         position: 'inside',
-                        formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); },
+                        formatter: function(p){ 
+                          var d = Math.round(p.percent || 0); 
+                          return (d > 0 ? d + '%' : ''); 
+                        },
                         fontSize: 20,
                         lineHeight: 20,
                         width: 50,
@@ -301,6 +386,7 @@
 <% content_for :header_tags do %>
     <%= javascript_include_tag 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js' %>
     <%= auto_discovery_link_tag(:atom, {:issue_id => @issue, :format => 'atom', :key => User.current.atom_key}, :title => l(:label_spent_time)) %>
+
     <script>
       // Отключаем контекстное меню (правый клик) на странице Мои трудозатраты
       (function(){

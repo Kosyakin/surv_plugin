@@ -1,6 +1,5 @@
 <h2>Согласование трудозатрат</h2>
 
-
 <% if @query.valid? %>
 <% if @entries.empty? %>
 <p class="nodata"><%= l(:label_no_data) %></p>
@@ -78,6 +77,7 @@
 <% content_for :header_tags do %>
     <%= auto_discovery_link_tag(:atom, {:issue_id => @issue, :format => 'atom', :key => User.current.atom_key}, :title => l(:label_spent_time)) %>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
 <% end %>
 
 <% unless @entries.empty? || @user_charts.empty? %>
@@ -86,13 +86,31 @@ document.addEventListener('DOMContentLoaded', function() {
   var userCharts = <%= raw @user_charts.to_json %>;
   var charts = [];
   
-  // Color mapping by activity_id (matching my_timelog colors)
-  var colorById = {
-    1: 'rgba(46, 125, 50, 0.7)',   // заявки и договоры
-    2: 'rgba(46, 125, 50, 0.4)',   // внепроектная для заказчика
-    3: 'rgba(249, 168, 37, 0.7)',  // обеспечивающая
-    4: 'rgba(176, 190, 197, 0.7)'  // согласованное отсутствие
-  };
+  // Функция для получения цвета активности из CSS
+  function getActivityColor(activityId) {
+    // Создаем временный элемент для получения цвета из CSS
+    var tempEl = document.createElement('div');
+    tempEl.className = 'activity-color-' + activityId;
+    tempEl.style.display = 'none';
+    document.body.appendChild(tempEl);
+    
+    // Получаем вычисленные стили
+    var computedStyle = window.getComputedStyle(tempEl);
+    var color = computedStyle.backgroundColor;
+    
+    // Удаляем временный элемент
+    document.body.removeChild(tempEl);
+    
+    // Если цвет не найден, используем fallback
+    if (!color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent') {
+      tempEl.className = 'activity-color-default';
+      document.body.appendChild(tempEl);
+      color = window.getComputedStyle(tempEl).backgroundColor;
+      document.body.removeChild(tempEl);
+    }
+    
+    return color;
+  }
   
   // Find global max hours for consistent opacity calculation across all charts
   var globalMaxHours = 0;
@@ -139,8 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
           var data = new Array(dates.length).fill(0);
           data[dayIndex] = entry.hours;
           
-          // Get color by activity_id, fallback to default red if not found
-          var activityColor = colorById[entry.activity_id] || 'rgba(229, 57, 53, 0.7)';
+          // Get color by activity_id from CSS
+          var activityColor = getActivityColor(entry.activity_id);
           
           series.push({
             name: seriesName,
@@ -294,5 +312,3 @@ function handleChartContainerClick(index) {
 
 </script>
 <% end %>
-
-

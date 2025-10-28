@@ -19,6 +19,32 @@
         return minutes + 'мин';
       }
     }
+
+    // Функция для получения цвета активности из CSS
+    function getActivityColor(activityId) {
+      // Создаем временный элемент для получения цвета из CSS
+      var tempEl = document.createElement('div');
+      tempEl.className = 'activity-color-' + activityId;
+      tempEl.style.display = 'none';
+      document.body.appendChild(tempEl);
+      
+      // Получаем вычисленные стили
+      var computedStyle = window.getComputedStyle(tempEl);
+      var color = computedStyle.backgroundColor;
+      
+      // Удаляем временный элемент
+      document.body.removeChild(tempEl);
+      
+      // Если цвет не найден, используем fallback
+      if (!color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent') {
+        tempEl.className = 'activity-color-default';
+        document.body.appendChild(tempEl);
+        color = window.getComputedStyle(tempEl).backgroundColor;
+        document.body.removeChild(tempEl);
+      }
+      
+      return color;
+    }
   </script>
   
   <%# Compute aggregation in the view to simplify controller %>
@@ -62,18 +88,13 @@
                 if (!el) { return; }
                 var chart = echarts.init(el);
                 var data = <%= raw(child_chart_data.to_json) %>;
-                var colorById = {
-                  1: 'rgba(46, 125, 50, 0.7)',
-                  2: 'rgba(46, 125, 50, 0.4)',
-                  3: 'rgba(249, 168, 37, 0.7)',
-                  4: 'rgba(176, 190, 197, 0.7)'
-                };
-                var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
+                
                 var colored = data.map(function(item, idx){
                   var id = item.activity_id;
-                  var color = colorById[id] || fallback[idx % fallback.length];
+                  var color = getActivityColor(id);
                   return Object.assign({}, item, { itemStyle: { color: color } });
                 });
+                
                 function formatHours(val){ return formatHoursMinutes(val); }
                 var option = {
                   tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
@@ -151,16 +172,10 @@
                   var chart = echarts.init(el);
                   var activityData = <%= raw((per_user_activity[uid] || []).to_json) %>;
                   var targetUrl = '<%= project_time_entries_path(@project, user_params) %>';
-                  var colorById = {
-                    1: 'rgba(46, 125, 50, 0.7)',
-                    2: 'rgba(46, 125, 50, 0.4)',
-                    3: 'rgba(249, 168, 37, 0.7)',
-                    4: 'rgba(176, 190, 197, 0.7)'
-                  };
-                  var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
+                  
                   var series = [];
                   (activityData || []).forEach(function(item, idx){
-                    var color = colorById[item.activity_id] || fallback[idx % fallback.length];
+                    var color = getActivityColor(item.activity_id);
                     series.push({
                       name: item.name,
                       type: 'bar',
@@ -170,6 +185,7 @@
                       itemStyle: { color: color, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }
                     });
                   });
+                  
                   var option = {
                     tooltip: { 
                       trigger: 'axis', 
@@ -213,20 +229,13 @@
       if (!el) { return; }
       var chart = echarts.init(el);
       var data = <%= raw(chart_data.to_json) %>;
-      // Fixed colors by activity_id (semi-transparent)
-      var colorById = {
-        1: 'rgba(46, 125, 50, 0.7)',
-        2: 'rgba(46, 125, 50, 0.4)',
-        3: 'rgba(249, 168, 37, 0.7)',
-        4: 'rgba(176, 190, 197, 0.7)'
-      };
-      // Fallback palette
-      var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
+      
       var colored = data.map(function(item, idx){
         var id = item.activity_id;
-        var color = colorById[id] || fallback[idx % fallback.length];
+        var color = getActivityColor(id);
         return Object.assign({}, item, { itemStyle: { color: color } });
       });
+      
       function formatHours(val){ return formatHoursMinutes(val); }
       var option = {
         tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
@@ -236,7 +245,6 @@
           type: 'pie',
           radius: ['30%','70%'],
           center: ['50%','50%'],
-
           avoidLabelOverlap: true,
           itemStyle: { borderColor: '#fff', borderWidth: 1 },
           label: {
@@ -262,3 +270,5 @@
   <p class="surv-nodata"><%= l(:label_no_data) %></p>
 <% end %>
 
+<% content_for :header_tags do %>
+<% end %>

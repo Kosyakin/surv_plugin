@@ -1,4 +1,3 @@
-
 <h2><%= @query.new_record? ? l(:label_spent_time) : @query.name %></h2>
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
 
@@ -41,6 +40,25 @@
       return minutes + 'мин';
     }
   }
+
+  // Функция для получения цвета из CSS классов
+  function getColorFromCSS(className) {
+    // Создаем временный элемент для получения цвета из CSS
+    var tempEl = document.createElement('div');
+    tempEl.className = className;
+    tempEl.style.display = 'none';
+    document.body.appendChild(tempEl);
+    
+    // Получаем вычисленные стили
+    var computedStyle = window.getComputedStyle(tempEl);
+    var color = computedStyle.backgroundColor;
+    
+    // Удаляем временный элемент
+    document.body.removeChild(tempEl);
+    
+    return color || 'rgba(0, 0, 0, 0.7)'; // fallback цвет
+  }
+  
   // Данные из контроллера
   var dailyData = <%= raw(daily_data.to_json) %>;
   
@@ -59,6 +77,12 @@
   // item[0]=date, item[1]=approved, item[2]=unapproved, item[3]=deficit, item[4]=is_empty
   var pieSeries = dailyData.map(function (item, index) {
     var is_empty = item[4] || false;
+    
+    // Получаем цвета из CSS
+    var approvedColor = getColorFromCSS('chart-approved');
+    var unapprovedColor = getColorFromCSS('chart-unapproved');
+    var deficitColor = getColorFromCSS('chart-deficit');
+    var emptyDayColor = getColorFromCSS('chart-empty-day');
     
     return {
       type: 'pie',
@@ -80,23 +104,23 @@
         { 
           name: 'Пустой день', 
           value: item[3] || 8.67, // deficit или план на день
-          itemStyle: { color: 'rgba(255, 87, 87, 0.9)' }
+          itemStyle: { color: emptyDayColor }
         }
       ] : [
         { 
           name: 'Согласовано', 
           value: item[1], // approved hours
-          itemStyle: { color: 'rgba(46, 125, 50, 0.7)' }
+          itemStyle: { color: approvedColor }
         },
         { 
           name: 'Требуется согласование', 
           value: item[2], // unapproved hours
-          itemStyle: { color: 'rgba(176, 190, 197, 0.7)' }
+          itemStyle: { color: unapprovedColor }
         },
         { 
           name: 'Осталось распределить', 
           value: item[3], // deficit
-          itemStyle: { color: 'rgba(229, 57, 53, 0.7)' }
+          itemStyle: { color: deficitColor }
         }
       ]
     };
@@ -191,17 +215,22 @@
   
   // Отображаем статистику
   function displayStats(stats) {
+    // Получаем цвета из CSS для статистики
+    var approvedColor = getColorFromCSS('chart-approved');
+    var unapprovedColor = getColorFromCSS('chart-unapproved');
+    var deficitColor = getColorFromCSS('chart-deficit');
+    
     var statsHtml = '<div class="surv-stats-container">' +
       '<div class="surv-stat-item">' +
-        '<div class="surv-stat-label" style="color: rgba(46, 125, 50, 0.7);">Согласовано:</div>' +
+        '<div class="surv-stat-label" style="color: ' + approvedColor + ';">Согласовано:</div>' +
         '<div class="surv-stat-value">' + formatHoursMinutes(stats.approved) + '</div>' +
       '</div>' +
       '<div class="surv-stat-item">' +
-        '<div class="surv-stat-label" style="color: rgba(176, 190, 197, 0.7);">Требует согласования:</div>' +
+        '<div class="surv-stat-label" style="color: ' + unapprovedColor + ';">Требует согласования:</div>' +
         '<div class="surv-stat-value">' + formatHoursMinutes(stats.unapproved) + '</div>' +
       '</div>' +
       '<div class="surv-stat-item">' +
-        '<div class="surv-stat-label" style="color: rgba(229, 57, 53, 0.7);">Осталось распределить:</div>' +
+        '<div class="surv-stat-label" style="color: ' + deficitColor + ';">Осталось распределить:</div>' +
         '<div class="surv-stat-value">' + formatHoursMinutes(stats.deficit) + '</div>' +
       '</div>' +
     '</div>';
