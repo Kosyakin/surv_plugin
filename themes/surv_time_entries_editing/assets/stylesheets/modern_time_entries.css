@@ -1,0 +1,330 @@
+/* Основные стили формы */
+#content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 100px 20px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+}
+
+#new_time_entry, .edit_time_entry {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 700px;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+#new_time_entry h2, .edit_time_entry h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.box.tabular {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.box.tabular p {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.box.tabular label {
+    width: 220px;
+    min-width: 220px;
+    font-weight: bold;
+    color: #555;
+    margin-right: 15px;
+    font-size: 20px;
+}
+
+.box.tabular input[type="text"],
+.box.tabular input[type="date"],
+.box.tabular select {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    flex-grow: 1;
+    height: 46px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    background: white;
+}
+
+.box.tabular textarea {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    flex-grow: 1;
+    min-height: 100px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    background: white;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.box.tabular input[type="text"]:focus,
+.box.tabular input[type="date"]:focus,
+.box.tabular select:focus,
+.box.tabular textarea:focus {
+    border-color: #000000;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 12px;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+#new_time_entry input[type="submit"],
+.edit_time_entry input[type="submit"],
+#new_time_entry .cancel-btn,
+.edit_time_entry .cancel-btn {
+    padding: 12px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    height: 46px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#new_time_entry input[type="submit"],
+.edit_time_entry input[type="submit"] {
+    background-color: #c53030;
+    color: white;
+    border: none;
+}
+
+#new_time_entry input[type="submit"]:hover,
+.edit_time_entry input[type="submit"]:hover {
+    background-color: #9c2727;
+    transform: translateY(-1px);
+}
+
+#new_time_entry .cancel-btn,
+.edit_time_entry .cancel-btn {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
+    margin-left: auto;
+}
+
+#new_time_entry .cancel-btn:hover,
+.edit_time_entry .cancel-btn:hover {
+    background-color: #ddd;
+    transform: translateY(-1px);
+}
+
+.required {
+    color: red;
+    margin-left: 2px;
+}
+
+.hidden-field {
+    display: none !important;
+}
+
+/* Стили для комбинированного поля */
+.combo-field-wrapper {
+    flex-grow: 1;
+}
+
+.combo-select-container {
+    position: relative;
+    height: 46px;
+    transition: height 0.3s ease;
+    margin-right: 0; /* Убираем отступ справа */
+}
+
+.combo-select-container.expanded {
+    height: auto;
+    min-height: 46px;
+}
+
+.combo-select-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    height: 46px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    background: white;
+}
+
+.combo-select-dropdown {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1;
+    margin-top: -6px;
+    transition: max-height 0.3s ease;
+}
+
+.combo-select-container.expanded .combo-select-dropdown {
+    max-height: 300px;
+    overflow-y: auto;
+    border-color: #000000;
+}
+
+.combo-select-container.expanded .combo-select-input {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: #000000;
+}
+
+.combo-select-option {
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.combo-select-option:hover {
+    background-color: #f5f5f5;
+}
+
+.combo-select-option.group {
+    font-weight: bold;
+    color: #666;
+    background-color: #f0f0f0;
+    cursor: default;
+}
+
+.combo-select-option.highlighted {
+    background-color: #e0e0e0;
+}
+
+/* Скрытие элемента списка заявок/договоров 
+#time_entry_custom_field_values_1,
+p:has(#time_entry_custom_field_values_1) {
+    display: none !important;
+}*/
+
+/* Барабан выбора часов и минут */
+.drum-picker-container {
+    flex-grow: 1;
+}
+
+/* .drum-picker-wrapper зарезервирован для совместимости */
+
+.drum-columns {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.drum-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.drum-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.drum-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+}
+
+/* Кнопки барабана удалены */
+
+.drum-viewport {
+    width: 60px;
+    height: 84px; /* 3 видимых элемента по 28px */
+    overflow: hidden;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin: 6px 0;
+    position: relative;
+    background: #fff;
+}
+
+.drum-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    transition: transform 0.15s ease;
+}
+
+.drum-item {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.drum-item.active {
+    font-weight: bold;
+}
+
+/* Стили для подсказки */
+.combo-select-tooltip {
+    font-size: 16px;
+    color: #666;
+    font-style: italic;
+    margin-top: 4px;
+    padding: 2px 4px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    border-left: 3px solid #ddd;
+}
+
+/* Disabled state for combo */
+.combo-select-container.disabled .combo-select-input {
+    background: #f8f8f8;
+    color: #999;
+    cursor: not-allowed;
+}
+.combo-select-container.disabled .combo-select-dropdown {
+    display: none !important;
+}
+.combo-field-wrapper.disabled .combo-select-tooltip {
+    display: none !important;
+}

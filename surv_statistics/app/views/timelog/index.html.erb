@@ -3,6 +3,227 @@
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
 
 <% if @query.valid? %>
+<%= javascript_include_tag 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js' %>
+
+<%
+  # Получаем данные из контроллера
+  calendar_data = @calendar_chart_data || {}
+  daily_data = calendar_data[:daily_data] || []
+  date_range = calendar_data[:date_range] || []
+  
+  # Определяем диапазон дат
+  if date_range.is_a?(Array) && date_range.length == 2
+    min_date = date_range[0]
+    max_date = date_range[1]
+  else
+    # Fallback на текущий месяц
+    min_date = Date.today.beginning_of_month
+    max_date = Date.today.end_of_month
+  end
+%>
+
+<%= javascript_tag do %>
+  // This example requires ECharts v5.4.0 or later
+  const cellSize = [50, 50];
+  const pieRadius = 18;
+
+  // Функция для конвертации десятичных часов в формат Чч ММмин
+  function formatHoursMinutes(decimalHours) {
+    if (!decimalHours || decimalHours <= 0) return '0мин';
+    var hours = Math.floor(decimalHours);
+    var minutes = Math.round((decimalHours - hours) * 60);
+    if (minutes === 60) { hours += 1; minutes = 0; }
+    if (hours > 0 && minutes > 0) {
+      return hours + 'ч ' + minutes + 'мин';
+    } else if (hours > 0) {
+      return hours + 'ч';
+    } else {
+      return minutes + 'мин';
+    }
+  }
+  // Данные из контроллера
+  var dailyData = <%= raw(daily_data.to_json) %>;
+  
+  // Определяем диапазон дат для календаря
+  var dateFrom = '<%= min_date.strftime('%Y-%m-%d') %>';
+  var dateTo = '<%= max_date.strftime('%Y-%m-%d') %>';
+  
+  // Создаем scatter data для отображения дней на календаре
+  // item[0]=date, item[1]=approved, item[2]=unapproved, item[3]=deficit
+  // Для scatter используем общее количество часов (approved + unapproved) для размера маркера
+  var scatterData = dailyData.map(function(item) {
+    return [item[0], item[1] + item[2]]; // date, total_hours
+  });
+  
+  // Создаем pie series для каждого дня
+  // item[0]=date, item[1]=approved, item[2]=unapproved, item[3]=deficit, item[4]=is_empty
+  var pieSeries = dailyData.map(function (item, index) {
+    var is_empty = item[4] || false;
+    
+    return {
+      type: 'pie',
+      id: 'pie-' + index,
+      center: item[0],
+      radius: pieRadius,
+      coordinateSystem: 'calendar',
+      label: {
+        show: false
+      },
+      emphasis: {
+        label: {
+          show: false
+        },
+        scale: true,
+        scaleSize: 1.2
+      },
+      data: is_empty ? [
+        { 
+          name: 'Пустой день', 
+          value: item[3] || 8.67, // deficit или план на день
+          itemStyle: { color: 'rgba(255, 87, 87, 0.9)' }
+        }
+      ] : [
+        { 
+          name: 'Согласовано', 
+          value: item[1], // approved hours
+          itemStyle: { color: 'rgba(46, 125, 50, 0.7)' }
+        },
+        { 
+          name: 'Требуется согласование', 
+          value: item[2], // unapproved hours
+          itemStyle: { color: 'rgba(176, 190, 197, 0.7)' }
+        },
+        { 
+          name: 'Осталось распределить', 
+          value: item[3], // deficit
+          itemStyle: { color: 'rgba(229, 57, 53, 0.7)' }
+        }
+      ]
+    };
+  });
+  
+  // Дата диапазон для календаря
+  var calendarDateRange = [dateFrom, dateTo];
+  
+  var calendarOption = {
+  tooltip: {
+    formatter: function (params) {
+      if (params.seriesType === 'pie') {
+        // Показываем категорию и значение
+        return `${params.data.name}: ${formatHoursMinutes(params.data.value)}`;
+      }
+      return echarts.time.format(params.value[0], '{yyyy}-{MM}-{dd}', false);
+    }
+  },
+  legend: {
+    data: ['Согласовано', 'Требуется согласование', 'Осталось распределить'],
+    bottom: 10
+  },
+  calendar: {
+    top: 60,
+    left: 30,
+    bottom: 50,
+    right: 40,
+    orient: 'vertical',
+    cellSize: cellSize,
+    yearLabel: {
+      show: true,
+      fontSize: 14
+    },
+    dayLabel: {
+      margin: 10,
+      firstDay: 1,
+      nameMap: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+    },
+    monthLabel: {
+      show: true,
+      nameMap: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+      fontSize: 12,
+      color: '#000'
+    },
+    range: calendarDateRange
+  },
+  series: [
+    {
+      id: 'label',
+      type: 'scatter',
+      coordinateSystem: 'calendar',
+      symbolSize: 0,
+      label: {
+        show: true,
+        formatter: function (params) {
+          return echarts.time.format(params.value[0], '{dd}', false);
+        },
+        offset: [-cellSize[0] / 2 + 5, -cellSize[1] / 2 + 5],
+        fontSize: 10
+      },
+      data: scatterData
+    },
+    ...pieSeries
+  ]
+};
+  
+  // Вычисляем статистику
+  function calculateStats() {
+    var stats = {
+      approved: 0,
+      unapproved: 0,
+      deficit: 0
+    };
+    
+    dailyData.forEach(function(item) {
+      if (item[4] && item[4] === true) {
+        // Пустой день - весь план идет в deficit
+        stats.deficit += item[3] || 0;
+      } else {
+        stats.approved += item[1] || 0;
+        stats.unapproved += item[2] || 0;
+        stats.deficit += item[3] || 0;
+      }
+    });
+    
+    return {
+      approved: Math.round(stats.approved * 100) / 100,
+      unapproved: Math.round(stats.unapproved * 100) / 100,
+      deficit: Math.round(stats.deficit * 100) / 100
+    };
+  }
+  
+  // Отображаем статистику
+  function displayStats(stats) {
+    var statsHtml = '<div class="surv-stats-container">' +
+      '<div class="surv-stat-item">' +
+        '<div class="surv-stat-label" style="color: rgba(46, 125, 50, 0.7);">Согласовано:</div>' +
+        '<div class="surv-stat-value">' + formatHoursMinutes(stats.approved) + '</div>' +
+      '</div>' +
+      '<div class="surv-stat-item">' +
+        '<div class="surv-stat-label" style="color: rgba(176, 190, 197, 0.7);">Требует согласования:</div>' +
+        '<div class="surv-stat-value">' + formatHoursMinutes(stats.unapproved) + '</div>' +
+      '</div>' +
+      '<div class="surv-stat-item">' +
+        '<div class="surv-stat-label" style="color: rgba(229, 57, 53, 0.7);">Осталось распределить:</div>' +
+        '<div class="surv-stat-value">' + formatHoursMinutes(stats.deficit) + '</div>' +
+      '</div>' +
+    '</div>';
+    
+    document.getElementById('timelog-stats').innerHTML = statsHtml;
+  }
+  
+  // Инициализация графика
+  document.addEventListener('DOMContentLoaded', function() {
+    var chartEl = document.getElementById('timelog-calendar-chart');
+    if (chartEl) {
+      var chart = echarts.init(chartEl);
+      chart.setOption(calendarOption);
+      window.addEventListener('resize', function(){ chart.resize(); });
+      
+      // Отображаем статистику
+      var stats = calculateStats();
+      displayStats(stats);
+    }
+  });
+<% end %>
+
 <div class="surv-main-container">
   <div class="surv-filters-left">
     <%= form_tag(_time_entries_path(@project, nil), :method => :get, :id => 'query_form') do %>
@@ -10,7 +231,7 @@
     <% end %>
   </div>
   
-  <div class="surv-chart-left">
+  <div class="surv-table-container">
     <% if @entries.empty? %>
       <p class="nodata"><%= l(:label_no_data) %></p>
     <% else %>
@@ -51,6 +272,11 @@
         <% end %>
       </div>
     <% end %>
+  </div>
+  
+  <div class="surv-chart-right-timelog">
+    <div id="timelog-calendar-chart" style="width: 100%; height: 800px;"></div>
+    <div id="timelog-stats"></div>
   </div>
 </div>
 <% else %>

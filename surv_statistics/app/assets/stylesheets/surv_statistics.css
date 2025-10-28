@@ -364,8 +364,9 @@ body, html {
   margin: 0;
 }
 
-.timelog .surv-chart-left {
-  flex: 1 1 80%;
+/* Table container - ~60% of screen */
+.timelog .surv-table-container {
+  flex: 1 1 60%;
   min-width: 0;
   align-self: flex-start;
   margin-top: 0;
@@ -373,14 +374,54 @@ body, html {
 }
 
 /* Сброс отступов для элементов внутри таблицы */
-.timelog .surv-chart-left > *:first-child {
+.timelog .surv-table-container > *:first-child {
   margin-top: 0;
   padding-top: 0;
 }
 
-.timelog .surv-chart-left .nodata {
+.timelog .surv-table-container .nodata {
   margin-top: 0;
   padding-top: 0;
+}
+
+/* Chart container - 25% of screen minimum */
+.timelog .surv-chart-right-timelog {
+  flex: 0 0 25%;
+  min-width: 300px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  align-self: flex-start;
+}
+
+/* Statistics container */
+.timelog .surv-stats-container {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.timelog .surv-stat-item {
+  margin-bottom: 8px;
+}
+
+.timelog .surv-stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.timelog .surv-stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.timelog .surv-stat-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
 }
 
 /* Ensure filters work properly on timelog page */
