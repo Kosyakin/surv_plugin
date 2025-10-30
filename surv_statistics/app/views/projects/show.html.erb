@@ -2,7 +2,7 @@
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
 
 <% if @query.valid? %>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="/themes/SURV/javascripts/vendor/echarts/echarts.min.js"></script>
   
   <script>
     // Функция для конвертации десятичных часов в формат Чч ММмин

@@ -2,7 +2,7 @@
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
 
 <% if @query.valid? %>
-<%= javascript_include_tag 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js' %>
+<%= javascript_include_tag '/themes/SURV/javascripts/vendor/echarts/echarts.min.js' %>
 
 <%
   # Получаем данные из контроллера

@@ -32,6 +32,8 @@ Redmine::MenuManager.map :top_menu do |menu|
   # - Добавляем "Мои трудозатраты" и "Согласование трудозатрат"
   menu.delete :home
   menu.delete :my_page
+  # Заменяем стандартный пункт "Помощь" на ссылку на внутренние инструкции
+  menu.delete :help
 end
 
 Redmine::MenuManager.map :project_menu do |menu|
@@ -41,4 +43,5 @@ end
 Redmine::MenuManager.map :application_menu do |menu|
   menu.delete :activity # Убираем пункт меню activity из меню приложения
   menu.delete :time_entries # Убираем пункт меню time_entries из меню приложения
+
 end

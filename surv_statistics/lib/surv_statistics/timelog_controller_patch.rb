@@ -192,7 +192,7 @@ module SurvStatistics
             when 1, 2, 3, 4  # Понедельник-Четверг
               8.67
             when 5  # Пятница
-              5.33
+              5.17
             else  # Выходные
               0.0
             end

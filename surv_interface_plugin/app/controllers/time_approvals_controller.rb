@@ -257,12 +257,12 @@ class TimeApprovalsController < ApplicationController
     @week_from ||= Date.today.beginning_of_week(:monday)
     @week_to   ||= (@week_from + 6)
 
-    # Compute weekly planned hours (Mon..Thu 8.67, Fri 5.33, weekend 0)
+    # Compute weekly planned hours (Mon..Thu 8.67, Fri 5.17, weekend 0)
     weekly_dates = (@week_from..@week_to).to_a
     @week_planned_hours = weekly_dates.sum do |d|
       case d.wday
       when 1,2,3,4 then 8.67
-      when 5 then 5.33
+      when 5 then 5.17
       else 0.0
       end
     end

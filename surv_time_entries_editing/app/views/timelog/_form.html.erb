@@ -62,7 +62,7 @@
         if (!date) { return 0.0; }
         var w = date.getDay(); // 0..6 (Вс..Сб)
         if (w === 1 || w === 2 || w === 3 || w === 4) return 8.67; // Пн-Чт
-        if (w === 5) return 5.33; // Пт
+        if (w === 5) return 5.17; // Пт
         return 0.0; // Сб-Вс
       }
 
@@ -85,7 +85,7 @@
           if (window.echarts) { echartsLoaded = true; return resolve(window.echarts); }
           if (echartsLoaded) { return resolve(window.echarts); }
           var s = document.createElement('script');
-          s.src = 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js';
+          s.src = '/themes/SURV/javascripts/vendor/echarts/echarts.min.js';
           s.async = true;
           s.onload = function(){ echartsLoaded = true; resolve(window.echarts); };
           s.onerror = function(){ reject(new Error('Failed to load ECharts')); };

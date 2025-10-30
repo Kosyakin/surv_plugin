@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+  redmine:
+    container_name: surv_redmine
+    image: redmine:5.1.8
+    ports:
+      - "6083:3000"
+    environment:
+        - REDMINE_PLUGINS_MIGRATE=1
+        - REDMINE_DB_POSTGRES=10.0.0.17
+        - REDMINE_DB_DATABASE=surv_rm
+        - REDMINE_DB_USERNAME=surv_admin
+        - REDMINE_DB_PASSWORD=HjSdt73E
+    volumes:
+      - /opt/surv/docker_redmine-themes:/usr/src/redmine/public/themes
+      - /opt/surv/docker_redmine-data:/usr/src/redmine/files:rw
+      - /opt/surv/docker_redmine-plugins:/usr/src/redmine/plugins
+      - /opt/surv/redmine-logs:/var/log/redmine:rw
+      - /opt/surv/configuration.yml:/usr/src/redmine/config/configuration.yml
+      #- /opt/surv/docker_redmine-views:/usr/src/redmine/app/views
+    restart: unless-stopped
+    networks:
+      - surv_redmine_default
+    command: rails server -b 0.0.0.0
+
+networks:
+  surv_redmine_default:
+    external: true

@@ -76,7 +76,7 @@
 
 <% content_for :header_tags do %>
     <%= auto_discovery_link_tag(:atom, {:issue_id => @issue, :format => 'atom', :key => User.current.atom_key}, :title => l(:label_spent_time)) %>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="/themes/SURV/javascripts/vendor/echarts/echarts.min.js"></script>
     
 <% end %>
 
@@ -139,6 +139,21 @@ document.addEventListener('DOMContentLoaded', function() {
     return dd + '.' + mm + ' (' + wd + ')';
   }
 
+  // Convert decimal hours to string like "5ч 10мин"
+  function formatHoursMinutes(decimalHours) {
+    if (!decimalHours || decimalHours <= 0) return '0мин';
+    var hours = Math.floor(decimalHours);
+    var minutes = Math.round((decimalHours - hours) * 60);
+    if (minutes === 60) { hours += 1; minutes = 0; }
+    if (hours > 0 && minutes > 0) {
+      return hours + 'ч ' + minutes + 'мин';
+    } else if (hours > 0) {
+      return hours + 'ч';
+    } else {
+      return minutes + 'мин';
+    }
+  }
+
   // Create a chart for each user
   userCharts.forEach(function(userChart, userIndex) {
     var chartDom = document.getElementById('userChart' + userIndex);
@@ -168,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             label: {
               show: true,
               position: 'inside',
-              formatter: function(p) { return p.value ? (p.value + 'ч') : ''; },
+              formatter: function(p) { return (p && p.value) ? formatHoursMinutes(p.value) : ''; },
               color: '#fff',
               fontSize: 11
             },
@@ -194,10 +209,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             var result = '<strong>' + userChart.user_name + '</strong><br/>';
             result += '<strong>Дата: ' + formatDateShortRu(dayInfo.date) + '</strong><br/>';
-            result += 'Не согласовано: <strong>' + dayInfo.total_hours + 'ч</strong><br/>';
+            result += 'Не согласовано: <strong>' + formatHoursMinutes(dayInfo.total_hours) + '</strong><br/>';
             
             dayInfo.entries.forEach(function(entry) {
-              result += entry.activity +': ' + '<strong>' + entry.hours + 'ч </strong>';
+              result += entry.activity +': ' + '<strong>' + formatHoursMinutes(entry.hours) + ' </strong>';
               if (entry.comments) {
                 result +=  entry.comments + '<br/>';
               }
@@ -221,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
           type: 'value',
           name: 'Часы',
           axisLabel: {
-            formatter: '{value} ч',
+            formatter: function(value) { return formatHoursMinutes(value); },
             fontSize: 12
           }
         },

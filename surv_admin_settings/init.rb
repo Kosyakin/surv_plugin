@@ -23,6 +23,11 @@ Redmine::Plugin.register :surv_admin_settings do
   # Пункт меню в Администрировании
   menu :admin_menu, :surv_admin_settings, { controller: 'surv_admin_settings', action: 'edit' },
        caption: :label_surv_admin_settings_menu, html: { class: 'icon' }
+
+  # Верхнее меню: Инструкции (вместо "Помощь")
+  menu :top_menu, :instructions, 'https://surv.01l.ru/projects/wiki/wiki',
+       caption: :label_surv_instructions,
+       html: { target: '_blank', rel: 'noopener', class: 'help' }
 end
 
 # Базовые константы и утилиты
@@ -57,3 +62,4 @@ TimelogController.send(:include, SurvAdminSettings::Controllers::TimelogControll
 # Удаление вкладки "Действия" из контроллера проектов
 require_dependency File.expand_path('../lib/surv_admin_settings/controllers/projects_controller_patch', __FILE__)
 ProjectsController.send(:include, SurvAdminSettings::Controllers::ProjectsControllerPatch)
+
