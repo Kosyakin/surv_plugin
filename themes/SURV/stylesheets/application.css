@@ -26,7 +26,8 @@ hr {
     height: 0;
     overflow: visible
 }
-
+#header h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+#header h1 .breadcrumbs { display:block; font-size: .5em; font-weight: normal; }
 pre {
     font-family: monospace,monospace;
     font-size: 1em
@@ -397,7 +398,7 @@ tr.group .count, .badge-count {
 input[type=button], input[type=submit], input[type=reset], button {
     padding: 3px 12px;
     border-radius: 3px;
-    font-size: 14px;
+    font-size: 18px;
     line-height: 1.428571429;
     display: inline-block;
     margin-bottom: 0;
@@ -412,24 +413,24 @@ input[type=button], input[type=submit], input[type=reset], button {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    background-color: #0065ff;
+    background-color: #c53030;
     color: #fff;
-    border-color: #0065ff #0065ff #004dc2;
-    box-shadow: 0 1px 0 #004dc2
+    /*border-color: #0065ff #0065ff #004dc2;*/
+    /*box-shadow: 0 1px 0 #004dc2*/
 }
 
     input[type=button]:hover, input[type=button]:focus, input[type=submit]:hover, input[type=submit]:focus, input[type=reset]:hover, input[type=reset]:focus, button:hover, button:focus {
         background-color: #004dc2;
         color: #fff;
         border-color: #004dc2 #004dc2 #003585;
-        box-shadow: 0 1px 0 #003585
+        /*box-shadow: 0 1px 0 #003585*/
     }
 
     input[type=button]:active, input[type=submit]:active, input[type=reset]:active, button:active {
         transform: translate(0, 1px);
         border-color: #0047b3;
         background-color: #004dc2;
-        box-shadow: inset 0 3px 4px -2px #0047b3
+        /*box-shadow: inset 0 3px 4px -2px #0047b3*/
     }
 
     input[type=button]:hover, input[type=button]:focus, input[type=submit]:hover, input[type=submit]:focus, input[type=reset]:hover, input[type=reset]:focus, button:hover, button:focus {
@@ -450,21 +451,21 @@ form input[type=submit] {
         background-color: #029934;
         color: #fff;
         border-color: #029934 #029934 #027b2a;
-        box-shadow: 0 1px 0 #027b2a
+        /*box-shadow: 0 1px 0 #027b2a*/
     }
 
         form input[type=submit] + input:hover, form input[type=submit] + input:focus {
             background-color: #027b2a;
             color: #fff;
             border-color: #027b2a #027b2a #015d1f;
-            box-shadow: 0 1px 0 #015d1f
+            /*box-shadow: 0 1px 0 #015d1f*/
         }
 
         form input[type=submit] + input:active {
             transform: translate(0, 1px);
             border-color: #027327;
             background-color: #027b2a;
-            box-shadow: inset 0 3px 4px -2px #027327
+            /*box-shadow: inset 0 3px 4px -2px #027327*/
         }
 
     form input[type=submit] ~ a {
@@ -891,7 +892,8 @@ span.required {
     color: #e5123d;
     font-size: 1.5em;
     font-weight: normal;
-    line-height: 0
+    line-height: 0;
+	display: none;
 }
 
 em.info {
@@ -1298,7 +1300,7 @@ fieldset#filters td.add-filter {
 }
 
 fieldset#filters td input[type=checkbox], fieldset#filters td input[type=radio] {
-    margin-top: 7px
+    margin-top: 1px
 }
 
 fieldset#filters div.add-filter {
@@ -1860,7 +1862,7 @@ table {
     table.list {
         width: 100%;
         margin-bottom: 20px;
-        font-size: .92em
+        font-size: 18px;
     }
 
 .autoscroll table.list {
@@ -3540,8 +3542,10 @@ span.private {
     #login-form label {
         display: block;
         margin-bottom: 6px;
-        font-weight: 600;
-        line-height: inherit
+        font-weight: bold;
+        line-height: inherit;
+		font-size: 18px;
+		color: #404040;
     }
 
         #login-form label[for=autologin] {
@@ -3562,16 +3566,28 @@ span.private {
 
         #login-form label > a {
             float: right;
-            font-weight: normal
+            font-weight: normal;
+			color: black;
         }
 
     #login-form input[type=text], #login-form input[type=password] {
-        margin-bottom: 15px
+        /*margin-bottom: 15px*/
+		outline: none;
+		margin-bottom: 20px;
+		border: 1px solid #DDD;
+		padding: 6px;
+		font-size: 140%;
+		border-radius: 2px;
+		-webkit-border-radius: 2px;
+		height: 35px;
     }
 
     #login-form #login-submit {
-        padding-top: 6px;
-        padding-bottom: 6px
+        /*padding-top: 6px;
+        padding-bottom: 6px*/
+		display: block;
+		width: 100%;
+		height: 35px;
     }
 
     #login-form table {
@@ -3600,13 +3616,21 @@ span.private {
 
 @media screen and (min-width: 480px) {
     #login-form {
-        width: 24em;
+        /*width: 24em;
         padding: 20px;
         border: 1px solid #dadce6;
         border-radius: 3px;
         background-color: #f9fafb;
         box-shadow: 0 1px 2px rgba(0,0,0,.07),0 3px 8px rgba(0,0,0,.04);
-        color: #3e4359
+        color: #3e4359*/
+		margin: 5em auto 2em auto;
+		padding: 20px;
+		width: 340px;
+		border: none;
+		background-color: white;
+		border-radius: 4px;
+		box-sizing: border-box;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
         #login-form table {
@@ -7995,9 +8019,9 @@ table.list th.checkbox > a img {
 #top-menu {
     box-sizing: border-box;
     padding: 10px 20px;
-    background: white;
+    background: #f6f6f9;
     color: #3e4359;
-    font-size: 14px;
+    font-size: 15px;
 	border-bottom: 2px solid #e3e5ec;
 }
 
@@ -10113,7 +10137,89 @@ div.wiking.flash.warning, div.wiking.flash.notice, div.wiking.flash.tip {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0
 }
+@font-face {
+    font-family: 'Futuris C';
+    src: url('../fonts/FuturisC-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
 
+@font-face {
+    font-family: 'Futuris C';
+    src: url('../fonts/FuturisC-Italic.otf') format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Futuris C';
+    src: url('../fonts/FuturisC-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Futuris C';
+    src: url('../fonts/FuturisC-BoldItalic.otf') format('opentype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Helios C';
+    src: url('../fonts/HeliosC.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Helios C';
+    src: url('../fonts/HeliosC-italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Helios C';
+    src: url('../fonts/HeliosC-bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Helios C';
+    src: url('../fonts/HeliosC-bold-italic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Roboto C';
+    src: url('../fonts/roboto-condensed.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto C';
+    src: url('../fonts/roboto-condensed-italic.ttf');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Roboto C';
+    src: url('../fonts/roboto-bold-condensed.ttf');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto C';
+    src: url('../fonts/roboto-bold-condensed-italic.ttf');
+    font-weight: bold;
+    font-style: italic;
+}
 @media print {
     .sidebar-toggler {
         display: none

@@ -1,0 +1,9 @@
+ru:
+  surv_statistics:
+    errors:
+      author_cannot_edit_approved_entry: "Нельзя изменять запись: она уже согласована руководителем"
+      author_cannot_approve_own_entries: "Автор не может менять поле согласования в своих трудозатратах"
+      author_cannot_modify_approved_entries: "Нельзя изменять/удалять согласованные записи"
+      author_cannot_delete_others_entries: "Нельзя удалять чужие трудозатраты"
+
+

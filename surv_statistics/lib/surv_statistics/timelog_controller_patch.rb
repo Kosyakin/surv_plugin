@@ -28,6 +28,20 @@ module SurvStatistics
         # (ТОЛЬКО для HTML-запросов; см. проверку внутри метода)
         before_action :surv_apply_default_time_filters, :only => [:index, :report]
         
+        # Ограничения на изменение записей с учетом согласования
+        before_action :surv_guard_author_edit_permissions, :only => [:edit, :update, :destroy, :bulk_edit, :bulk_update]
+        
+        # Переопределяем метод time_entry_scope для фильтрации по праву view_own_time_entries
+        alias_method :time_entry_scope_without_visibility, :time_entry_scope unless method_defined?(:time_entry_scope_without_visibility)
+        
+        def time_entry_scope(options={})
+          scope = time_entry_scope_without_visibility(options)
+          if should_restrict_to_own_entries?
+            scope = scope.where(user_id: User.current.id)
+          end
+          scope
+        end
+        
         # Переопределяем метод retrieve_time_entry_query для добавления данных графика
         alias_method :retrieve_time_entry_query_without_calendar, :retrieve_time_entry_query unless method_defined?(:retrieve_time_entry_query_without_calendar)
         
@@ -43,6 +57,87 @@ module SurvStatistics
         end
         
         private
+        
+        # Блокирует недопустимые изменения автором:
+        # - автор не может изменять поле "Согласовано" в своих записях;
+        # - если запись уже согласована ("Согласовано" = Да), автор не может править запись вовсе,
+        #   пока согласование не будет отменено руководителем
+        def surv_guard_author_edit_permissions
+          # Требуется загруженная запись
+          @time_entry ||= TimeEntry.find_by(id: params[:id]) if params[:id]
+          return unless @time_entry && @project
+
+          is_author = (@time_entry.user_id == User.current.id)
+          approved = surv_time_entry_approved?(@time_entry)
+
+          # Если запись согласована — автору запрещено редактирование/удаление
+          if is_author && approved
+            flash[:error] = I18n.t('surv_statistics.errors.author_cannot_edit_approved_entry', default: 'Нельзя изменять запись: она уже согласована руководителем')
+            return surv_redirect_back_or_list
+          end
+
+          # Автор не может изменять поле "Согласовано" (даже если не согласовано)
+          if is_author && params[:time_entry].is_a?(Hash)
+            cf_values = params[:time_entry][:'custom_field_values'] || params[:time_entry]['custom_field_values']
+            if cf_values.is_a?(Hash) && (cf_values['2'].present? || cf_values[2].present?)
+              flash[:error] = I18n.t('surv_statistics.errors.author_cannot_approve_own_entries', default: 'Автор не может менять поле согласования в своих трудозатратах')
+              return surv_redirect_back_or_list
+            end
+          end
+
+          # Запрещаем удалять чужие записи (только автор может удалять свои)
+          if action_name == 'destroy'
+            # Одиночное удаление
+            if @time_entry && @time_entry.user_id != User.current.id
+              flash[:error] = I18n.t('surv_statistics.errors.author_cannot_delete_others_entries', default: 'Нельзя удалять чужие трудозатраты')
+              return surv_redirect_back_or_list
+            end
+            # Массовое удаление через @time_entries
+            if defined?(@time_entries) && @time_entries.present?
+              any_foreign = @time_entries.any? { |entry| entry.user_id != User.current.id }
+              if any_foreign
+                flash[:error] = I18n.t('surv_statistics.errors.author_cannot_delete_others_entries', default: 'Нельзя удалять чужие трудозатраты')
+                return surv_redirect_back_or_list
+              end
+            end
+          end
+
+          # Массовые операции — запрещаем изменение/удаление согласованных записей автором
+          if %w[bulk_edit bulk_update destroy].include?(action_name) && defined?(@time_entries) && @time_entries.present?
+            any_blocked = @time_entries.any? do |entry|
+              entry.user_id == User.current.id && surv_time_entry_approved?(entry)
+            end
+            if any_blocked
+              flash[:error] = I18n.t('surv_statistics.errors.author_cannot_modify_approved_entries', default: 'Нельзя изменять/удалять согласованные записи')
+              return surv_redirect_back_or_list
+            end
+          end
+        end
+
+        # Проверяет признак согласования по настраиваемому полю с id=2
+        def surv_time_entry_approved?(entry)
+          begin
+            approved_cf_id = 2
+            cv = entry.custom_values&.detect { |v| v.custom_field_id == approved_cf_id }
+            return false unless cv
+            val = cv.value
+            (val == true) || (val == '1') || val.to_s.strip.downcase.in?(['true','t','yes','y','да','1'])
+          rescue
+            false
+          end
+        end
+
+        # Безопасный редирект назад
+        def surv_redirect_back_or_list
+          redirect_to :back
+        rescue ActionController::RedirectBackError
+          redirect_to project_time_entries_path(@project)
+        end
+
+        def should_restrict_to_own_entries?
+          return false unless @project
+          User.current.allowed_to?(:view_own_time_entries, @project)
+        end
         
         def surv_prepare_calendar_chart_data
           return unless @query

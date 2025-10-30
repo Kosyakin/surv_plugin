@@ -179,7 +179,15 @@
           return echarts.time.format(params.value[0], '{dd}', false);
         },
         offset: [-cellSize[0] / 2 + 5, -cellSize[1] / 2 + 5],
-        fontSize: 10
+        // ИЗМЕНЕНИЕ СТИЛЯ ГРАФИКА: размер и цвет цифр дней месяца
+        fontSize: 16, // Увеличен размер шрифта с 10 до 16
+        color: '#000000', // Черный цвет для цифр
+        fontWeight: 'bold' // Жирный шрифт для лучшей читаемости
+      },
+      // ИЗМЕНЕНИЕ СТИЛЯ ГРАФИКА: убираем обводку вокруг маркеров
+      itemStyle: {
+        borderWidth: 0, // Убираем обводку (синяя обводка была здесь)
+        borderColor: 'transparent' // Прозрачный цвет обводки
       },
       data: scatterData
     },

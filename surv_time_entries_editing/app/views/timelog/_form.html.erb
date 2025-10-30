@@ -24,6 +24,32 @@
         return Number(hours).toFixed(2);
       }
 
+      // Функция для получения цвета активности из CSS
+      function getActivityColor(activityId) {
+        // Создаем временный элемент для получения цвета из CSS
+        var tempEl = document.createElement('div');
+        tempEl.className = 'activity-color-' + activityId;
+        tempEl.style.display = 'none';
+        document.body.appendChild(tempEl);
+        
+        // Получаем вычисленные стили
+        var computedStyle = window.getComputedStyle(tempEl);
+        var color = computedStyle.backgroundColor;
+        
+        // Удаляем временный элемент
+        document.body.removeChild(tempEl);
+        
+        // Если цвет не найден, используем fallback
+        if (!color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent') {
+          tempEl.className = 'activity-color-default';
+          document.body.appendChild(tempEl);
+          color = window.getComputedStyle(tempEl).backgroundColor;
+          document.body.removeChild(tempEl);
+        }
+        
+        return color;
+      }
+
       // Упрощенный расчет плана по дню недели из строки YYYY-MM-DD (локально)
       function getPlanHours(dateString) {
         var date;
@@ -93,14 +119,10 @@
         // Рассчитываем оставшиеся часы для распределения
         var remainingHours = Math.max(0, planHours - totalLoggedHours);
 
-        // Цвета по id активности с запасной палитрой
-        var colorById = { 1: 'rgba(46, 125, 50, 0.7)', 2: 'rgba(46, 125, 50, 0.4)', 3: 'rgba(249, 168, 37, 0.7)', 4: 'rgba(176, 190, 197, 0.7)' };
-        var fallback = ['#1976d2','#6a1b9a','#00897b','#5d4037','#455a64','#7b1fa2','#2e7d32'];
-
         // Формируем серии для распределенных часов
         var dataSeries = entries.map(function(e, idx){
           var actId = e.activity_id;
-          var color = colorById[actId] || fallback[idx % fallback.length];
+          var color = getActivityColor(actId);
           var val = Number((Number(e.hours) || 0).toFixed(2));
           var labelVisible = val > 0.0;
           return {
@@ -114,7 +136,7 @@
               formatter: function(p){ 
                 return (p && typeof p.value === 'number' && p.value > 0) ? formatHoursToHM(p.value) : ''; 
               }, 
-              color: '#FFFFFFF', // Черный цвет текста
+              color: '#ffffff', // Белый цвет текста
               fontSize: 11,
               fontWeight: 'bold'
             },
@@ -260,10 +282,10 @@
           },
           legend: { show: false },
           grid: { 
-            left: '3%', 
-            right: '3%', 
-            top: '6%', 
-            bottom: '6%', 
+            left: '0%', 
+            right: '0%', 
+            top: '0%', 
+            bottom: '0%', 
             containLabel: true 
           },
           xAxis: { 
@@ -273,7 +295,7 @@
                 return formatHoursToHM(value);
               }, 
               fontSize: 11,
-              color: '#FFFFFF' // Черный цвет подписей оси X
+              color: '#FFFFFF' 
             }, 
             min: 0,
             // Устанавливаем максимум как максимум из плана и распределенных часов,
@@ -453,4 +475,8 @@
       }
     }
   );
+<% end %>
+
+<% content_for :header_tags do %>
+  
 <% end %>

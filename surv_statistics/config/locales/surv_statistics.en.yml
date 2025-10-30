@@ -1,0 +1,9 @@
+en:
+  surv_statistics:
+    errors:
+      author_cannot_edit_approved_entry: "You cannot edit this entry: it has already been approved by a manager"
+      author_cannot_approve_own_entries: "An author cannot change the approval field on their own time entries"
+      author_cannot_modify_approved_entries: "You cannot modify/delete approved entries"
+      author_cannot_delete_others_entries: "You cannot delete other users' time entries"
+
+

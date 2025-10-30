@@ -1,17 +1,161 @@
 /* SURV Statistics Plugin Styles */
+/* Цвета для различных типов активностей */
+.activity-color-1 { background-color: rgba(46, 125, 50, 0.7); }   /* заявки и договоры */
+.activity-color-2 { background-color: rgba(46, 125, 50, 0.4); }   /* внепроектная для заказчика */
+.activity-color-3 { background-color: rgba(249, 168, 37, 0.7); }  /* обеспечивающая */
+.activity-color-4 { background-color: rgba(176, 190, 197, 0.7); } /* согласованное отсутствие */
+.chart-approved { background-color: rgba(46, 125, 50, 0.7); }
+.chart-unapproved { background-color: rgba(176, 190, 197, 0.7); }
+.chart-deficit { background-color: rgba(229, 57, 53, 0.7); }
+.chart-empty-day { background-color: rgba(229, 57, 53, 0.7); }
+/* Fallback цвета на случай отсутствия ID */
+.activity-color-default { background-color: #1976d2; }
+.mte-stats-title {
+    font-family: 'Segoe UI', Segoe, Tahoma, Arial, sans-serif;
+    /* дополнительные стили если нужно */
+    font-size: 10px;
+    font-weight: 600;
+    color: #555555;
+    text-align: center;  /* ← выравнивание по центру */
+
+}
+
+/* Ensure full width for the page */
+body, html {
+  width: 100%;
+}
 
 /* Main container layout */
 .surv-main-container {
   display: flex;
   gap: 16px;
   align-items: flex-start;
+  width: 100%;
+}
+
+/* Left side filters container */
+.surv-filters-left {
+  flex: 0 0 15%;
+  max-width: 20%;
+  min-width: 200px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.surv-filters-left form {
+  margin: 0;
+}
+
+/* Filter table styling */
+.surv-filters-left #filters-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.surv-filters-left #filters-table tr.filter {
+  display: block;
+  margin-bottom: 10px;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.surv-filters-left #filters-table tr.filter td {
+  display: block;
+  padding: 0;
+  border: none;
+}
+
+/* Field column - checkbox and label */
+.surv-filters-left #filters-table tr.filter td.field {
+  margin-bottom: 8px;
+}
+
+.surv-filters-left #filters-table tr.filter td.field input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.surv-filters-left #filters-table tr.filter td.field label {
+  display: inline;
+  font-weight: bold;
+  color: #333;
+  font-size: 13px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+/* Operator column - filter type */
+.surv-filters-left #filters-table tr.filter td.operator {
+  margin-bottom: 8px;
+}
+
+.surv-filters-left #filters-table tr.filter td.operator select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+}
+
+/* Values column - filter values */
+.surv-filters-left #filters-table tr.filter td.values {
+  margin-bottom: 0;
+}
+
+.surv-filters-left #filters-table tr.filter td.values select,
+.surv-filters-left #filters-table tr.filter td.values input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+}
+
+.surv-filters-left #filters-table tr.filter td.values span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Add filter section */
+.surv-filters-left .add-filter {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.surv-filters-left .add-filter label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #333;
+  font-size: 12px;
+}
+
+.surv-filters-left .add-filter select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+
+/* Hide tabs (Подробности|Отчет) */
+.surv-filters-left .tabs {
+  display: none;
 }
 
 /* Left side chart container */
 .surv-chart-left {
-  flex: 0 0 40%;
-  max-width: 40%;
-  min-width: 280px;
+  flex: 0 0 30%;
+  max-width: 300%;
+  min-width: 300px;
 }
 
 .surv-main-chart {
@@ -21,8 +165,8 @@
 
 /* Right side container */
 .surv-chart-right {
-  flex: 1 1 60%;
-  max-width: 60%;
+  flex: 1 1 50%;
+  max-width: 50%;
 }
 
 /* Child projects grid */
@@ -51,10 +195,10 @@
 .surv-child-project-title {
   text-align: center;
   margin: 0 0 10px 0;
-  color: #d73925;
+  color: #C53030;
   font-size: 16px;
   font-weight: bold;
-  border-bottom: 2px solid #d73925;
+  border-bottom: 2px solid #C53030;
   padding-bottom: 5px;
 }
 
@@ -82,7 +226,7 @@
 /* Employee tile styles */
 .surv-employee-name {
   font-weight: bold;
-  color: #d73925;
+  color: #C53030;
   margin-bottom: 6px;
 }
 
@@ -104,6 +248,7 @@
   text-align: center;
   padding: 20px;
 }
+
 
 /* Time Approvals Page Styles */
 
@@ -152,10 +297,10 @@
 .surv-approvals-user-title {
   text-align: center;
   margin: 0 0 10px 0;
-  color: #d73925;
+  color: #C53030;
   font-size: 16px;
   font-weight: bold;
-  border-bottom: 2px solid #d73925;
+  border-bottom: 2px solid #C53030;
   padding-bottom: 5px;
 }
 
@@ -213,4 +358,172 @@
 /* CSV export button */
 .surv-csv-export-button {
   margin-left: 10px;
+}
+
+/* Timelog page specific styles */
+.timelog .surv-main-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.timelog .surv-filters-left {
+  flex: 0 0 15%;
+  max-width: 20%;
+  min-width: 200px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  align-self: flex-start;
+}
+
+.timelog .surv-filters-left form {
+  margin: 0;
+}
+
+/* Table container - ~60% of screen */
+.timelog .surv-table-container {
+	flex: 1 1 60%;
+	min-width: 0;
+	margin-top: 12px;
+}
+
+
+
+/* Chart container - 25% of screen minimum */
+.timelog .surv-chart-right-timelog {
+  flex: 0 0 25%;
+  min-width: 300px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  align-self: flex-start;
+}
+
+/* Statistics container */
+.timelog .surv-stats-container {
+  margin-top: 15px;
+  padding: 12px;
+  //background: #f8f9fa;
+  //border-radius: 4px;
+  //border: 1px solid #e9ecef;
+}
+
+.timelog .surv-stat-item {
+  margin-bottom: 8px;
+}
+
+.timelog .surv-stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.timelog .surv-stat-label {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.timelog .surv-stat-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Ensure filters work properly on timelog page */
+.timelog .surv-filters-left #filters-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter {
+  display: block;
+  margin-bottom: 10px;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td {
+  display: block;
+  padding: 0;
+  border: none;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.field {
+  margin-bottom: 8px;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.field input[type="checkbox"] {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.field label {
+  display: inline;
+  font-weight: bold;
+  color: #333;
+  font-size: 13px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.operator {
+  margin-bottom: 8px;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.operator select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.values {
+  margin-bottom: 0;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.values select,
+.timelog .surv-filters-left #filters-table tr.filter td.values input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+  background: white;
+}
+
+.timelog .surv-filters-left #filters-table tr.filter td.values span {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.timelog .surv-filters-left .add-filter {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.timelog .surv-filters-left .add-filter label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #333;
+  font-size: 12px;
+}
+
+.timelog .surv-filters-left .add-filter select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.timelog .surv-filters-left .tabs {
+  display: none;
 }
