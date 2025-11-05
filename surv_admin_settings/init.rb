@@ -25,9 +25,15 @@ Redmine::Plugin.register :surv_admin_settings do
        caption: :label_surv_admin_settings_menu, html: { class: 'icon' }
 
   # Верхнее меню: Инструкции (вместо "Помощь")
-  menu :top_menu, :instructions, 'https://surv.01l.ru/projects/wiki/wiki',
+  menu :top_menu, :instructions, '/projects/wiki/wiki',
        caption: :label_surv_instructions,
        html: { target: '_blank', rel: 'noopener', class: 'help' }
+
+  # Верхнее меню: Сообщить об ошибке\доработке (вместо "Помощь")
+  menu :top_menu, :errors, '/projects/wiki/boards',
+       caption: :label_surv_errors,
+       html: { target: '_blank', rel: 'noopener', class: 'help' }
+
 end
 
 # Базовые константы и утилиты

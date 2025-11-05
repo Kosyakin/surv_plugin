@@ -177,6 +177,15 @@ class ProjectsController < ApplicationController
 
   # Show @project
   def show
+    # Redirect to wiki if project identifier is "wiki" (check before menu item redirect)
+    if @project.identifier == 'wiki'
+      respond_to do |format|
+        format.html { redirect_to "/projects/" }
+        format.api
+      end
+      return
+    end
+
     # try to redirect to the requested menu item
     if params[:jump] && redirect_to_project_menu_item(@project, params[:jump])
       return
