@@ -4,12 +4,16 @@ module SurvAdminSettings
       def self.included(base)
         base.class_eval do
           validate :sas_validate_approval_field_permission, :on => [:create, :update]
+          before_destroy :sas_check_destroy_permission
 
           private
 
           def sas_validate_approval_field_permission
             return unless project
             return unless custom_field_values_changed?
+
+            # Админ может делать все
+            return if User.current.admin?
 
             # Проверяем изменение поля "Согласовано" (custom_field id="2")
             approval_field = custom_field_values.find { |cfv| cfv.custom_field_id == 2 }
@@ -57,6 +61,17 @@ module SurvAdminSettings
                   errors.add(:base, I18n.t('surv_admin_settings.errors.insufficient_permissions_for_approval_field'))
                 end
               end
+            end
+          end
+
+          def sas_check_destroy_permission
+            return if User.current.admin?
+
+            # Пользователь может удалять только свои записи
+            if user_id != User.current.id
+              Rails.logger.warn "[SURV_ADMIN_SETTINGS] User #{User.current.login} (ID: #{User.current.id}) attempted to delete time entry #{id} (author: #{user_id}) in project #{project.identifier}"
+              errors.add(:base, I18n.t('surv_admin_settings.errors.insufficient_permissions_for_deletion'))
+              throw :abort
             end
           end
         end

@@ -24,9 +24,13 @@ module SurvAdminSettings
 
           private
 
+          # TODO: Данный функционал конфликтует с другим плагином, по статистике. Надо их объеденить
           def sas_check_approval_permission_before_action
             return true unless @project
             return true unless params[:time_entry]
+
+            # Админ может делать все
+            return true if User.current.admin?
 
             # Если пользователь не автор записи и имеет право согласования
             if action_name == 'update' && @time_entry && @time_entry.user_id != User.current.id && User.current.allowed_to?(:approve_time_entries, @project)

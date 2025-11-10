@@ -376,7 +376,7 @@ class ProjectsController < ApplicationController
 
     params[:f] = ['spent_on', 'activity_id', 'cf_1', 'author_id', 'cf_2', '']
     params[:op] ||= {}
-    params[:op][:spent_on] = 'lm'
+    params[:op][:spent_on] = 'm'
     params[:op][:activity_id] = '='
     params[:op][:cf_1] = '*'
     params[:op][:author_id] = '*'

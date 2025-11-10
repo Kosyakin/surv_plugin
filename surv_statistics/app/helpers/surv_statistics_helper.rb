@@ -41,6 +41,8 @@ module SurvStatisticsHelper
   def should_restrict_to_own_entries?
     # Проверяем наличие проекта
     return false unless @project
+    # Администраторы всегда видят все записи
+    return false if User.current.admin?
     
     # КРИТИЧЕСКИ ВАЖНО: Для проектов с подпроектами НЕ применяем фильтрацию
     # Это позволяет видеть полную статистику по всем подпроектам на родительском уровне

@@ -58,6 +58,7 @@ module SurvStatistics
         
         private
         
+        # TODO: Данный функционал конфликтует с другим плагином, по администрированию. Надо их объеденить
         # Блокирует недопустимые изменения автором:
         # - автор не может изменять поле "Согласовано" в своих записях;
         # - если запись уже согласована ("Согласовано" = Да), автор не может править запись вовсе,
@@ -66,6 +67,9 @@ module SurvStatistics
           # Требуется загруженная запись
           @time_entry ||= TimeEntry.find_by(id: params[:id]) if params[:id]
           return unless @time_entry && @project
+
+          # Администраторы не ограничиваются этими правилами
+          return if User.current.admin?
 
           is_author = (@time_entry.user_id == User.current.id)
           approved = surv_time_entry_approved?(@time_entry)
@@ -136,6 +140,7 @@ module SurvStatistics
 
         def should_restrict_to_own_entries?
           return false unless @project
+          return false if User.current.admin?
           User.current.allowed_to?(:view_own_time_entries, @project)
         end
         
@@ -295,7 +300,7 @@ module SurvStatistics
         # Если фильтров нет вообще - полная инициализация
         params[:f] = ['spent_on', 'activity_id', 'cf_1', 'author_id', 'cf_2', '']
         params[:op] ||= {}
-        params[:op]['spent_on'] = 'lm'
+        params[:op]['spent_on'] = 'm'
         params[:op]['activity_id'] = '='
         params[:op]['cf_1'] = '*'
         params[:op]['author_id'] = '*'
