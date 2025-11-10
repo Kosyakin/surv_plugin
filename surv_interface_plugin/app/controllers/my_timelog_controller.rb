@@ -217,6 +217,28 @@ class MyTimelogController < ApplicationController
   end
 
   def index
+    # Если у пользователя нет права видеть собственные трудозатраты ни в одном проекте,
+    # перенаправляем: сначала на проект, где он Руководитель (роль id=4), иначе на инструкции
+    begin
+      unless Project.allowed_to(:view_own_time_entries).to_a.any?
+        manager_role_id = (defined?(SurvAdminSettings::MANAGER_ROLE_ID) ? SurvAdminSettings::MANAGER_ROLE_ID : 4)
+        membership_with_manager = User.current.memberships.includes(:roles, :project).detect do |m|
+          m.roles.any? { |r| r.id.to_i == manager_role_id }
+        end
+        if membership_with_manager&.project
+          redirect_to project_path(membership_with_manager.project)
+          return
+        else
+          redirect_to '/projects/wiki/wiki'
+          return
+        end
+      end
+    rescue
+      # В случае ошибки политики — безопасный возврат на инструкции
+      redirect_to '/projects/wiki/wiki'
+      return
+    end
+
     # If no project selected, default to a project where the user has role id=3
     if @project.nil?
       membership_with_role3 = User.current.memberships.includes(:roles, :project).detect do |m|

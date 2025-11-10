@@ -28,7 +28,8 @@ module SurvAdminSettings
             return unless role_id.to_i == SurvAdminSettings::MANAGER_ROLE_ID
 
             parent_project = member.project.parent
-            return unless parent_project
+            # Пропускаем, если родительский проект является корнем (нет своего родителя)
+            return unless parent_project && parent_project.parent
 
             employee_role = Role.find_by_id(SurvAdminSettings::EMPLOYEE_ROLE_ID)
             return unless employee_role
