@@ -317,7 +317,7 @@ module SurvStatistics
     
         # Базовые фильтры по умолчанию
         default_filters = {
-          'spent_on' => { op: 'lm', v: nil }, # v не устанавливаем для дат
+          'spent_on' => { op: 'm', v: nil }, # v не устанавливаем для дат
           'activity_id' => { op: '=', v: ['1','2','3','4'] },
           'cf_1' => { op: '*', v: [''] },
           'author_id' => { op: '*', v: [''] },
