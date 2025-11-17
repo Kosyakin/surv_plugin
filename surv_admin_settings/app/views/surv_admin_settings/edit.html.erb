@@ -10,4 +10,271 @@
   <% end %>
 </div>
 
+<!-- Секция для управления группами -->
+<div class="box tabular settings">
+  <h3><%= l(:label_group_management) %></h3>
+  
+  <!-- Выбор группы -->
+  <fieldset>
+    <legend><%= l(:label_select_group) %></legend>
+    <% if custom_field_groups_options.any? %>
+      <%= form_tag({}, method: :get, id: 'group_selection_form') do %>
+        <p>
+          <label for="selected_group"><%= l(:label_group) %></label>
+          <%= select_tag 'selected_group', 
+                         options_for_select(custom_field_groups_options, @selected_group),
+                         onchange: "this.form.submit()" %>
+        </p>
+      <% end %>
+    <% else %>
+      <p><%= l(:text_no_groups_available) %></p>
+    <% end %>
+  </fieldset>
 
+  <!-- Операции с выбранной группой -->
+  <% if @selected_group.present? %>
+  <fieldset>
+    <legend><%= l(:label_group_operations, group: @selected_group) %></legend>
+    
+    <!-- Выгрузка группы -->
+    <div style="margin-bottom: 15px;">
+      <%= form_tag({ action: 'export_group' }, method: :get) do %>
+        <%= hidden_field_tag 'group', @selected_group %>
+        <%= submit_tag l(:button_export_group), class: 'button' %>
+        <em><%= l(:text_export_group_help) %></em>
+      <% end %>
+    </div>
+    
+    <!-- Загрузка CSV в группу -->
+    <div>
+      <%= form_tag({ action: 'upload_group_preview' }, multipart: true) do %>
+        <%= hidden_field_tag 'group', @selected_group %>
+        <p>
+          <label for="csv_file"><%= l(:label_upload_group_csv) %></label>
+          <%= file_field_tag 'csv_file', accept: '.csv' %>
+        </p>
+        <p>
+          <%= submit_tag l(:button_upload_group_csv) %>
+          <em><%= l(:text_upload_group_help) %></em>
+        </p>
+      <% end %>
+    </div>
+  </fieldset>
+  <% end %>
+</div>
+
+<!-- Предпросмотр изменений группы -->
+<% if @group_preview_data %>
+<div class="box tabular settings">
+  <h3><%= l(:label_group_preview, group: @group_preview_data[:group_name]) %></h3>
+  
+  <!-- Статистика -->
+  <div class="preview-stats">
+    <p>
+      <strong><%= l(:label_current_count) %>:</strong> <%= @group_preview_data[:current_values].size %>
+      <strong><%= l(:label_new_count) %>:</strong> <%= @group_preview_data[:new_values].size %>
+    </p>
+    <p>
+      <em><%= l(:text_preview_info) %></em>
+    </p>
+  </div>
+  
+  <!-- Таблица сравнения -->
+  <div class="autoscroll">
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:label_current_values) %></th>
+          <th><%= l(:label_new_values) %></th>
+          <th><%= l(:label_status) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% max_rows = [@group_preview_data[:current_values].size, @group_preview_data[:new_values].size].max %>
+        <% max_rows.times do |i| %>
+          <tr>
+            <td><%= @group_preview_data[:current_values][i] %></td>
+            <td><%= @group_preview_data[:new_values][i] %></td>
+            <td>
+              <% if i < @group_preview_data[:current_values].size && i < @group_preview_data[:new_values].size %>
+                <% if @group_preview_data[:current_values][i] == @group_preview_data[:new_values][i] %>
+                  <span class="icon icon-checked"><%= l(:label_unchanged) %></span>
+                <% else %>
+                  <span class="icon icon-edit"><%= l(:label_modified) %></span>
+                <% end %>
+              <% elsif i < @group_preview_data[:current_values].size %>
+                <span class="icon icon-del"><%= l(:label_removed) %></span>
+              <% else %>
+                <span class="icon icon-add"><%= l(:label_added) %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Кнопки действий -->
+  <div class="preview-actions">
+    <%= form_tag({ action: 'update_group' }, method: :post) do %>
+      <%= submit_tag l(:button_update_group), data: { confirm: l(:text_confirm_group_update) } %>
+    <% end %>
+    
+    <%= form_tag({ action: 'clear_group_preview' }, method: :post) do %>
+      <%= submit_tag l(:button_cancel_preview) %>
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<!-- Секция для добавления отдельных значений -->
+<div class="box tabular settings">
+  <h3><%= l(:label_add_individual_values) %></h3>
+  
+  <!-- Форма для добавления нового значения -->
+  <fieldset>
+    <legend><%= l(:label_add_new_value) %></legend>
+    <%= form_tag({ action: 'add_custom_field_value' }, method: :post) do %>
+      <p>
+        <label for="new_value"><%= l(:label_new_value) %></label>
+        <%= text_field_tag 'new_value', '', size: 50, required: true %>
+      </p>
+      <p>
+        <label for="group"><%= l(:label_select_group) %></label>
+        <%= select_tag 'group', options_for_select([['Без группы', '']] + custom_field_groups_options) %>
+        <em><%= l(:text_group_optional) %></em>
+      </p>
+      <p>
+        <%= submit_tag l(:button_add_value) %>
+      </p>
+    <% end %>
+  </fieldset>
+
+  <!-- Список текущих значений -->
+  <% if @custom_field_values && @custom_field_values.any? %>
+  <fieldset>
+    <legend><%= l(:label_current_values_all) %></legend>
+    <div class="autoscroll">
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:label_value) %></th>
+            <th><%= l(:label_actions) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @custom_field_values.each do |value| %>
+            <tr>
+              <td>
+                <% if value.start_with?('--') && value.end_with?('--') %>
+                  <strong><%= value %></strong>
+                <% else %>
+                  <%= value %>
+                <% end %>
+              </td>
+              <td class="buttons">
+                <% unless value.start_with?('--') && value.end_with?('--') %>
+                  <%= link_to l(:button_delete), 
+                              { action: 'delete_custom_field_value', value: value },
+                              method: :post, 
+                              data: { confirm: l(:text_confirm_delete) },
+                              class: 'icon icon-del' %>
+                <% else %>
+                  <em><%= l(:text_group_not_deletable) %></em>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
+  <% end %>
+</div>
+
+<!-- Секция для работы с кастомным полем -->
+<div class="box tabular settings">
+  <h3><%= l(:label_custom_field_operations) %></h3>
+  
+  <p>
+    <%= link_to l(:button_export_contracts_requests), 
+                { action: 'export_custom_field' }, 
+                class: 'icon icon-save' %>
+    <em><%= l(:text_export_contracts_requests_help) %></em>
+  </p>
+</div>
+
+<!-- Секция для загрузки CSV файла -->
+<div class="box tabular settings">
+  <h3><%= l(:label_csv_upload) %></h3>
+  
+  <%= form_tag({ action: 'upload_csv' }, multipart: true) do %>
+    <p>
+      <label for="csv_file"><%= l(:label_select_csv_file) %></label>
+      <%= file_field_tag 'csv_file', accept: '.csv' %>
+    </p>
+    <p class="info">
+      <%= l(:text_csv_support_info) %>
+    </p>
+    <p>
+      <%= submit_tag l(:button_upload_csv) %>
+      <%= link_to l(:button_clear_csv), { action: 'clear_csv' }, method: :post, class: 'button' if @csv_data.any? %>
+    </p>
+  <% end %>
+</div>
+
+<!-- Секция для отображения данных CSV -->
+<% if @csv_data.any? %>
+<div class="box tabular settings">
+  <h3><%= l(:label_csv_data) %></h3>
+  
+  <% if Setting.plugin_surv_admin_settings['last_upload_delimiter'] %>
+    <p class="info">
+      <%= l(:label_detected_delimiter, delimiter: Setting.plugin_surv_admin_settings['last_upload_delimiter'] == "\t" ? "табуляция" : Setting.plugin_surv_admin_settings['last_upload_delimiter']) %>
+    </p>
+  <% end %>
+  
+  <div class="autoscroll">
+    <table class="list">
+      <thead>
+        <tr>
+          <% @csv_data.first.keys.each do |header| %>
+            <th><%= header %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @csv_data.each do |row| %>
+          <tr>
+            <% row.values.each do |value| %>
+              <td><%= value %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <p class="csv-info">
+    <%= l(:label_total_records, count: @csv_data.size) %>
+  </p>
+</div>
+<% end %>
+
+<style>
+.preview-stats {
+  background: #f5f5f5;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 3px;
+}
+
+.preview-actions {
+  margin-top: 15px;
+}
+
+.preview-actions form {
+  display: inline-block;
+  margin-right: 10px;
+}
+</style>

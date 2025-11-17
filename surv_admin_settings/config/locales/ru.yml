@@ -23,3 +23,58 @@ ru:
   label_overview: Статистика
   label_surv_instructions: Инструкции
   label_surv_errors: Сообщить об ошибке!
+
+
+  label_custom_field_operations: "Операции с кастомным полем"
+  button_export_contracts_requests: "Выгрузить Договоры и Заявки"
+  text_export_contracts_requests_help: "Выгружает значения групп 'Договоры' и 'Заявки' из кастомного поля в CSV файл с разделителем табуляции"
+  error_custom_field_not_found: "Кастомное поле не найдено или не имеет значений"
+  
+# Управление группами
+  label_group_management: "Управление группами"
+  label_select_group: "Выберите группу"
+  label_group: "Группа"
+  label_group_operations: "Операции с группой: %{group}"
+  button_export_group: "Выгрузить группу в CSV"
+  button_upload_group_csv: "Загрузить CSV для группы"
+  button_update_group: "Обновить группу"
+  button_cancel_preview: "Отменить предпросмотр"
+  label_upload_group_csv: "CSV файл для загрузки"
+  text_export_group_help: "Выгружает все значения выбранной группы в CSV файл"
+  text_upload_group_help: "Загрузите CSV файл с новыми значениями для выбранной группы"
+  text_preview_info: "Предпросмотр изменений. Нажмите 'Обновить группу' для применения изменений."
+
+  # Предпросмотр изменений
+  label_group_preview: "Предпросмотр изменений для группы: %{group}"
+  label_current_values: "Текущие значения"
+  label_new_values: "Новые значения"
+  label_status: "Статус"
+  label_current_count: "Текущее количество"
+  label_new_count: "Новое количество"
+  label_unchanged: "Без изменений"
+  label_modified: "Изменено"
+  label_added: "Добавлено"
+  label_removed: "Удалено"
+
+  # Уведомления
+  notice_group_preview_ready: "Предпросмотр изменений группы готов"
+  notice_group_updated: "Группа успешно обновлена. Добавлено %{count} значений"
+  notice_preview_cleared: "Предпросмотр очищен"
+
+  # Ошибки
+  error_group_not_selected: "Группа не выбрана"
+  error_group_file_required: "Выберите группу и CSV файл"
+  error_no_preview_data: "Нет данных для предпросмотра"
+  error_group_update_failed: "Не удалось обновить группу"
+
+  # Подтверждения
+  text_confirm_group_update: "Вы уверены, что хотите заменить все значения в группе на новые из CSV файла?"
+
+  # Дополнительные тексты
+  text_no_groups_available: "Нет доступных групп"
+  label_add_individual_values: "Добавление отдельных значений"
+  label_current_values_all: "Все текущие значения"
+
+  
+  # Информационные тексты
+  text_csv_support_info: "Поддерживаемые форматы: CSV с разделителями табуляции, точки с запятой (;) или запятой"

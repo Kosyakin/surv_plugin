@@ -64,8 +64,3 @@ TimeEntry.send(:include, SurvAdminSettings::Policies::TimeEntryApprovalPatch)
 
 require_dependency File.expand_path('../lib/surv_admin_settings/controllers/timelog_controller_approval_patch', __FILE__)
 TimelogController.send(:include, SurvAdminSettings::Controllers::TimelogControllerApprovalPatch)
-
-# Удаление вкладки "Действия" из контроллера проектов
-require_dependency File.expand_path('../lib/surv_admin_settings/controllers/projects_controller_patch', __FILE__)
-ProjectsController.send(:include, SurvAdminSettings::Controllers::ProjectsControllerPatch)
-
