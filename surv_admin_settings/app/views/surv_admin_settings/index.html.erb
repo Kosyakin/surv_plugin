@@ -1,0 +1,62 @@
+<div class="box tabular settings">
+  <h3>Настройки СУРВ</h3>
+  
+  <p>Выберите раздел для настройки:</p>
+  
+  <div class="surv-navigation">
+    <div class="surv-nav-item">
+      <%= link_to 'Закрытый период', 
+                  { action: 'closed_period' }, 
+                  class: 'icon icon-time-add' %>
+      <div class="nav-description">Настройка даты закрытого периода для трудозатрат</div>
+    </div>
+    
+    <div class="surv-nav-item">
+      <%= link_to 'Управление списками', 
+                  { action: 'list_management' }, 
+                  class: 'icon icon-edit' %>
+      <div class="nav-description">Управление значениями кастомных полей и группами</div>
+    </div>
+    
+    <div class="surv-nav-item">
+      <%= link_to 'Управление пользователями', 
+                  '/users', 
+                  class: 'icon icon-user' %>
+      <div class="nav-description">Управление пользователями системы</div>
+    </div>
+  </div>
+</div>
+
+<style>
+.surv-navigation {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.surv-nav-item {
+  flex: 1;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  text-align: center;
+  background: #f9f9f9;
+}
+
+.surv-nav-item a {
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #18507c;
+}
+
+.surv-nav-item a:hover {
+  color: #2a6496;
+}
+
+.nav-description {
+  margin: 10px 0 0 0;
+  color: #666;
+  font-size: 12px;
+}
+</style>

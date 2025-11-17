@@ -21,8 +21,13 @@ Redmine::Plugin.register :surv_admin_settings do
   }, partial: 'settings/surv_admin_settings'
 
   # Пункт меню в Администрировании
-  menu :admin_menu, :surv_admin_settings, { controller: 'surv_admin_settings', action: 'edit' },
-       caption: :label_surv_admin_settings_menu, html: { class: 'icon' }
+  menu :admin_menu, :surv_admin_settings, { controller: 'surv_admin_settings', action: 'index' },
+      caption: :label_surv_admin_settings_menu, html: { class: 'icon' }
+
+  # Верхнее меню: Администрирование (только для админов)
+  menu :top_menu, :surv_admin, { controller: 'surv_admin_settings', action: 'index' },
+       caption: :label_surv_admin_settings_menu,
+       :if => Proc.new { User.current.admin? }
 
   # Верхнее меню: Инструкции (вместо "Помощь")
   menu :top_menu, :instructions, '/projects/wiki/wiki',
@@ -34,6 +39,11 @@ Redmine::Plugin.register :surv_admin_settings do
        caption: :label_surv_errors,
        html: { target: 'index',  class: 'help' }
 
+end
+
+# Удаляем стандартный пункт "Администрирование" из верхнего меню
+Redmine::MenuManager.map :top_menu do |menu|
+  menu.delete :administration
 end
 
 # Базовые константы и утилиты

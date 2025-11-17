@@ -1,0 +1,244 @@
+<div class="box tabular settings">
+  <h3>Навигация</h3>
+  <%= link_to '← Назад к настройкам СУРВ', 
+              { action: 'index' }, 
+              class: 'icon icon-arrow-left' %>
+</div>
+
+<!-- Секция для управления группами -->
+<div class="box tabular settings">
+  <h3>Управление списками</h3>
+  
+  <!-- Выбор группы -->
+  <fieldset>
+    <legend>Выберите группу</legend>
+    <% if custom_field_groups_options.any? %>
+      <% if @selected_group.present? && !@preview_mode %>
+        <!-- Режим фиксированной группы с кнопкой изменения -->
+        <div class="fixed-group">
+          <strong>Выбрана группа:</strong> <%= @selected_group %>
+          <%= link_to 'Изменить', 
+                      { action: 'list_management' }, 
+                      class: 'button' %>
+        </div>
+      <% else %>
+        <!-- Обычный выбор группы -->
+        <%= form_tag({}, method: :get, id: 'group_selection_form') do %>
+          <%= select_tag 'selected_group', 
+                         options_for_select(custom_field_groups_options, @selected_group),
+                         onchange: "this.form.submit()",
+                         disabled: @preview_mode %>
+        <% end %>
+        <% if @preview_mode %>
+          <div class="notice">Выбор группы заблокирован. Завершите текущую операцию.</div>
+        <% end %>
+      <% end %>
+    <% else %>
+      <div>Нет доступных групп</div>
+    <% end %>
+  </fieldset>
+
+  <!-- Операции с выбранной группой -->
+  <% if @selected_group.present? && !@preview_mode %>
+  <fieldset>
+    <legend>Операции с группой: <%= @selected_group %></legend>
+    
+    <!-- Выгрузка группы -->
+    <div class="operation-block">
+      <%= form_tag({ action: 'export_group' }, method: :get) do %>
+        <%= hidden_field_tag 'group', @selected_group %>
+        <%= submit_tag 'Выгрузить список в CSV', class: 'button' %>
+        <div class="help-text">Выгружает все значения выбранной группы в CSV файл</div>
+      <% end %>
+    </div>
+    
+    <!-- Загрузка CSV в группу -->
+    <div class="operation-block">
+      <%= form_tag({ action: 'upload_group_preview' }, method: :post, multipart: true, id: 'upload_form') do %>
+        <%= hidden_field_tag 'group', @selected_group %>
+        <%= file_field_tag 'csv_file', accept: '.csv', id: 'csv_file_input' %>
+        <div id="upload_help" style="display: none;" class="help-text">
+          Файл выбран. Предпросмотр загружается автоматически...
+        </div>
+        <div class="help-text">Поле для загрузки нового списка в формате CSV файла</div>
+      <% end %>
+    </div>
+  </fieldset>
+  <% end %>
+</div>
+
+<!-- Предпросмотр изменений группы -->
+<% if @preview_mode %>
+<div class="box tabular settings">
+  <h3>Предпросмотр изменений для группы: <%= @group_name %></h3>
+  
+  <!-- Кнопка возврата к выбору группы -->
+  <div class="action-block">
+    <%= link_to '← Вернуться к выбору группы', 
+                { action: 'list_management' }, 
+                class: 'button' %>
+  </div>
+  
+  <!-- Статистика -->
+  <div class="preview-stats">
+    <div>
+      <strong>Текущее количество:</strong> <%= @current_values.size %>
+      <strong>Новое количество:</strong> <%= @new_values.size %>
+    </div>
+    <div class="help-text">
+      Предпросмотр изменений. Нажмите 'Обновить группу' для применения изменений.
+    </div>
+  </div>
+  
+  <!-- Таблица сравнения -->
+  <div class="autoscroll">
+    <table class="list">
+      <thead>
+        <tr>
+          <th>Текущие значения</th>
+          <th>Новые значения</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% max_rows = [@current_values.size, @new_values.size].max %>
+        <% max_rows.times do |i| %>
+          <tr>
+            <td><%= @current_values[i] %></td>
+            <td><%= @new_values[i] %></td>
+            <td>
+              <% if i < @current_values.size && i < @new_values.size %>
+                <% if @current_values[i] == @new_values[i] %>
+                  <span class="icon icon-checked">Без изменений</span>
+                <% else %>
+                  <span class="icon icon-edit">Изменено</span>
+                <% end %>
+              <% elsif i < @current_values.size %>
+                <span class="icon icon-del">Удалено</span>
+              <% else %>
+                <span class="icon icon-add">Добавлено</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Кнопка обновления -->
+  <div class="preview-actions">
+    <%= form_tag({ action: 'update_group' }, method: :post) do %>
+      <%= hidden_field_tag 'group_name', @group_name %>
+      <%= hidden_field_tag 'new_values', @new_values.to_json %>
+      <%= submit_tag 'Обновить группу', data: { confirm: 'Вы уверены, что хотите заменить все значения в группе на новые из CSV файла?' } %>
+    <% end %>
+  </div>
+</div>
+<% end %>
+
+<style>
+.preview-stats {
+  background: #f5f5f5;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 3px;
+}
+
+.preview-actions {
+  margin-top: 15px;
+}
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.fixed-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.help-text {
+  color: #666;
+  font-size: 0.9em;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.notice {
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.operation-block {
+  margin-bottom: 15px;
+}
+
+.action-block {
+  margin-bottom: 15px;
+}
+
+.box.tabular.settings {
+  text-align: left;
+}
+
+.box.tabular.settings fieldset {
+  text-align: left;
+  border: 1px solid #e6e6e6;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.box.tabular.settings legend {
+  font-weight: bold;
+  padding: 0 10px;
+}
+
+.box.tabular.settings label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.box.tabular.settings select,
+.box.tabular.settings input[type="file"] {
+  margin-bottom: 10px;
+}
+
+.box.tabular.settings .preview-stats {
+  text-align: left;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const csvFileInput = document.getElementById('csv_file_input');
+  const uploadForm = document.getElementById('upload_form');
+  const uploadHelp = document.getElementById('upload_help');
+  
+  if (csvFileInput && uploadForm) {
+    csvFileInput.addEventListener('change', function() {
+      if (this.files.length > 0) {
+        // Показываем сообщение о загрузке
+        if (uploadHelp) {
+          uploadHelp.style.display = 'block';
+        }
+        
+        // Добавляем класс loading к форме
+        uploadForm.classList.add('loading');
+        
+        // Автоматически отправляем форму
+        setTimeout(function() {
+          uploadForm.submit();
+        }, 100);
+      }
+    });
+  }
+});
+</script>

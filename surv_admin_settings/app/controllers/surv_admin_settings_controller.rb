@@ -3,133 +3,32 @@ class SurvAdminSettingsController < ApplicationController
   self.main_menu = false
 
   before_action :require_admin
-  before_action :find_custom_field, only: [:edit, :add_custom_field_value, :delete_custom_field_value, :export_group, :upload_group_preview, :update_group]
+  before_action :find_custom_field, only: [:list_management, :export_group, :upload_group_preview, :update_group]
 
   helper_method :custom_field_groups_options
 
-  def edit
-    @closed_period_date = Setting.plugin_surv_admin_settings['closed_period_date']
-    @csv_data = Setting.plugin_surv_admin_settings['csv_data'] || []
-    @custom_field_values = @custom_field.possible_values if @custom_field
-    
-    # Загружаем данные предпросмотра если есть
-    @group_preview_data = session[:group_preview_data]
-    @selected_group = params[:selected_group] || @group_preview_data&.dig(:group_name)
+  def index
+    # Главная страница - только навигация
   end
 
-  def update
+  def closed_period
+    @closed_period_date = Setting.plugin_surv_admin_settings['closed_period_date']
+  end
+
+  def update_closed_period
     closed_date = params.dig(:settings, :closed_period_date)
     Setting.plugin_surv_admin_settings = { 
-      'closed_period_date' => closed_date,
-      'csv_data' => Setting.plugin_surv_admin_settings['csv_data'] || []
+      'closed_period_date' => closed_date
     }
     flash[:notice] = l(:notice_successful_update)
-    redirect_to action: :edit
+    redirect_to action: :closed_period
   end
 
-  def upload_csv
-    uploaded_file = params[:csv_file]
-    
-    if uploaded_file && uploaded_file.original_filename.end_with?('.csv')
-      begin
-        csv_data = []
-        
-        # Читаем файл с определением кодировки
-        csv_content = File.read(uploaded_file.path)
-        
-        # Пробуем определить кодировку и конвертировать в UTF-8
-        detected_encoding = detect_encoding(csv_content)
-        if detected_encoding && detected_encoding != 'UTF-8'
-          csv_content = csv_content.force_encoding(detected_encoding).encode('UTF-8', invalid: :replace, undef: :replace)
-        else
-          csv_content = csv_content.force_encoding('UTF-8')
-        end
-        
-        # Удаляем BOM если присутствует
-        csv_content = remove_bom(csv_content)
-        
-        # Определяем разделитель
-        delimiter = detect_delimiter(csv_content)
-        
-        # Парсим CSV с определенным разделителем
-        CSV.parse(csv_content, headers: true, col_sep: delimiter, encoding: 'UTF-8') do |row|
-          csv_data << row.to_hash
-        end
-        
-        settings = Setting.plugin_surv_admin_settings || {}
-        settings['csv_data'] = csv_data
-        settings['last_upload_delimiter'] = delimiter
-        Setting.plugin_surv_admin_settings = settings
-        
-        flash[:notice] = l(:notice_successful_upload, delimiter: delimiter == "\t" ? "табуляция" : delimiter)
-      rescue CSV::MalformedCSVError => e
-        flash[:error] = "Ошибка формата CSV файла: #{e.message}"
-      rescue StandardError => e
-        flash[:error] = "Ошибка обработки файла: #{e.message}"
-      end
-    else
-      flash[:error] = "Пожалуйста, выберите CSV файл"
-    end
-    
-    redirect_to action: :edit
+  def list_management
+    @selected_group = params[:selected_group]
+    @preview_mode = params[:preview_mode] || (@current_values && @new_values)
   end
 
-  def clear_csv
-    settings = Setting.plugin_surv_admin_settings || {}
-    settings['csv_data'] = []
-    Setting.plugin_surv_admin_settings = settings
-    
-    flash[:notice] = l(:notice_successful_clear)
-    redirect_to action: :edit
-  end
-
-  def export_custom_field
-    custom_field_id = 1
-    custom_field = CustomField.find_by(id: custom_field_id)
-    
-    if custom_field && custom_field.possible_values.any?
-      all_values = custom_field.possible_values
-      
-      contracts = []
-      requests = []
-      current_group = nil
-      
-      all_values.each do |value|
-        if value.start_with?('--') && value.end_with?('--')
-          current_group = value
-        else
-          case current_group
-          when '--Договоры--'
-            contracts << value
-          when '--Заявки--'
-            requests << value
-          end
-        end
-      end
-      
-      # Создаем CSV с UTF-8 и BOM
-      csv_content = "\uFEFF" # BOM для UTF-8
-      csv_content += CSV.generate(col_sep: "\t") do |csv|
-        csv << ['Договоры', 'Заявки']
-        
-        max_length = [contracts.length, requests.length].max
-        
-        max_length.times do |i|
-          contract_value = contracts[i] || ''
-          request_value = requests[i] || ''
-          csv << [contract_value, request_value]
-        end
-      end
-      
-      send_data csv_content,
-                type: 'text/csv; charset=utf-8',
-                filename: "contracts_requests_#{Date.today}.csv",
-                disposition: 'attachment'
-    else
-      flash[:error] = l(:error_custom_field_not_found)
-      redirect_to action: :edit
-    end
-  end
   def export_group
     group_name = params[:group]
     
@@ -145,7 +44,7 @@ class SurvAdminSettingsController < ApplicationController
         end
       end
       
-      filename = "group_#{group_name.gsub(/[^a-zA-Z0-9]/, '_')}_#{Date.today}.csv"
+      filename = "#{group_name.gsub(/[^a-zA-Z0-9а-яА-Я]/, '_')}_#{Date.today}.csv"
       
       send_data csv_content,
                 type: 'text/csv; charset=utf-8',
@@ -153,106 +52,97 @@ class SurvAdminSettingsController < ApplicationController
                 disposition: 'attachment'
     else
       flash[:error] = l(:error_group_not_selected)
-      redirect_to action: :edit
+      redirect_to action: :list_management
     end
   end
-  def add_custom_field_value
-    new_value = params[:new_value]
-    group = params[:group]
 
-    if new_value.present? && @custom_field
-      current_values = @custom_field.possible_values.dup
+  def upload_group_preview
+    group_name = params[:group]
+    uploaded_file = params[:csv_file]
+
+    if group_name.blank? || uploaded_file.blank?
+      flash[:error] = l(:error_group_file_required)
+      redirect_to action: :list_management
+      return
+    end
+
+    begin
+      # Получаем текущие значения группы
+      @current_values = get_group_values(@custom_field.possible_values, group_name)
       
-      if group.present?
-        # Добавляем значение в конкретную группу
-        updated_values = insert_value_into_group(current_values, group, new_value)
-      else
-        # Добавляем значение в конец списка
-        updated_values = current_values << new_value
+      # Читаем и парсим CSV файл
+      csv_content = File.read(uploaded_file.path, encoding: 'bom|utf-8')
+      csv_content = csv_content.encode('UTF-8', invalid: :replace, undef: :replace)
+      
+      # Определяем разделитель
+      delimiter = detect_delimiter(csv_content)
+      
+      # Парсим новые значения
+      @new_values = []
+      CSV.parse(csv_content, headers: true, col_sep: delimiter, encoding: 'UTF-8') do |row|
+        value = row[0] || row['Значения'] # Первый столбец или столбец "Значения"
+        @new_values << value if value.present?
       end
-
-      if update_custom_field_values(updated_values)
-        flash[:notice] = l(:notice_custom_field_value_added)
-      else
-        flash[:error] = l(:error_custom_field_update_failed)
-      end
-    else
-      flash[:error] = l(:error_custom_field_value_blank)
+      
+      # Убираем дубликаты
+      @new_values.uniq!
+      
+      # Сохраняем все необходимые переменные для шаблона
+      @selected_group = group_name
+      @group_name = group_name
+      @file_name = uploaded_file.original_filename
+      @preview_mode = true
+      
+      # Рендерим страницу управления списками с данными предпросмотра
+      render :list_management
+      
+    rescue CSV::MalformedCSVError => e
+      flash[:error] = "Ошибка формата CSV файла: #{e.message}"
+      redirect_to action: :list_management, selected_group: group_name
+    rescue StandardError => e
+      flash[:error] = "Ошибка обработки файла: #{e.message}"
+      redirect_to action: :list_management, selected_group: group_name
     end
-
-    redirect_to action: :edit
   end
 
-  def delete_custom_field_value
-    value_to_delete = params[:value]
+  def update_group
+    group_name = params[:group_name]
+    new_values_json = params[:new_values]
 
-    if value_to_delete.present? && @custom_field
-      current_values = @custom_field.possible_values.dup
-      updated_values = current_values.reject { |v| v == value_to_delete }
-
-      if update_custom_field_values(updated_values)
-        flash[:notice] = l(:notice_custom_field_value_deleted)
-      else
-        flash[:error] = l(:error_custom_field_update_failed)
-      end
-    else
-      flash[:error] = l(:error_custom_field_value_blank)
+    if group_name.blank? || new_values_json.blank?
+      flash[:error] = l(:error_group_update_failed)
+      redirect_to action: :list_management
+      return
     end
 
-    redirect_to action: :edit
+    begin
+      # Парсим новые значения из JSON
+      new_values = JSON.parse(new_values_json)
+      
+      if @custom_field && group_name.present?
+        # Обновляем значения в группе
+        updated_values = replace_group_values(@custom_field.possible_values, group_name, new_values)
+        
+        if update_custom_field_values(updated_values)
+          flash[:notice] = l(:notice_group_updated, count: new_values.size)
+        else
+          flash[:error] = l(:error_custom_field_update_failed)
+        end
+      else
+        flash[:error] = l(:error_group_update_failed)
+      end
+
+    rescue JSON::ParserError
+      flash[:error] = "Ошибка обработки данных"
+    end
+
+    redirect_to action: :list_management, selected_group: group_name
   end
 
   private
 
   def find_custom_field
     @custom_field = CustomField.find_by(id: 1)
-  end
-
-  def detect_encoding(content)
-    # Простая проверка распространенных кодировок
-    encodings = ['UTF-8', 'Windows-1251', 'CP1251', 'ISO-8859-5', 'UTF-16LE', 'UTF-16BE']
-    
-    encodings.each do |encoding|
-      begin
-        test_content = content.dup.force_encoding(encoding)
-        if test_content.valid_encoding?
-          # Дополнительная проверка для Windows-1251
-          if encoding == 'Windows-1251' || encoding == 'CP1251'
-            # Проверяем наличие кириллических символов
-            if test_content =~ /[а-яА-Я]/
-              return encoding
-            end
-          else
-            return encoding
-          end
-        end
-      rescue
-        next
-      end
-    end
-    
-    # Если не удалось определить, возвращаем UTF-8 с заменой невалидных символов
-    'UTF-8'
-  end
-
-  def remove_bom(content)
-    # Удаляем BOM маркеры для разных кодировок
-    bom_patterns = [
-      "\xEF\xBB\xBF",    # UTF-8 BOM
-      "\xFE\xFF",        # UTF-16 BE BOM
-      "\xFF\xFE",        # UTF-16 LE BOM
-      "\x00\x00\xFE\xFF", # UTF-32 BE BOM
-      "\xFF\xFE\x00\x00"  # UTF-32 LE BOM
-    ]
-    
-    bom_patterns.each do |bom|
-      if content.start_with?(bom)
-        content = content.byteslice(bom.bytesize..-1)
-        break
-      end
-    end
-    
-    content
   end
 
   def detect_delimiter(content)
@@ -275,31 +165,6 @@ class SurvAdminSettingsController < ApplicationController
     else
       ";"
     end
-  end
-
-  def insert_value_into_group(values, group_name, new_value)
-    # Находим индекс группы
-    group_index = values.index(group_name)
-    
-    if group_index
-      # Находим где заканчивается группа (до следующей группы или конца массива)
-      next_group_index = nil
-      values.each_with_index do |value, index|
-        if index > group_index && value.start_with?('--') && value.end_with?('--')
-          next_group_index = index
-          break
-        end
-      end
-
-      # Вставляем новое значение после группы, но перед следующей группой
-      insert_index = next_group_index || values.size
-      values.insert(insert_index, new_value)
-    else
-      # Если группа не найдена, добавляем в конец
-      values << new_value
-    end
-    
-    values
   end
 
   def update_custom_field_values(new_values)
@@ -366,24 +231,5 @@ class SurvAdminSettingsController < ApplicationController
     end
     
     result
-  end
-  # Метод для получения списка групп кастомного поля
-  def custom_field_groups_options
-    return [] unless @custom_field_values
-    
-    groups = []
-    current_group = nil
-    
-    @custom_field_values.each do |value|
-      if value.start_with?('--') && value.end_with?('--')
-        current_group = value
-        groups << [current_group, current_group]
-      end
-    end
-    
-    # Добавляем опцию "Без группы"
-    groups.unshift([l(:label_no_group), ''])
-    
-    groups
   end
 end

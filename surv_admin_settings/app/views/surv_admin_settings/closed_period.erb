@@ -1,0 +1,24 @@
+<div class="box tabular settings">
+  <h3>Навигация</h3>
+  <p>
+    <%= link_to '← Назад к настройкам СУРВ', 
+                { action: 'index' }, 
+                class: 'icon icon-arrow-left' %>
+  </p>
+</div>
+
+<div class="box tabular settings">
+  <h3>Закрытый период</h3>
+  
+  <%= form_tag({ action: 'update_closed_period' }, method: :post) do %>
+    <p>
+      <label for="settings_closed_period_date">Дата закрытого периода</label>
+      <%= text_field_tag 'settings[closed_period_date]', @closed_period_date, size: 12, type: 'date' %>
+      <br>
+      <em>Трудозатраты нельзя будет создавать или изменять до этой даты</em>
+    </p>
+    <p>
+      <%= submit_tag 'Сохранить', class: 'button' %>
+    </p>
+  <% end %>
+</div>
