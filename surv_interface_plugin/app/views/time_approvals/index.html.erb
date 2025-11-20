@@ -197,12 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       var option = {
-        tooltip: {
-          trigger: 'axis',
-          position: 'bottom',
-          axisPointer: {
-            type: 'shadow'
-          },
+      tooltip: {
+        trigger: 'axis',
+        position: function(point, params, dom, rect, size) {
+            // Фиксированная позиция слева от графика
+            return [-110, 190]; // [x, y] - отступ слева и сверху
+        },
+        alwaysShowContent: false, // Показывать только при наведении
           formatter: function(params) {
             var dateIndex = params[0].dataIndex;
             var dayInfo = chartData[dateIndex];
