@@ -350,7 +350,14 @@ class MyTimelogController < ApplicationController
         @week_hours_approved = @week_hours_approved.round(2)
         @week_hours_unapproved = @week_hours_unapproved.round(2)
         @week_total_hours = (@week_hours_approved + @week_hours_unapproved).round(2)
-        @week_remaining_hours = [(@week_planned_hours - @week_total_hours).round(2), 0.0].max
+        # Округляем до 10 минут (0.1667 часа)
+        def round_to_10_minutes(hours)
+          minutes = hours * 60
+          rounded_minutes = (minutes / 10.0).round * 10
+          (rounded_minutes / 60.0).round(2)
+        end
+        remaining = @week_planned_hours - @week_total_hours
+        @week_remaining_hours = [round_to_10_minutes(remaining), 0.0].max
         @week_completion_percent = (@week_planned_hours > 0 ? ((@week_total_hours / @week_planned_hours) * 100.0) : 0.0).round(1)
 
         # User memberships with roles

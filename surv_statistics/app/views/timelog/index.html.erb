@@ -40,7 +40,14 @@
       return minutes + 'мин';
     }
   }
-
+  // Функция для округления до 10 минут (0.1667 часа)
+  function roundTo10Minutes(hours) {
+    if (hours <= 0) return 0;
+    var minutes = hours * 60;
+    var roundedMinutes = Math.round(minutes / 10) * 10;
+    return roundedMinutes / 60;
+  }
+  
   // Функция для получения цвета из CSS классов
   function getColorFromCSS(className) {
     // Создаем временный элемент для получения цвета из CSS
@@ -58,10 +65,18 @@
     
     return color || 'rgba(0, 0, 0, 0.7)'; // fallback цвет
   }
-  
+
   // Данные из контроллера
   var dailyData = <%= raw(daily_data.to_json) %>;
-  
+  // Округляем deficit в dailyData до 10 минут
+  dailyData = dailyData.map(function(item) {
+    if (item.length > 3 && item[3] > 0) { // item[3] - deficit
+      var newItem = item.slice();
+      newItem[3] = Math.round(roundTo10Minutes(newItem[3]) * 100) / 100;
+      return newItem;
+    }
+    return item;
+  });
   // Определяем диапазон дат для календаря
   var dateFrom = '<%= min_date.strftime('%Y-%m-%d') %>';
   var dateTo = '<%= max_date.strftime('%Y-%m-%d') %>';
@@ -72,7 +87,7 @@
   var scatterData = dailyData.map(function(item) {
     return [item[0], item[1] + item[2]]; // date, total_hours
   });
-  
+
   // Создаем pie series для каждого дня
   // item[0]=date, item[1]=approved, item[2]=unapproved, item[3]=deficit, item[4]=is_empty
   var pieSeries = dailyData.map(function (item, index) {
@@ -194,7 +209,7 @@
     ...pieSeries
   ]
 };
-  
+
   // Вычисляем статистику
   function calculateStats() {
     var stats = {
@@ -217,7 +232,7 @@
     return {
       approved: Math.round(stats.approved * 100) / 100,
       unapproved: Math.round(stats.unapproved * 100) / 100,
-      deficit: Math.round(stats.deficit * 100) / 100
+      deficit: Math.round(roundTo10Minutes(stats.deficit) * 100) / 100
     };
   }
   

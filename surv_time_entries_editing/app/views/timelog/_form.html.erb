@@ -116,8 +116,14 @@
         // Получаем плановые часы для текущей даты
         var planHours = getPlanHours(data && data.date);
         
-        // Рассчитываем оставшиеся часы для распределения
+        // Рассчитываем и округляем оставшиеся часы для распределения до 10 минут
         var remainingHours = Math.max(0, planHours - totalLoggedHours);
+        if (remainingHours > 0) {
+          // Округляем до ближайшей 1/6 часа (10 минут)
+          remainingHours = Math.round(remainingHours * 6) / 6;
+          // Округляем до 2 знаков после запятой
+          remainingHours = Math.round(remainingHours * 100) / 100;
+        }
 
         // Формируем серии для распределенных часов
         var dataSeries = entries.map(function(e, idx){

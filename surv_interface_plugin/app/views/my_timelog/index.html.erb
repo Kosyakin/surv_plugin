@@ -61,7 +61,16 @@
 <% approved_raw = week_dates.map { |d| (approved_by_date[d] || 0.0).round(2) } %>
 <% unapproved_raw = week_dates.map { |d| (unapproved_by_date[d] || 0.0).round(2) } %>
 <% total_raw = approved_raw.each_with_index.map { |v, i| (v + unapproved_raw[i]).round(2) } %>
-<% deficit = total_raw.each_with_index.map { |v, i| [plan[i] - v, 0.0].max.round(2) } %>
+<% 
+deficit = total_raw.each_with_index.map { |v, i| 
+  remaining = plan[i] - v
+  if remaining <= 0
+    0.0
+  else
+    ((remaining * 6).round / 6.0).round(2)  # 6 = 60/10
+  end
+} 
+%>
 
 <div style="display:flex; gap:16px; align-items:flex-start;">
   <div style="flex:1 1 60%; min-width:0;align-items:stretch;">
@@ -81,7 +90,7 @@
         <strong><%= week_from.strftime('%d.%m.%Y') %> — <%= week_to.strftime('%d.%m.%Y') %></strong>
       </div>
       <div style="display:flex; gap:12px; justify-content:flex-end; align-items:center;">
-        <div>Итого за неделю: <strong><%= sprintf('%.2f', @week_total_hours.to_f) %> ч (<%= @week_completion_percent %>%)</strong></div>
+        <div>Итого за неделю: <strong><%= sprintf('%.0f', @week_total_hours.to_f.round) %> ч (<%= @week_completion_percent %>%)</strong></div>
         <%= link_to 'След. неделя →', my_time_entries_path(:set_filter => '1', :sort => params[:sort] || 'spent_on:desc',
         :f => ['spent_on','author_id',''], :op => {'spent_on' => '><','author_id' => '='},
         :v => {'spent_on' => [next_from, next_to], 'author_id' => ['me']}, :group_by => (params[:group_by] || @query.group_by)),
