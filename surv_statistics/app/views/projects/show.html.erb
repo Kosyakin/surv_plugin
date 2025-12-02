@@ -64,165 +64,213 @@
       <div id="echart" class="surv-main-chart"></div>
     </div>
     <div class="surv-chart-right">
-      <%# Right side: show child projects charts if present; otherwise show employee tiles %>
-      <% child_projects = @project.children.visible.to_a %>
-      <% if child_projects.any? %>
-        <div class="surv-child-projects-grid">
-          <% child_projects.each do |child_project| %>
-            <% child_ids = child_project.self_and_descendants.pluck(:id) %>
-            <% child_aggregated = time_entry_scope_with_visibility.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
-            <% child_chart_data = child_aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
-            <% preserved = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
+      <div class="surv-two-columns">
+        <%# Левая колонка: дочерние проекты (если есть) %>
+        <% child_projects = @project.children.visible.to_a %>
+        <% if child_projects.any? %>
+          <div class="surv-left-column">
+            <h3 class="surv-section-title">Подразделения</h3>
+            <div class="surv-child-projects-grid">
+              <% child_projects.each do |child_project| %>
+                <% child_ids = child_project.self_and_descendants.pluck(:id) %>
+                <% child_aggregated = time_entry_scope_with_visibility.where(:project_id => child_ids).joins(:activity).group("#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+                <% child_chart_data = child_aggregated.map { |aid, name, sum| { activity_id: aid, name: name, value: sum.to_f } } %>
+                <% preserved = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
 
-            <div class="surv-chart-container"
-                 onclick="window.location.href='<%= project_path(child_project, preserved) %>'">
-              <h3 class="surv-child-project-title">
-                <%= h(child_project.name) %>
-                <small class="surv-child-project-subtitle">Нажмите для перехода в подразделение</small>
-              </h3>
-              <div id="echart-<%= child_project.id %>" class="surv-child-chart"></div>
-            </div>
-            <script>
-              (function() {
-                var el = document.getElementById('echart-<%= child_project.id %>');
-                if (!el) { return; }
-                var chart = echarts.init(el);
-                var data = <%= raw(child_chart_data.to_json) %>;
-                
-                var colored = data.map(function(item, idx){
-                  var id = item.activity_id;
-                  var color = getActivityColor(id);
-                  return Object.assign({}, item, { itemStyle: { color: color } });
-                });
-                
-                function formatHours(val){ return formatHoursMinutes(val); }
-                var option = {
-                  tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
-                  legend: { show: false },
-                  series: [{
-                    name: '<%= l(:label_spent_time) %>',
-                    type: 'pie',
-                    radius: ['30%','70%'],
-                    center: ['50%','50%'],
-                    avoidLabelOverlap: true,
-                    itemStyle: { borderColor: '#fff', borderWidth: 1 },
-                    label: {
-                      show: true,
-                      position: 'inside',
-                      color: '#ffffff',
-                      formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); },
-                      fontSize: 20,
-                      lineHeight: 20,
-                      width: 50,
-                      overflow: 'break'
-                    },                    
-                    emphasis: { scale: true },
-                    labelLine: { show: false },
-                    data: colored
-                  }]
-                };
-                chart.setOption(option);
-                var targetUrl = '<%= project_path(child_project, preserved) %>';
-                chart.on('click', function(params){
-                  if (params && params.componentType === 'series' && params.seriesType === 'pie') {
-                    window.location.href = targetUrl;
-                  }
-                });
-                window.addEventListener('resize', function(){ chart.resize(); });
-              })();
-            </script>
-          <% end %>
-        </div>
-      <% else %>
-        <%# No child projects: show employees tiles with total hours %>
-        <% users_table = User.table_name %>
-        <% user_rows = time_entry_scope_with_visibility.joins(:user).group("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname").reorder(nil).pluck("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname", "SUM(#{time_entries_table}.hours)") %>
-        <% user_rows = user_rows.sort_by { |(_, fn, ln, h)| [-h.to_f, ln.to_s, fn.to_s] } %>
-        <%# Build per-user activity distribution %>
-        <% per_user_activity_rows = time_entry_scope_with_visibility.joins(:user).joins(:activity).group("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name").reorder(nil).pluck("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
-        <% per_user_activity = Hash.new { |h, k| h[k] = [] } %>
-        <% per_user_activity_rows.each do |uid, aid, aname, sum| %>
-          <% per_user_activity[uid] << { activity_id: aid, name: aname, hours: sum.to_f } %>
-        <% end %>
-        <div class="surv-employee-grid">
-          <% user_rows.each do |uid, firstname, lastname, hours| %>
-            <% full_name = [firstname, lastname].compact.join(' ') %>
-            <% preserved_user = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
-            <% user_params = (preserved_user.deep_dup rescue preserved_user.dup) %>
-            <% user_params['set_filter'] = '1' %>
-            <% user_params['op'] ||= {} %>
-            <% user_params['v'] ||= {} %>
-            <% user_params['op']['author_id'] = '=' %>
-            <% user_params['v']['author_id'] = [uid.to_s] %>
-            <% current_f = Array(user_params['f']).map(&:to_s) %>
-            <% unless current_f.include?('author_id') %>
-              <% user_params['f'] = (current_f + ['author_id']).reject(&:blank?) %>
-            <% end %>
-            <div class="surv-chart-container"
-                 onclick="window.location.href='<%= project_time_entries_path(@project, user_params) %>'">
-              <div class="surv-employee-name">
-                <%= h(full_name) %>
-              </div>
-              <div class="surv-employee-hours">Итого: <strong><script>document.write(formatHoursMinutes(<%= hours.to_f %>));</script></strong></div>
-              <div id="user-chart-<%= uid %>" class="surv-employee-chart"></div>
-              <script>
-                (function(){
-                  var el = document.getElementById('user-chart-<%= uid %>');
-                  if (!el) { return; }
-                  var chart = echarts.init(el);
-                  var activityData = <%= raw((per_user_activity[uid] || []).to_json) %>;
-                  var targetUrl = '<%= project_time_entries_path(@project, user_params) %>';
-                  
-                  var series = [];
-                  (activityData || []).forEach(function(item, idx){
-                    var color = getActivityColor(item.activity_id);
-                    series.push({
-                      name: item.name,
-                      type: 'bar',
-                      stack: 'total',
-                      data: [item.hours],
-                      label: { show: true, position: 'inside', formatter: function(p){ return (p && typeof p.value === 'number' && p.value > 0) ? formatHoursMinutes(p.value) : ''; }, color: '#fff', fontSize: 11 },
-                      itemStyle: { color: color, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }
+                <div class="surv-chart-container"
+                     onclick="window.location.href='<%= project_path(child_project, preserved) %>'">
+                  <h3 class="surv-child-project-title">
+                    <%= h(child_project.name) %>
+                    <small class="surv-child-project-subtitle">Нажмите для перехода в подразделение</small>
+                  </h3>
+                  <div id="echart-<%= child_project.id %>" class="surv-child-chart"></div>
+                </div>
+                <script>
+                  (function() {
+                    var el = document.getElementById('echart-<%= child_project.id %>');
+                    if (!el) { return; }
+                    var chart = echarts.init(el);
+                    var data = <%= raw(child_chart_data.to_json) %>;
+                    
+                    var colored = data.map(function(item, idx){
+                      var id = item.activity_id;
+                      var color = getActivityColor(id);
+                      return Object.assign({}, item, { itemStyle: { color: color } });
                     });
-                  });
-                  
-                  var option = {
-                    tooltip: { 
-                      trigger: 'axis', 
-                      axisPointer: { type: 'shadow' },
-                      formatter: function(params) {
-                        if (params && params.length > 0) {
-                          var result = '';
-                          params.forEach(function(item) {
-                            if (item.value > 0) {
-                              result += item.seriesName + ': ' + formatHoursMinutes(item.value) + '<br/>';
-                            }
-                          });
-                          return result;
-                        }
-                        return '';
+                    
+                    function formatHours(val){ return formatHoursMinutes(val); }
+                    var option = {
+                      tooltip: { trigger: 'item', formatter: function(p){ return (p.name || '') + ': ' + formatHours(p.value || 0) + ' (' + (Math.round(p.percent || 0)) + '%)'; } },
+                      legend: { show: false },
+                      series: [{
+                        name: '<%= l(:label_spent_time) %>',
+                        type: 'pie',
+                        radius: ['30%','70%'],
+                        center: ['50%','50%'],
+                        avoidLabelOverlap: true,
+                        itemStyle: { borderColor: '#fff', borderWidth: 1 },
+                        label: {
+                          show: true,
+                          position: 'inside',
+                          color: '#ffffff',
+                          formatter: function(p){ var d = Math.round(p.percent || 0); return (d > 0 ? d + '%' : ''); },
+                          fontSize: 20,
+                          lineHeight: 20,
+                          width: 50,
+                          overflow: 'break'
+                        },                    
+                        emphasis: { scale: true },
+                        labelLine: { show: false },
+                        data: colored
+                      }]
+                    };
+                    chart.setOption(option);
+                    var targetUrl = '<%= project_path(child_project, preserved) %>';
+                    chart.on('click', function(params){
+                      if (params && params.componentType === 'series' && params.seriesType === 'pie') {
+                        window.location.href = targetUrl;
                       }
-                    },
-                    legend: { show: false },
-                    grid: { left: '3%', right: '3%', top: '8%', bottom: '8%', containLabel: true },
-                    xAxis: { type: 'value', axisLabel: { formatter: function(value) { return formatHoursMinutes(value); }, fontSize: 11 } },
-                    yAxis: { type: 'category', data: [''], axisLabel: { show: false }, axisTick: { show: false } },
-                    series: series
-                  };
-                  chart.setOption(option);
-                  chart.on('click', function(){ window.location.href = targetUrl; });
-                  window.addEventListener('resize', function(){ chart.resize(); });
-                })();
-              </script>
+                    });
+                    window.addEventListener('resize', function(){ chart.resize(); });
+                  })();
+                </script>
+              <% end %>
             </div>
-          <% end %>
-          <% if user_rows.empty? %>
-            <p class="surv-nodata">Нет данных по сотрудникам</p>
-          <% end %>
+          </div>
+        <% end %>
+        
+        <%# Правая колонка: сотрудники, прикрепленные к ТЕКУЩЕМУ проекту (не дочерним) %>
+        <div class="surv-right-column">
+          <h3 class="surv-section-title">Сотрудники подразделения</h3>
+          <div class="surv-employee-grid">
+            <%# Получаем ID пользователей, которые являются членами ТЕКУЩЕГО проекта %>
+            <% member_user_ids = @project.members.pluck(:user_id).uniq %>
+            
+            <% if member_user_ids.any? %>
+              <% users_table = User.table_name %>
+              <%# Фильтруем трудозатраты только по пользователям-членам проекта %>
+              <% user_rows = time_entry_scope_with_visibility
+                    .joins(:user)
+                    .where(users_table => { id: member_user_ids })  # ← ФИЛЬТР ПО ЧЛЕНАМ ПРОЕКТА
+                    .group("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname")
+                    .reorder(nil)
+                    .pluck("#{users_table}.id", "#{users_table}.firstname", "#{users_table}.lastname", "SUM(#{time_entries_table}.hours)") %>
+              
+              <% user_rows = user_rows.sort_by { |(_, fn, ln, h)| [-h.to_f, ln.to_s, fn.to_s] } %>
+              
+              <%# Build per-user activity distribution ТОЛЬКО для членов проекта %>
+              <% per_user_activity_rows = time_entry_scope_with_visibility
+                    .joins(:user)
+                    .joins(:activity)
+                    .where(users_table => { id: member_user_ids })  # ← ФИЛЬТР ПО ЧЛЕНАМ ПРОЕКТА
+                    .group("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name")
+                    .reorder(nil)
+                    .pluck("#{users_table}.id", "#{activity_table}.id", "#{activity_table}.name", "SUM(#{time_entries_table}.hours)") %>
+              
+              <% per_user_activity = Hash.new { |h, k| h[k] = [] } %>
+              <% per_user_activity_rows.each do |uid, aid, aname, sum| %>
+                <% per_user_activity[uid] << { activity_id: aid, name: aname, hours: sum.to_f } %>
+              <% end %>
+              
+              <% if user_rows.any? %>
+                <% user_rows.each do |uid, firstname, lastname, hours| %>
+                  <% full_name = [firstname, lastname].compact.join(' ') %>
+                  <% preserved_user = request.query_parameters.slice('f', 'op', 'v', 'sort', 'c', 't', 'group_by', 'set_filter') %>
+                  <% user_params = (preserved_user.deep_dup rescue preserved_user.dup) %>
+                  <% user_params['set_filter'] = '1' %>
+                  <% user_params['op'] ||= {} %>
+                  <% user_params['v'] ||= {} %>
+                  <% user_params['op']['author_id'] = '=' %>
+                  <% user_params['v']['author_id'] = [uid.to_s] %>
+                  <% current_f = Array(user_params['f']).map(&:to_s) %>
+                  <% unless current_f.include?('author_id') %>
+                    <% user_params['f'] = (current_f + ['author_id']).reject(&:blank?) %>
+                  <% end %>
+                  
+                  <%# Проверяем, есть ли у пользователя роль в проекте (необязательно, но информативно) %>
+                  <% user_member = @project.members.find_by(user_id: uid) %>
+                  <% user_roles = user_member ? user_member.roles.map(&:name).join(', ') : 'Участник' %>
+                  
+                  <div class="surv-chart-container"
+                       onclick="window.location.href='<%= project_time_entries_path(@project, user_params) %>'">
+                    <div class="surv-employee-header">
+                      <div class="surv-employee-name">
+                        <%= h(full_name) %>
+                      </div>
+                      <% if user_member %>
+                        <div class="surv-employee-role">
+                          <span class="surv-role-badge"><%= user_roles %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                    <div class="surv-employee-hours">Итого: <strong><script>document.write(formatHoursMinutes(<%= hours.to_f %>));</script></strong></div>
+                    <div id="user-chart-<%= uid %>" class="surv-employee-chart"></div>
+                    <script>
+                      (function(){
+                        var el = document.getElementById('user-chart-<%= uid %>');
+                        if (!el) { return; }
+                        var chart = echarts.init(el);
+                        var activityData = <%= raw((per_user_activity[uid] || []).to_json) %>;
+                        var targetUrl = '<%= project_time_entries_path(@project, user_params) %>';
+                        
+                        var series = [];
+                        (activityData || []).forEach(function(item, idx){
+                          var color = getActivityColor(item.activity_id);
+                          series.push({
+                            name: item.name,
+                            type: 'bar',
+                            stack: 'total',
+                            data: [item.hours],
+                            label: { show: true, position: 'inside', formatter: function(p){ return (p && typeof p.value === 'number' && p.value > 0) ? formatHoursMinutes(p.value) : ''; }, color: '#fff', fontSize: 11 },
+                            itemStyle: { color: color, borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1 }
+                          });
+                        });
+                        
+                        var option = {
+                          tooltip: { 
+                            trigger: 'axis', 
+                            axisPointer: { type: 'shadow' },
+                            formatter: function(params) {
+                              if (params && params.length > 0) {
+                                var result = '';
+                                params.forEach(function(item) {
+                                  if (item.value > 0) {
+                                    result += item.seriesName + ': ' + formatHoursMinutes(item.value) + '<br/>';
+                                  }
+                                });
+                                return result;
+                              }
+                              return '';
+                            }
+                          },
+                          legend: { show: false },
+                          grid: { left: '3%', right: '3%', top: '8%', bottom: '8%', containLabel: true },
+                          xAxis: { type: 'value', axisLabel: { formatter: function(value) { return formatHoursMinutes(value); }, fontSize: 11 } },
+                          yAxis: { type: 'category', data: [''], axisLabel: { show: false }, axisTick: { show: false } },
+                          series: series
+                        };
+                        chart.setOption(option);
+                        chart.on('click', function(){ window.location.href = targetUrl; });
+                        window.addEventListener('resize', function(){ chart.resize(); });
+                      })();
+                    </script>
+                  </div>
+                <% end %>
+              <% else %>
+                <p class="surv-nodata">
+                  У сотрудников подразделения нет трудозатрат в выбранном периоде
+                  (<%= member_user_ids.size %> чел. в проекте)
+                </p>
+              <% end %>
+            <% else %>
+              <p class="surv-nodata">Нет данных по заданной фильтрации</p>
+            <% end %>
+          </div>
         </div>
-      <% end %>
+      </div>
     </div>
   </div>
+  
   <script>
     (function() {
       var el = document.getElementById('echart');
@@ -268,7 +316,4 @@
   </script>
 <% else %>
   <p class="surv-nodata"><%= l(:label_no_data) %></p>
-<% end %>
-
-<% content_for :header_tags do %>
 <% end %>
