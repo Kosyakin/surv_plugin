@@ -374,16 +374,12 @@ class ProjectsController < ApplicationController
     params[:set_filter] = '1'
     params[:sort] = 'spent_on:desc'
 
-    params[:f] = ['spent_on', 'activity_id', 'cf_1', 'author_id', 'cf_2', '']
+    params[:f] = ['spent_on',  'cf_2', '']
     params[:op] ||= {}
     params[:op][:spent_on] = 'm'
-    params[:op][:activity_id] = '='
-    params[:op][:cf_1] = '*'
-    params[:op][:author_id] = '*'
     params[:op][:cf_2] = '='
 
     params[:v] ||= {}
-    params[:v][:activity_id] = ['1','2','3','4']
     params[:v][:cf_2] = ['1']
 
     # Columns and totals

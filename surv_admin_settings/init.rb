@@ -56,7 +56,6 @@ TimeEntry.send(:include, SurvAdminSettings::Visibility::TimeEntryPatch)
 require_dependency File.expand_path('../lib/surv_admin_settings/visibility/timelog_controller_patch', __FILE__)
 TimelogController.send(:include, SurvAdminSettings::Visibility::TimelogControllerPatch)
 
-
 # Синхронизация иерархии ролей и описание проекта
 require_dependency File.expand_path('../lib/surv_admin_settings/hierarchy/member_patch', __FILE__)
 Member.send(:include, SurvAdminSettings::Hierarchy::MemberPatch)
