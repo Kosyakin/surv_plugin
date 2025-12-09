@@ -1,0 +1,13 @@
+<div class="box tabular settings">
+  <%= form_tag({ action: 'update' }, method: :post) do %>
+    <p>
+      <label for="settings_closed_period_date"><%= l(:label_surv_admin_settings_closed_period_date) %></label>
+      <%= text_field_tag 'settings[closed_period_date]', @closed_period_date, size: 12, type: 'date' %>
+    </p>
+    <p>
+      <%= submit_tag l(:button_save) %>
+    </p>
+  <% end %>
+</div>
+
+
