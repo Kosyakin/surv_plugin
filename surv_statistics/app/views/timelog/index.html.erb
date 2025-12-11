@@ -1,3 +1,15 @@
+<style>
+.icon-only icon-edit {
+    display: none !important;
+}
+.icon-only icon-del {
+    display: none !important;
+}
+td.buttons a.icon-edit,
+td.buttons a.icon-del {
+    display: none !important;
+}
+</style>
 <h2><%= @query.new_record? ? l(:label_spent_time) : @query.name %></h2>
 <%= @query.persisted? && @query.description.present? ? content_tag('p', @query.description, class: 'subtitle') : '' %>
 

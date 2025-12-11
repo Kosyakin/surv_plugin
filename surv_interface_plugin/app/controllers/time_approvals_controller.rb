@@ -457,7 +457,7 @@ class TimeApprovalsController < ApplicationController
       'cf_2' => ['1']
     }
 
-    params[:c] = ['spent_on','activity','cf_1','comments','cf_2','hours']
+    params[:c] = ['spent_on','activity','cf_1','comments','hours']
     params[:group_by] ||= 'user'
     params[:t] ||= ['hours']
   end

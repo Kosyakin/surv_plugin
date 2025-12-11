@@ -278,23 +278,23 @@ module SurvStatistics
     # иначе ставим оператор "*" (показать все).
     def surv_apply_default_time_filters
       return unless request.format && request.format.html?
-    
+
       # Сохраняем исходные параметры запроса
       original = {
         f: params[:f], op: params[:op], v: params[:v], c: params[:c], t: params[:t],
         sort: params[:sort], query_id: params[:query_id], group_by: params[:group_by], columns: params[:columns]
       }
       Rails.logger.info("[SurvStats] Timelog before defaults: user_id=#{User.current.id} project_id=#{@project&.id} original=#{original.inspect}")
-    
+
       # Сбрасываем только сохраненный запрос
       params[:query_id] = nil
       params[:set_filter] = '1'
-    
+
       # sort - устанавливаем только если не передан или пустой
       if params[:sort].blank? && params['sort'].blank?
         params[:sort] = 'spent_on:desc'
       end
-    
+
       # Обработка фильтров - сохраняем все переданные, добавляем недостающие базовые
       if params[:f].nil? || !params[:f].is_a?(Array)
         # Если фильтров нет вообще - полная инициализация
@@ -305,7 +305,7 @@ module SurvStatistics
         params[:op]['cf_1'] = '*'
         params[:op]['author_id'] = '*'
         params[:op]['cf_2'] = '*'
-    
+
         params[:v] ||= {}
         params[:v]['activity_id'] = ['1','2','3','4']
         params[:v]['author_id'] = ['']
@@ -314,7 +314,7 @@ module SurvStatistics
         # Если фильтры уже есть - добавляем только недостающие базовые
         params[:op] ||= {}
         params[:v] ||= {}
-    
+
         # Базовые фильтры по умолчанию
         default_filters = {
           'spent_on' => { op: 'm', v: nil }, # v не устанавливаем для дат
@@ -323,7 +323,7 @@ module SurvStatistics
           'author_id' => { op: '*', v: [''] },
           'cf_2' => { op: '*', v: [''] }
         }
-    
+
         default_filters.each do |field, config|
           unless params[:f].include?(field)
             params[:f] << field
@@ -331,26 +331,59 @@ module SurvStatistics
             params[:v][field] = config[:v] if config[:v]
           end
         end
-    
+
         # Убедимся, что пустой элемент есть в массиве фильтров
         params[:f] << '' unless params[:f].include?('')
       end
-    
+
+      # Определяем, нужно ли скрывать столбец пользователя
+      hide_user_column = false
+      
+      # Проверяем фильтр author_id
+      if params[:f] && params[:f].include?('author_id')
+        author_op = params[:op]['author_id'] if params[:op]
+        author_values = params[:v]['author_id'] if params[:v]
+        
+        # Если оператор не '*' и только одно значение (конкретный пользователь)
+        if author_op && author_op != '*' && author_values.is_a?(Array)
+          # Фильтр на одного пользователя, если только одно непустое значение
+          non_empty_values = author_values.reject(&:blank?)
+          hide_user_column = non_empty_values.size == 1
+          
+          Rails.logger.info("[SurvStats] Author filter analysis: op=#{author_op} values=#{author_values.inspect} hide_user_column=#{hide_user_column}")
+        end
+      end
+
       # Колонки для списка - устанавливаем только если не переданы или пустые
       if params[:c].blank? && params['c'].blank?
-        params[:c] = ['spent_on','cf_1','comments','cf_2','hours']
+        # Базовый набор колонок
+        columns = ['spent_on', 'user', 'cf_1', 'comments', 'cf_2', 'hours']
+        
+        # Убираем столбец 'user' если нужно скрыть
+        if hide_user_column
+          columns.delete('user')
+          Rails.logger.info("[SurvStats] Hiding user column due to single-user filter")
+        end
+        
+        params[:c] = columns
+      elsif params[:c].is_a?(Array)
+        # Если колонки переданы явно, но нужно скрыть user - убираем его из массива
+        if hide_user_column && params[:c].include?('user')
+          params[:c].delete('user')
+          Rails.logger.info("[SurvStats] Removing user column from explicit list due to single-user filter")
+        end
       end
-    
+
       # Группировка - устанавливаем только если не передана или пустая
       if params[:group_by].blank? && params['group_by'].blank?
         params[:group_by] = 'activity'
       end
-    
+
       # Итоги - устанавливаем только если не переданы или пустые
       if params[:t].blank? && params['t'].blank?
         params[:t] = ['hours','']
       end
-    
+
       Rails.logger.info(
         "[SurvStats] Timelog defaults applied: set_filter=#{params[:set_filter]} sort=#{params[:sort]} " \
         "f=#{params[:f].inspect} op_keys=#{params[:op]&.keys.inspect} v_keys=#{params[:v]&.keys.inspect} " \

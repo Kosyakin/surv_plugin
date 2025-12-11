@@ -75,6 +75,27 @@ document.addEventListener('DOMContentLoaded', function() {
         input.className = 'combo-select-input';
         input.placeholder = 'Введите или выберите значение';
 
+        // Добавляем крестик
+        const clearButton = document.createElement('button');
+        clearButton.className = 'combo-select-clear';
+        clearButton.type = 'button';
+        clearButton.innerHTML = '&times;';
+        clearButton.style.display = 'none';
+        container.appendChild(clearButton);
+        // Функция для управления видимостью крестика
+        function toggleClearButton() {
+            clearButton.style.display = input.value ? 'block' : 'none';
+        }
+        // Обработчик клика по крестику
+        clearButton.addEventListener('click', () => {
+            input.value = '';
+            originalSelect.value = '';
+            tooltip.style.display = 'none';
+            updateDropdown('');
+            toggleClearButton();
+            input.focus();
+        });
+
         const dropdown = document.createElement('div');
         dropdown.className = 'combo-select-dropdown';
 
@@ -169,6 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         
                         container.classList.remove('expanded');
+                        toggleClearButton(); // показываем крестик после выбора
+
                     });
 
                     dropdown.appendChild(optionElement);
@@ -200,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         input.addEventListener('input', (e) => {
             updateDropdown(e.target.value);
+            toggleClearButton();
 
             const exactMatch = options.find(
                 opt => !opt.isGroup && opt.displayText.toLowerCase() === e.target.value.toLowerCase()
@@ -332,7 +356,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         }
 
-        return { container, fieldWrapper, input, dropdown, tooltip, originalSelect, setEnabled, setAllowedGroups, clearSelection, setValueByOptionValue };
+        return {
+            container,
+            fieldWrapper,
+            input,
+            dropdown,
+            tooltip,
+            originalSelect,
+            setEnabled,
+            setAllowedGroups,
+            clearSelection: () => {
+                input.value = '';
+                originalSelect.value = '';
+                tooltip.style.display = 'none';
+                updateDropdown('');
+                toggleClearButton(); // скрываем крестик
+            },
+            setValueByOptionValue
+        };
     }
 
     // Вспомогательные функции для барабана выбора часов/минут
