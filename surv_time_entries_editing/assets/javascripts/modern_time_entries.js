@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Основной модуль улучшений формы трудозатрат (селект с поиском, барабан часов и др.)
     // Конфигурация идентификаторов пользовательских полей Redmine.
-    // ID пользовательского поля "Подтип трудозатрат" — преобразуется в комбинированное поле
     const CUSTOM_FIELD_CONTRACT_ID = 'time_entry_custom_field_values_1';
 
     // Отключает стили плагина на страницах со списком трудозатрат, чтобы не ломать таблицы
@@ -46,334 +44,28 @@ document.addEventListener('DOMContentLoaded', function() {
         enhanceForm(editTimeEntryForm);
     }
 
-    // Парсинг текста вида "Название (подсказка)" для раздельного отображения
-    function extractParenthesesContent(text) {
-        const match = text.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
-        if (match) {
-            return {
-                mainText: match[1].trim(),
-                parenthesesText: match[2].trim(),
-                hasParentheses: true
-            };
-        }
-        return {
-            mainText: text,
-            parenthesesText: '',
-            hasParentheses: false
-        };
-    }
-
-    // Преобразует обычный <select> в комбинированное поле с фильтрацией, подсказкой и группами
-    function convertSelectToCombo(selectElement) {
-        if (!selectElement) return;
-
-        const container = document.createElement('div');
-        container.className = 'combo-select-container';
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'combo-select-input';
-        input.placeholder = 'Введите или выберите значение';
-
-        // Добавляем крестик
-        const clearButton = document.createElement('button');
-        clearButton.className = 'combo-select-clear';
-        clearButton.type = 'button';
-        clearButton.innerHTML = '&times;';
-        clearButton.style.display = 'none';
-        container.appendChild(clearButton);
-        // Функция для управления видимостью крестика
-        function toggleClearButton() {
-            clearButton.style.display = input.value ? 'block' : 'none';
-        }
-        // Обработчик клика по крестику
-        clearButton.addEventListener('click', () => {
-            input.value = '';
-            originalSelect.value = '';
-            tooltip.style.display = 'none';
-            updateDropdown('');
-            toggleClearButton();
-            input.focus();
-        });
-
-        const dropdown = document.createElement('div');
-        dropdown.className = 'combo-select-dropdown';
-
-        // Создаем обертку для всего поля (включая подсказку)
-        const fieldWrapper = document.createElement('div');
-        fieldWrapper.className = 'combo-field-wrapper';
-
-        // Создаем элемент для подсказки (отдельно от combo-контейнера)
-        const tooltip = document.createElement('div');
-        tooltip.className = 'combo-select-tooltip';
-        tooltip.style.display = 'none';
-
-        const originalSelect = selectElement.cloneNode(true);
-        originalSelect.style.display = 'none';
-
-        if (selectElement.value) {
-            // Ищем выбранный option безопасно, без querySelector (значение может содержать кавычки)
-            let selectedText = '';
-            for (const opt of selectElement.options) {
-                if (opt.value === selectElement.value) { selectedText = opt.textContent; break; }
-            }
-            if (selectedText) { 
-                const parsed = extractParenthesesContent(selectedText);
-                input.value = parsed.mainText;
-                if (parsed.hasParentheses) {
-                    tooltip.textContent = parsed.parenthesesText;
-                    tooltip.style.display = 'block';
-                }
-            }
-        }
-
-        const options = [];
-        let currentGroup = null;
-        for (const option of selectElement.options) {
-            const text = option.textContent || '';
-            const isGroupLine = text.startsWith('--') && text.endsWith('--');
-            if (isGroupLine) {
-                currentGroup = text.replace(/^--|--$/g, '');
-                options.push({ value: '', text: currentGroup, isGroup: true, groupName: currentGroup });
-                continue;
-            }
-            if (option.value) {
-                const parsed = extractParenthesesContent(text);
-                options.push({
-                    value: option.value,
-                    text: text, // Оригинальный текст для отправки на сервер
-                    displayText: parsed.mainText, // Текст для отображения
-                    tooltipText: parsed.parenthesesText, // Текст для подсказки
-                    hasParentheses: parsed.hasParentheses,
-                    isGroup: false,
-                    groupName: currentGroup
-                });
-            }
-        }
-
-        let allowedGroups = null; // null = без фильтра, иначе массив имен групп
-
-        // Перестраивает список опций с учетом фильтра и разрешенных групп
-        function updateDropdown(filter = '') {
-            dropdown.innerHTML = '';
-            let hasVisibleOptions = false;
-
-            options.forEach(option => {
-                const groupAllowed = !allowedGroups || (option.groupName && allowedGroups.includes(option.groupName));
-                if (option.isGroup) {
-                    if (!groupAllowed) return;
-                    const groupElement = document.createElement('div');
-                    groupElement.className = 'combo-select-option group';
-                    groupElement.textContent = option.text.replace(/^--|--$/g, '');
-                    dropdown.appendChild(groupElement);
-                } else if (groupAllowed && (filter === '' || option.displayText.toLowerCase().includes(filter.toLowerCase()))) {
-                    const optionElement = document.createElement('div');
-                    optionElement.className = 'combo-select-option';
-                    optionElement.textContent = option.displayText; // Показываем только основной текст
-                    optionElement.dataset.value = option.value;
-                    optionElement.dataset.originalText = option.text;
-                    optionElement.dataset.displayText = option.displayText;
-                    optionElement.dataset.tooltipText = option.tooltipText;
-                    optionElement.dataset.hasParentheses = option.hasParentheses;
-
-                    optionElement.addEventListener('mousedown', (e) => {
-                        e.preventDefault();
-                        input.value = option.displayText; // В поле ввода показываем только основной текст
-                        originalSelect.value = option.value; // В скрытом select сохраняем оригинальное значение
-                        
-                        // Обновляем подсказку
-                        if (option.hasParentheses) {
-                            tooltip.textContent = option.tooltipText;
-                            tooltip.style.display = 'block';
-                        } else {
-                            tooltip.style.display = 'none';
-                        }
-                        
-                        container.classList.remove('expanded');
-                        toggleClearButton(); // показываем крестик после выбора
-
-                    });
-
-                    dropdown.appendChild(optionElement);
-                    hasVisibleOptions = true;
-                }
+     // Инициализирует Select2 для полей с поиском
+    function initSelect2Fields(form) {
+        const contractField = form.querySelector('#time_entry_custom_field_values_1');
+        const activityField = form.querySelector('#time_entry_activity_id');
+        
+        if (contractField && !contractField.classList.contains('select2-hidden-accessible')) {
+            $(contractField).select2({
+                language: 'ru',
+                placeholder: 'Выберите подтип деятельности',
+                allowClear: true,
+                width: '100%'
             });
-
-            if (!hasVisibleOptions && filter !== '') {
-                const noResults = document.createElement('div');
-                noResults.className = 'combo-select-option';
-                noResults.textContent = 'Совпадений не найдено';
-                dropdown.appendChild(noResults);
-            }
         }
-
-        updateDropdown();
-
-        // Открываем список по клику, чтобы не раскрываться при загрузке страницы с выбранным значением
-        input.addEventListener('click', () => {
-            container.classList.add('expanded');
-            updateDropdown(input.value);
-        });
-
-        input.addEventListener('blur', () => {
-            setTimeout(() => {
-                container.classList.remove('expanded');
-            }, 200);
-        });
-
-        input.addEventListener('input', (e) => {
-            updateDropdown(e.target.value);
-            toggleClearButton();
-
-            const exactMatch = options.find(
-                opt => !opt.isGroup && opt.displayText.toLowerCase() === e.target.value.toLowerCase()
-            );
-
-            if (exactMatch) {
-                originalSelect.value = exactMatch.value;
-                // Обновляем подсказку при точном совпадении
-                if (exactMatch.hasParentheses) {
-                    tooltip.textContent = exactMatch.tooltipText;
-                    tooltip.style.display = 'block';
-                } else {
-                    tooltip.style.display = 'none';
-                }
-            } else {
-                originalSelect.value = '';
-                tooltip.style.display = 'none';
-            }
-        });
-
-        // Клавиатурная навигация по выпадающему списку
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') {
-                e.preventDefault();
-
-                const visibleOptions = Array.from(dropdown.querySelectorAll('.combo-select-option:not(.group)'));
-                if (visibleOptions.length === 0) return;
-
-                let highlighted = dropdown.querySelector('.combo-select-option.highlighted');
-
-                if (e.key === 'Enter') {
-                    if (highlighted) {
-                        input.value = highlighted.dataset.displayText;
-                        originalSelect.value = highlighted.dataset.value;
-                        
-                        // Обновляем подсказку
-                        if (highlighted.dataset.hasParentheses === 'true') {
-                            tooltip.textContent = highlighted.dataset.tooltipText;
-                            tooltip.style.display = 'block';
-                        } else {
-                            tooltip.style.display = 'none';
-                        }
-                        
-                        container.classList.remove('expanded');
-                    }
-                    return;
-                }
-
-                if (!highlighted) {
-                    highlighted = visibleOptions[e.key === 'ArrowDown' ? 0 : visibleOptions.length - 1];
-                    highlighted.classList.add('highlighted');
-                } else {
-                    const currentIndex = visibleOptions.indexOf(highlighted);
-                    let newIndex = currentIndex;
-
-                    if (e.key === 'ArrowDown') {
-                        newIndex = (currentIndex + 1) % visibleOptions.length;
-                    } else {
-                        newIndex = (currentIndex - 1 + visibleOptions.length) % visibleOptions.length;
-                    }
-
-                    highlighted.classList.remove('highlighted');
-                    highlighted = visibleOptions[newIndex];
-                    highlighted.classList.add('highlighted');
-
-                    highlighted.scrollIntoView({ block: 'nearest' });
-                }
-            }
-        });
-
-        // Собираем combo-контейнер
-        container.appendChild(input);
-        container.appendChild(dropdown);
-        container.appendChild(originalSelect);
-
-        // Собираем обертку поля
-        fieldWrapper.appendChild(container);
-        fieldWrapper.appendChild(tooltip);
-
-        selectElement.parentNode.insertBefore(fieldWrapper, selectElement);
-        selectElement.remove();
-
-        // Публичный API комбополя для управления извне
-        function setEnabled(enabled) {
-            input.readOnly = !enabled;
-            container.classList.toggle('disabled', !enabled);
-            fieldWrapper.classList.toggle('disabled', !enabled);
-            if (!enabled) {
-                originalSelect.setAttribute('disabled', 'disabled');
-                tooltip.style.display = 'none';
-            } else {
-                originalSelect.removeAttribute('disabled');
-            }
-            if (!enabled) {
-                input.value = '';
-                originalSelect.value = '';
-                tooltip.style.display = 'none';
-            }
+        
+        if (activityField && !activityField.classList.contains('select2-hidden-accessible')) {
+            $(activityField).select2({
+                language: 'ru',
+                placeholder: 'Выберите деятельность',
+                allowClear: false,
+                width: '100%'
+            });
         }
-
-        function setAllowedGroups(groups) {
-            allowedGroups = Array.isArray(groups) && groups.length ? groups : null;
-            updateDropdown(input.value || '');
-        }
-
-        function clearSelection() {
-            input.value = '';
-            originalSelect.value = '';
-            tooltip.style.display = 'none';
-            updateDropdown('');
-        }
-
-        function setValueByOptionValue(value) {
-            if (!value) return false;
-            const opt = options.find(o => !o.isGroup && o.value === value);
-            if (!opt) return false;
-            const groupAllowed = !allowedGroups || (opt.groupName && allowedGroups.includes(opt.groupName));
-            if (!groupAllowed) return false;
-            originalSelect.value = opt.value;
-            input.value = opt.displayText;
-            
-            // Обновляем подсказку
-            if (opt.hasParentheses) {
-                tooltip.textContent = opt.tooltipText;
-                tooltip.style.display = 'block';
-            } else {
-                tooltip.style.display = 'none';
-            }
-            
-            return true;
-        }
-
-        return {
-            container,
-            fieldWrapper,
-            input,
-            dropdown,
-            tooltip,
-            originalSelect,
-            setEnabled,
-            setAllowedGroups,
-            clearSelection: () => {
-                input.value = '';
-                originalSelect.value = '';
-                tooltip.style.display = 'none';
-                updateDropdown('');
-                toggleClearButton(); // скрываем крестик
-            },
-            setValueByOptionValue
-        };
     }
 
     // Вспомогательные функции для барабана выбора часов/минут
@@ -504,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
             current = limited;
             hoursPicker.setValue(current.hours);
             minutesPicker.setValue(current.minutes);
-            // В упрощенной версии не меняем значение исходного инпута
         }
 
         function onHoursChange(h) {
@@ -565,8 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Делегат для получения трудозатрат по дате: вызывает глобальный обработчик, если он определен во вьюхе
-    // Никаких alert — визуализация и сообщения реализуются на уровне страницы (например, через ECharts)
+    // Делегат для получения трудозатрат по дате
     function getTimeEntriesForDate(date, userId, projectId) {
         if (!date) return;
         try {
@@ -602,46 +292,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Функционал скрытия/показа полей удален; используем только enable/disable + фильтрацию ниже
-        const activitySelect = form.querySelector('#time_entry_activity_id');
-
-        // Преобразуем select "Подтип деятельности" в комбинированное поле
-        const contractSelect = form.querySelector(`#${CUSTOM_FIELD_CONTRACT_ID}`);
-        let combo = null;
-        if (contractSelect) {
-            combo = convertSelectToCombo(contractSelect);
-        }
-
-        // Связка "Деятельность" -> "Подтип деятельности"
-        if (activitySelect && combo) {
-            const activityToGroups = {
-                '': [],
-                '1': ['Заявки', 'Договоры'],
-                '2': ['Внепроектная работа для заказчика'],
-                '3': ['Обеспечивающая деятельность'],
-                '4': ['Согласованное отсутствие']
-            };
-
-            function applyActivityFilter() {
-                const val = activitySelect.value || '';
-                const groups = activityToGroups[val] || [];
-                combo.setAllowedGroups(groups);
-                const enabled = val !== '';
-                combo.setEnabled(enabled);
-                if (!enabled) {
-                    combo.clearSelection();
-                } else {
-                    // Пытаемся восстановить выбранное значение, если оно разрешено
-                    const currentVal = combo.originalSelect.value;
-                    if (currentVal) {
-                        const kept = combo.setValueByOptionValue(currentVal);
-                        if (!kept) combo.clearSelection();
-                    }
+        // Инициализируем Select2 для поля "Подтип деятельности"
+        if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+            initSelect2Fields(form);
+        } else {
+            // Если Select2 еще не загружен, ждем его
+            const checkSelect2 = setInterval(() => {
+                if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+                    clearInterval(checkSelect2);
+                    initSelect2Fields(form);
                 }
-            }
-
-            applyActivityFilter();
-            activitySelect.addEventListener('change', applyActivityFilter);
+            }, 100);
         }
 
         // Подключаем барабан к полю часов
@@ -693,4 +354,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Повторная инициализация при полной загрузке (поддержка Turbolinks, если есть)
     document.addEventListener('turbolinks:load', initEnhancements, { once: true });
+    
+    // Также инициализируем при динамических изменениях формы
+    if (typeof Turbolinks !== 'undefined') {
+        document.addEventListener('turbolinks:render', function() {
+            setTimeout(initEnhancements, 100);
+        });
+    }
 });

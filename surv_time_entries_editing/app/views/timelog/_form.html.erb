@@ -492,5 +492,7 @@
 <% end %>
 
 <% content_for :header_tags do %>
-  
+  <%= stylesheet_link_tag '/themes/SURV/javascripts/vendor/select2/css/select2.min.css', :plugin => nil %>
+  <%= javascript_include_tag '/themes/SURV/javascripts/vendor/select2/js/select2.full.min.js', :plugin => nil %>
+  <%= javascript_include_tag '/themes/SURV/javascripts/vendor/select2/js/i18n/ru.js', :plugin => nil %>
 <% end %>

@@ -157,95 +157,10 @@
     display: none !important;
 }
 
-/* Стили для комбинированного поля */
-.combo-field-wrapper {
-    flex-grow: 1;
-}
-
-.combo-select-container {
-    position: relative;
-    height: 46px;
-    transition: height 0.3s ease;
-    margin-right: 0; /* Убираем отступ справа */
-}
-
-.combo-select-container.expanded {
-    height: auto;
-    min-height: 46px;
-}
-
-.combo-select-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 15px;
-    height: 46px;
-    box-sizing: border-box;
-    position: relative;
-    z-index: 2;
-    background: white;
-}
-
-.combo-select-dropdown {
-    width: 100%;
-    max-height: 0;
-    overflow: hidden;
-    background: white;
-    border: 1px solid #ddd;
-    border-top: none;
-    border-radius: 0 0 6px 6px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    position: relative;
-    z-index: 1;
-    margin-top: -6px;
-    transition: max-height 0.3s ease;
-}
-
-.combo-select-container.expanded .combo-select-dropdown {
-    max-height: 300px;
-    overflow-y: auto;
-    border-color: #000000;
-}
-
-.combo-select-container.expanded .combo-select-input {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-color: #000000;
-}
-
-.combo-select-option {
-    padding: 10px 15px;
-    cursor: pointer;
-}
-
-.combo-select-option:hover {
-    background-color: #f5f5f5;
-}
-
-.combo-select-option.group {
-    font-weight: bold;
-    color: #666;
-    background-color: #f0f0f0;
-    cursor: default;
-}
-
-.combo-select-option.highlighted {
-    background-color: #e0e0e0;
-}
-
-/* Скрытие элемента списка заявок/договоров 
-#time_entry_custom_field_values_1,
-p:has(#time_entry_custom_field_values_1) {
-    display: none !important;
-}*/
-
-/* Барабан выбора часов и минут */
+/* Стили для барабана выбора часов и минут */
 .drum-picker-container {
     flex-grow: 1;
 }
-
-/* .drum-picker-wrapper зарезервирован для совместимости */
 
 .drum-columns {
     display: flex;
@@ -271,8 +186,6 @@ p:has(#time_entry_custom_field_values_1) {
     align-items: center;
     user-select: none;
 }
-
-/* Кнопки барабана удалены */
 
 .drum-viewport {
     width: 60px;
@@ -303,28 +216,147 @@ p:has(#time_entry_custom_field_values_1) {
 .drum-item.active {
     font-weight: bold;
 }
+/* Стили для Select2 - финальная версия */
+.select2-container {
+    width: 100% !important;
+    max-width: 100%;
+    flex-grow: 1;
+}
 
-/* Стили для подсказки */
-.combo-select-tooltip {
-    font-size: 16px;
+.select2-container .select2-selection--single {
+    height: 52px;
+    min-height: 52px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 14px 15px;
+    font-size: 15px;
+    line-height: 1.5;
+    background: white;
+    transition: border-color 0.3s;
+}
+
+.select2-container .select2-selection--single:focus {
+    border-color: #000000;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 22px;
+    color: #333;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 50px;
+    right: 8px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #888 transparent transparent transparent;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: transparent transparent #888 transparent;
+}
+
+/* Выпадающий список */
+.select2-dropdown {
+    border: 1px solid #000000;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 10000;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+/* Когда dropdown открыт, скругляем только верхние углы у поля */
+.select2-container--open .select2-selection--single {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: #000000;
+}
+
+/* Поле поиска в dropdown */
+.select2-search--dropdown {
+    padding: 8px;
+}
+
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    height: 38px;
+    font-size: 14px;
+}
+
+/* Элементы списка */
+.select2-results__option {
+    padding: 10px 12px;
+    font-size: 14px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.select2-results__option--highlighted[aria-selected] {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.select2-results__option[aria-selected=true] {
+    background-color: #e0e0e0;
+}
+
+/* Группы в Select2 */
+.select2-results__group {
+    font-weight: bold;
     color: #666;
-    font-style: italic;
-    margin-top: 4px;
-    padding: 2px 4px;
-    background-color: #f9f9f9;
-    border-radius: 3px;
-    border-left: 3px solid #ddd;
+    background-color: #f0f0f0;
+    padding: 8px 12px;
+    cursor: default;
 }
 
-/* Disabled state for combo */
-.combo-select-container.disabled .combo-select-input {
-    background: #f8f8f8;
-    color: #999;
-    cursor: not-allowed;
+/* Убираем курсор для групп */
+.select2-results__group {
+    cursor: default !important;
 }
-.combo-select-container.disabled .combo-select-dropdown {
-    display: none !important;
+
+/* Responsive для маленьких экранов */
+@media (max-width: 768px) {
+    .select2-container .select2-selection--single {
+        height: 48px;
+        min-height: 48px;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px;
+    }
 }
-.combo-field-wrapper.disabled .combo-select-tooltip {
-    display: none !important;
+/* ФИКС: Принудительно задаем высоту для всех Select2 в форме трудозатрат */
+.select2-container .select2-selection--single,
+.edit_time_entry .select2-container .select2-selection--single {
+    height: 52px !important;
+    min-height: 52px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow,
+.edit_time_entry .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 50px !important;
+}
+
+/* Также для span.selection внутри */
+.select2-container .selection > span,
+.edit_time_entry .select2-container .selection > span {
+    height: 52px !important;
+    min-height: 52px !important;
 }
