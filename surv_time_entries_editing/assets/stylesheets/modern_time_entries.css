@@ -330,7 +330,7 @@
 }
 
 /* Responsive для маленьких экранов */
-@media (max-width: 768px) {
+@media (max-width: 700px) {
     .select2-container .select2-selection--single {
         height: 48px;
         min-height: 48px;
@@ -359,4 +359,25 @@
 .edit_time_entry .select2-container .selection > span {
     height: 52px !important;
     min-height: 52px !important;
+}
+
+.select2-container .select2-selection__rendered,
+.edit_time_entry .select2-container .select2-selection__rendered {
+    max-width: 86% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+/* Принудительно сбрасываем ширину после инициализации Select2 */
+.select2-container.select2-container--default.select2-container--below,
+.select2-container.select2-container--default.select2-container--above {
+    width: 86% !important;
+    min-width: 86% !important;
+}
+
+/* Или еще проще - переопределяем инлайн-стили */
+span.select2-container[style] {
+    width: 86% !important;
+    min-width: 86% !important;
+    max-width: 86% !important;
 }
