@@ -13,7 +13,7 @@ Redmine::Plugin.register :surv_interface_plugin do
         :caption => 'Мои трудозатраты', 
         :after => :activity,
         :param => :project_id,
-        :if => Proc.new { |project| User.current.allowed_to?(:view_own_time_entries, project) }
+        :if => Proc.new { |project| Project.allowed_to(:view_own_time_entries).to_a.any? }
         
   menu :project_menu, :time_entries_approval, { :controller => 'time_approvals', :action => 'index' }, 
         :caption => 'Согласование трудозатрат', 

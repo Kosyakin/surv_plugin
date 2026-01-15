@@ -239,14 +239,25 @@ class MyTimelogController < ApplicationController
       return
     end
 
-    # If no project selected, default to a project where the user has role id=3
-    if @project.nil?
-      membership_with_role3 = User.current.memberships.includes(:roles, :project).detect do |m|
-        m.roles.any? { |r| r.id.to_i == 3 }
+    # Находим проекты, где у пользователя есть право :view_own_time_entries
+    projects_with_permission = Project.allowed_to(:view_own_time_entries).to_a
+    
+    # Если проект выбран, но у пользователя нет права в этом проекте - перенаправляем на проект с правом
+    if @project.present?
+      unless User.current.allowed_to?(:view_own_time_entries, @project)
+        # Находим первый проект с правом и перенаправляем
+        if projects_with_permission.any?
+          target_project = projects_with_permission.first
+          redirect_to my_time_entries_path(project_id: target_project.id)
+          return
+        end
       end
-      if membership_with_role3&.project
-        @project = membership_with_role3.project
-        params[:project_id] = @project.id
+    else
+      # Если проект не выбран, выбираем первый проект с правом и перенаправляем
+      if projects_with_permission.any?
+        target_project = projects_with_permission.first
+        redirect_to my_time_entries_path(project_id: target_project.id)
+        return
       end
     end
 

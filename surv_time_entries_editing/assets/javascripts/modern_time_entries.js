@@ -265,6 +265,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Добавляем обработчик изменения деятельности
             $(activityField).on('change', function() {
                 const activityValue = this.value;
+                // Очищаем поле подтипа деятельности при изменении деятельности
+                const contractField = document.querySelector(`#${CUSTOM_FIELD_CONTRACT_ID}`);
+                if (contractField) {
+                    if (contractField.tagName === 'SELECT') {
+                        contractField.value = '';
+                        // Если используется Select2, обновляем его
+                        if ($(contractField).data('select2')) {
+                            $(contractField).val('').trigger('change');
+                        }
+                    } else if (contractField.tagName === 'INPUT') {
+                        contractField.value = '';
+                    }
+                }
                 // Обновляем видимость блока подтипа деятельности
                 toggleContractBlockVisibility(activityValue);
             });
@@ -535,6 +548,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (approvedField) {
                     const wrapper = approvedField.closest('p');
                     if (wrapper) wrapper.style.display = 'none';
+                }
+            }
+        } catch(e) { /* noop */ }
+
+        // При редактировании трудозатраты скрываем поле "Проект", "Пользователь" и "Согласовано"
+        try {
+            const isEditForm = form && (form.classList.contains('edit_time_entry') || (form.id && form.id !== 'new_time_entry'));
+            if (isEditForm) {
+                // Скрываем поле "Проект"
+                const projectField = form.querySelector('#time_entry_project_id');
+                if (projectField) {
+                    const projectWrapper = projectField.closest('p');
+                    if (projectWrapper) projectWrapper.style.display = 'none';
+                }
+                
+                // Скрываем поле "Пользователь"
+                const userField = form.querySelector('#time_entry_user_id');
+                if (userField) {
+                    const userWrapper = userField.closest('p');
+                    if (userWrapper) userWrapper.style.display = 'none';
+                }
+                
+                // Скрываем поле "Согласовано" (cf_2)
+                const approvedField = form.querySelector('#time_entry_custom_field_values_2');
+                if (approvedField) {
+                    const approvedWrapper = approvedField.closest('p');
+                    if (approvedWrapper) approvedWrapper.style.display = 'none';
                 }
             }
         } catch(e) { /* noop */ }
