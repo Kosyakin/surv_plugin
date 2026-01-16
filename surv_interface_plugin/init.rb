@@ -17,7 +17,9 @@ Redmine::Plugin.register :surv_interface_plugin do
         
   menu :project_menu, :time_entries_approval, { :controller => 'time_approvals', :action => 'index' }, 
         :caption => 'Согласование трудозатрат', 
-        :after => :my_time_entries
+        :after => :my_time_entries,
+        :if => Proc.new { |project|
+          User.current.logged? && User.current.projects.any? { |p| User.current.allowed_to?(:approve_time_entries, p) }}
 
   # Добавляем пункты в главное меню приложения (когда проект не выбран)
   menu :application_menu, :my_time_entries, { :controller => 'my_timelog', :action => 'index' }, 
@@ -26,7 +28,8 @@ Redmine::Plugin.register :surv_interface_plugin do
 
   menu :application_menu, :time_entries_approval, { :controller => 'time_approvals', :action => 'index' }, 
         :caption => 'Согласование трудозатрат', 
-        :after => :my_time_entries
+        :after => :my_time_entries,
+        :if => Proc.new { User.current.logged? && User.current.projects.any? { |p| User.current.allowed_to?(:approve_time_entries, p) }}
 end
 
 Redmine::MenuManager.map :top_menu do |menu|

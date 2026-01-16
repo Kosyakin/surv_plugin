@@ -12,16 +12,29 @@ module SurvStatisticsHelper
   # @param options [Hash] опции для запроса (сортировка, лимиты и т.д.)
   # @return [ActiveRecord::Relation] отфильтрованный scope трудозатрат
   def time_entry_scope_with_visibility(options = {})
-    # Получаем базовый scope из запроса (уже содержит фильтры по датам, активностям и т.д.)
     scope = @query.results_scope(options)
-    
-    # Применяем дополнительную фильтрацию по правам пользователя
-    if should_restrict_to_own_entries?
-      # Если пользователь не может согласовывать чужие записи, показываем только его записи
-      scope = scope.where(user_id: User.current.id)
+
+    # Администраторы всегда видят всё
+    return scope if User.current.admin?
+
+    # Если нет проекта в контексте — перестрахуемся и покажем только свои записи
+    return scope.where(user_id: User.current.id) unless @project
+
+    # Определяем проекты текущей ветки, по которым у пользователя есть право согласования
+    approvable_ids = surv_approvable_project_ids(@project)
+
+    if approvable_ids.empty?
+      # Во всей ветке нет прав на согласование → показываем только свои записи
+      scope.where(user_id: User.current.id)
+    else
+      # Видим все записи по проектам, где есть право согласования,
+      # и только свои записи по остальным проектам
+      scope.where(
+        "#{TimeEntry.table_name}.project_id IN (:projects) OR #{TimeEntry.table_name}.user_id = :uid",
+        projects: approvable_ids,
+        uid: User.current.id
+      )
     end
-    
-    scope
   end
 
   private
@@ -39,19 +52,22 @@ module SurvStatisticsHelper
   # 
   # @return [Boolean] true если нужно ограничить видимость только своими записями
   def should_restrict_to_own_entries?
-    # Проверяем наличие проекта
     return false unless @project
-    # Администраторы всегда видят все записи
     return false if User.current.admin?
-    
-    # КРИТИЧЕСКИ ВАЖНО: Для проектов с подпроектами НЕ применяем фильтрацию
-    # Это позволяет видеть полную статистику по всем подпроектам на родительском уровне
-    # Без этого ограничения статистика по подпроектам была бы неполной
-    return false if @project.children.visible.any?
-    
-    # Для проектов без подпроектов проверяем право согласования чужих трудозатрат
-    # Если пользователь НЕ может согласовывать чужие записи, 
-    # то он видит только свои трудозатраты
-    !User.current.allowed_to?(:approve_time_entries, @project)
+
+    # Если есть хотя бы один проект в ветке, где пользователь может согласовывать,
+    # то для этих проектов ограничение не требуется.
+    # Для остальных — показываем только свои записи.
+    surv_approvable_project_ids(@project).empty?
+  end
+
+  # Кэшируем список проектов (текущий + потомки), где у пользователя есть право согласования
+  def surv_approvable_project_ids(project)
+    @surv_approvable_project_ids ||= {}
+    @surv_approvable_project_ids[project.id] ||= begin
+      project.self_and_descendants.select do |p|
+        User.current.allowed_to?(:approve_time_entries, p)
+      end.map(&:id)
+    end
   end
 end
