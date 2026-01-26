@@ -248,7 +248,7 @@ class MyTimelogController < ApplicationController
         # Находим первый проект с правом и перенаправляем
         if projects_with_permission.any?
           target_project = projects_with_permission.first
-          redirect_to my_time_entries_path(project_id: target_project.id)
+          redirect_to my_time_entries_path(surv_preserve_my_time_params.merge(project_id: target_project.id))
           return
         end
       end
@@ -256,7 +256,7 @@ class MyTimelogController < ApplicationController
       # Если проект не выбран, выбираем первый проект с правом и перенаправляем
       if projects_with_permission.any?
         target_project = projects_with_permission.first
-        redirect_to my_time_entries_path(project_id: target_project.id)
+        redirect_to my_time_entries_path(surv_preserve_my_time_params.merge(project_id: target_project.id))
         return
       end
     end
@@ -453,6 +453,13 @@ class MyTimelogController < ApplicationController
   def query_error(exception)
     session.delete(:time_entry_query)
     super
+  end
+
+  # Сохраняем исходные query-параметры (включая фильтры недели) при редиректах
+  def surv_preserve_my_time_params
+    request.query_parameters.dup
+  rescue
+    {}
   end
 
   def find_project
