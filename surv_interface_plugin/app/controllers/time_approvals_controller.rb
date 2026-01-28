@@ -275,19 +275,29 @@ class TimeApprovalsController < ApplicationController
         Rails.logger.warn("TimeApprovalsController: unable to adjust columns - #{e.class}: #{e.message}") if defined?(Rails)
       end
     end
-    scope = time_entry_scope.
+    unapproved_scope = time_entry_scope.
       preload(:issue => [:project, :tracker, :status, :assigned_to, :priority]).
       preload(:project, :user, :activity, :custom_values => :custom_field)
+    @unapproved_dates = unapproved_scope.distinct.pluck(:spent_on)
+
+    # Показываем в списке все трудозатраты, но только по датам, где есть несогласованные
+    @query.filters.delete('cf_2') if @query && @query.filters
+
+    list_scope = time_entry_scope.
+      preload(:issue => [:project, :tracker, :status, :assigned_to, :priority]).
+      preload(:project, :user, :activity, :custom_values => :custom_field)
+    list_scope = @unapproved_dates.present? ? list_scope.where(:spent_on => @unapproved_dates) : list_scope.none
+    chart_scope = unapproved_scope
 
     respond_to do |format|
       format.html do
-        @entry_count = scope.count
+        @entry_count = list_scope.count
         @entry_pages = Paginator.new @entry_count, per_page_option, params['page']
-        @entries = scope.offset(@entry_pages.offset).limit(@entry_pages.per_page).to_a
+        @entries = list_scope.offset(@entry_pages.offset).limit(@entry_pages.per_page).to_a
 
         # Build activity distribution (pie) using the full filtered scope, not just current page
         activity_buckets = {}
-        scope.to_a.each do |time_entry|
+        chart_scope.to_a.each do |time_entry|
           activity_id = time_entry.activity_id
           activity_name = time_entry.activity&.name || l(:label_none)
           bucket = (activity_buckets[activity_id] ||= { activity_id: activity_id, name: activity_name, value: 0.0 })
@@ -297,7 +307,7 @@ class TimeApprovalsController < ApplicationController
           sort_by { |item| -item[:value].to_f }
 
         # Weekly totals based on the current filtered scope but limited to the computed week range
-        week_entries = scope.where(:spent_on => @week_from..@week_to).to_a
+        week_entries = chart_scope.where(:spent_on => @week_from..@week_to).to_a
         @week_total_hours = week_entries.sum { |e| e.hours.to_f }.round(2)
         @week_remaining_hours = [(@week_planned_hours - @week_total_hours).round(2), 0.0].max
         @week_completion_percent = (@week_planned_hours > 0 ? ((@week_total_hours / @week_planned_hours) * 100.0) : 0.0).round(1)
@@ -309,7 +319,7 @@ class TimeApprovalsController < ApplicationController
 
         # Prepare data for individual user charts
         user_date_data = {}
-        scope.includes(:user).each do |time_entry|
+        chart_scope.includes(:user).each do |time_entry|
           user_name = time_entry.user&.name || 'Unknown'
           date_str = time_entry.spent_on.strftime('%d.%m.%Y')
           
@@ -368,16 +378,16 @@ class TimeApprovalsController < ApplicationController
         render :layout => !request.xhr?
       end
       format.api do
-        @entry_count = scope.count
+        @entry_count = list_scope.count
         @offset, @limit = api_offset_and_limit
-        @entries = scope.offset(@offset).limit(@limit).preload(:custom_values => :custom_field).to_a
+        @entries = list_scope.offset(@offset).limit(@limit).preload(:custom_values => :custom_field).to_a
       end
       format.atom do
-        entries = scope.limit(Setting.feeds_limit.to_i).reorder("#{TimeEntry.table_name}.created_on DESC").to_a
+        entries = list_scope.limit(Setting.feeds_limit.to_i).reorder("#{TimeEntry.table_name}.created_on DESC").to_a
         render_feed(entries, :title => l(:label_spent_time))
       end
       format.csv do
-        entries = scope.to_a
+        entries = list_scope.to_a
         send_data(query_to_csv(entries, @query, params), :type => 'text/csv; header=present', :filename => "#{filename_for_export(@query, 'timelog')}.csv")
       end
     end
