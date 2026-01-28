@@ -278,7 +278,7 @@ class TimeApprovalsController < ApplicationController
     unapproved_scope = time_entry_scope.
       preload(:issue => [:project, :tracker, :status, :assigned_to, :priority]).
       preload(:project, :user, :activity, :custom_values => :custom_field)
-    @unapproved_dates = unapproved_scope.distinct.pluck(:spent_on)
+    @unapproved_dates = unapproved_scope.reorder(nil).distinct.pluck(:spent_on)
 
     # Показываем в списке все трудозатраты, но только по датам, где есть несогласованные
     @query.filters.delete('cf_2') if @query && @query.filters
@@ -288,6 +288,69 @@ class TimeApprovalsController < ApplicationController
       preload(:project, :user, :activity, :custom_values => :custom_field)
     list_scope = @unapproved_dates.present? ? list_scope.where(:spent_on => @unapproved_dates) : list_scope.none
     chart_scope = unapproved_scope
+
+    # Итоги по дням на каждого пользователя: согласовано/требуется согласование/дефицит
+    @user_daily_stats = []
+    if @unapproved_dates.present?
+      approved_cf = TimeEntryCustomField.find_by(id: 2) rescue nil
+      is_approved = lambda do |entry|
+        return false unless approved_cf
+        cv = entry.custom_values&.detect { |v| v.custom_field_id == approved_cf.id }
+        return false unless cv
+        val = cv.value
+        val == true || val == '1' || val.to_s.strip.downcase.in?(['true','t','yes','y','да','1'])
+      end
+
+      get_day_plan = lambda do |date|
+        case date.wday
+        when 1, 2, 3, 4
+          8.67
+        when 5
+          5.17
+        else
+          0.0
+        end
+      end
+
+      daily_data_by_user = Hash.new { |h, k| h[k] = Hash.new { |hh, kk| hh[kk] = { approved: 0.0, unapproved: 0.0 } } }
+      users_with_unapproved = {}
+
+      list_scope.to_a.each do |entry|
+        user = entry.user
+        next unless user
+        date = entry.spent_on.to_date
+        hours = entry.hours.to_f
+        if is_approved.call(entry)
+          daily_data_by_user[user.id][date][:approved] += hours
+        else
+          daily_data_by_user[user.id][date][:unapproved] += hours
+          users_with_unapproved[user.id] = user.name
+        end
+      end
+
+      @user_daily_stats = users_with_unapproved.keys.sort_by { |uid| users_with_unapproved[uid].to_s }.map do |user_id|
+        user_name = users_with_unapproved[user_id]
+        user_days = daily_data_by_user[user_id]
+        dates = user_days.keys.sort
+
+        {
+          user_name: user_name,
+          dates: dates.map { |d| d.strftime('%Y-%m-%d') },
+          chart_data: dates.map do |date|
+            approved = user_days[date][:approved].round(2)
+            unapproved = user_days[date][:unapproved].round(2)
+            total = approved + unapproved
+            deficit = [get_day_plan.call(date) - total, 0.0].max.round(2)
+            {
+              date: date.strftime('%Y-%m-%d'),
+              approved: approved,
+              unapproved: unapproved,
+              deficit: deficit
+            }
+          end
+        }
+      end
+    end
 
     respond_to do |format|
       format.html do
