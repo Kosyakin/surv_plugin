@@ -23,6 +23,9 @@ ru:
   label_overview: Статистика
   label_surv_instructions: Инструкции
   label_surv_errors: Сообщить об ошибке!
+  label_equals_true: Да
+  label_equals_false: Нет
+  label_all: Все
 
   # Навигация
   label_surv_admin_settings_menu: "Настройки СУРВ"

@@ -277,11 +277,14 @@ class Query < ActiveRecord::Base
   class_attribute :operators
   self.operators = {
     "="   => :label_equals,
+    "1"   => :label_equals_true,
+    "0"   => :label_equals_false,
     "!"   => :label_not_equals,
     "o"   => :label_open_issues,
     "c"   => :label_closed_issues,
     "!*"  => :label_none,
     "*"   => :label_any,
+    "all" => :label_all,
     ">="  => :label_greater_or_equal,
     "<="  => :label_less_or_equal,
     "><"  => :label_between,
@@ -325,6 +328,7 @@ class Query < ActiveRecord::Base
     :list_with_history =>  [ "=", "!", "ev", "!ev", "cf" ],
     :list_status => [ "o", "=", "!", "ev", "!ev", "cf", "c", "*" ],
     :list_optional => [ "=", "*" ],
+    :list_optional_bool => [ "1", "0", "all" ], # Чекбокс\булиева переменная
     :list_optional_with_history => [ "=", "!", "ev", "!ev", "cf", "!*", "*" ],
     :list_subprojects => [ "*", "!*", "=", "!" ],
     :date => [ "=", "><",  "m", "lm", "y", "*" ],
@@ -516,7 +520,7 @@ class Query < ActiveRecord::Base
           # filter requires one or more values
           (values_for(field) and values_for(field).first.present?) or
           # filter doesn't require any value
-          ["o", "c", "!*", "*", "nd", "t", "ld", "nw", "w", "lw", "l2w", "nm", "m", "lm", "y", "*o", "!o"].include? operator_for(field)
+          ["1", "0", "all", "o", "c", "!*", "*", "nd", "t", "ld", "nw", "w", "lw", "l2w", "nm", "m", "lm", "y", "*o", "!o"].include? operator_for(field)
     end if filters
   end
 
@@ -979,10 +983,17 @@ class Query < ActiveRecord::Base
     filters.each_key do |field|
       next if field == "subproject_id"
 
-      v = values_for(field).clone
-      next unless v and !v.empty?
-
       operator = operator_for(field)
+
+      if operator == "all"
+        next
+      elsif operator == "1" || operator == "0"
+        v = [operator == "1" ? "1" : "0"]
+        operator = "="
+      else
+        v = values_for(field).clone
+        next unless v and !v.empty?
+      end
 
       # "me" value substitution
       if %w(assigned_to_id author_id user_id watcher_id updated_by last_updated_by).include?(field)
@@ -1519,6 +1530,9 @@ class Query < ActiveRecord::Base
   # Adds a filter for the given custom field
   def add_custom_field_filter(field, assoc=nil)
     options = field.query_filter_options(self)
+    if field.respond_to?(:field_format) && %w[bool boolean].include?(field.field_format)
+      options = options.merge(:type => :list_optional_bool)
+    end
 
     filter_id = "cf_#{field.id}"
     filter_name = field.name
