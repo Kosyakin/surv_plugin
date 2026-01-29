@@ -132,27 +132,16 @@ document.addEventListener('DOMContentLoaded', function() {
     featuredEl = document.getElementById('survFeatured');
     featuredTitleEl = document.getElementById('survFeaturedTitle');
     var featuredChartDom = document.getElementById('survFeaturedChart');
-    // Явно скрываем featured-блок при загрузке страницы
+    // Явно скрываем featured-блок при загрузке страницы (без анимационных классов)
     if (featuredEl) {
-      featuredEl.classList.remove('is-visible', 'is-shown');
       featuredEl.style.display = 'none';
     }
 
     function ensureFeaturedChart() {
       if (!featuredEl || !featuredChartDom) return null;
-      // Гарантируем, что блок видим перед init/resize
+      // Гарантируем, что блок видим перед init/resize (без анимации)
       if (window.getComputedStyle(featuredEl).display === 'none') {
-        // Включаем видимость с классами анимации
-        featuredEl.classList.add('is-visible');
-        featuredEl.classList.remove('is-shown');
         featuredEl.style.display = 'block';
-        // Форсируем reflow для корректного старта анимации
-        void featuredEl.offsetWidth;
-      } else {
-        // Если уже видим — перезапускаем анимацию
-        featuredEl.classList.add('is-visible');
-        featuredEl.classList.remove('is-shown');
-        void featuredEl.offsetWidth;
       }
       // Инициализируем при первом обращении
       if (!featuredChart) {
@@ -198,8 +187,6 @@ document.addEventListener('DOMContentLoaded', function() {
       // После того как блок стал видимым — обязательно ресайз
       setTimeout(function(){
         try { chart.resize(); } catch(e) {}
-        // Завершаем анимацию появления
-        featuredEl.classList.add('is-shown');
       }, 0);
     }
 
@@ -247,6 +234,8 @@ document.addEventListener('DOMContentLoaded', function() {
         containerEl.addEventListener('click', function(ev) {
           // Показать крупный блок и отрисовать график
           renderFeatured(userChart);
+          // Запоминаем выбранного пользователя
+          try { sessionStorage.setItem('survFeaturedUserName', userChart.user_name || ''); } catch(e) {}
           // Вернуть предыдущую скрытую плитку, если выбрали новую
           if (hiddenContainerEl && hiddenContainerEl !== containerEl) {
             hiddenContainerEl.classList.remove('is-hidden');
@@ -266,6 +255,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (chart && chart.getZr) {
         chart.getZr().on('click', function() {
           renderFeatured(userChart);
+          // Запоминаем выбранного пользователя
+          try { sessionStorage.setItem('survFeaturedUserName', userChart.user_name || ''); } catch(e) {}
           if (hiddenContainerEl && hiddenContainerEl !== containerEl) {
             hiddenContainerEl.classList.remove('is-hidden');
             hiddenContainerEl.style.display = '';
@@ -280,6 +271,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
     });
+
+    // Восстановление выбранного графика из sessionStorage после перезагрузки
+    (function restoreFeaturedFromStorage() {
+      var savedName = null;
+      try { savedName = sessionStorage.getItem('survFeaturedUserName'); } catch(e) { savedName = null; }
+      if (!savedName) return;
+      var userChart = (userDailyStats || []).find(function(u){ return (u && u.user_name) === savedName; });
+      if (!userChart) return;
+      // Отрисовать вверху
+      renderFeatured(userChart);
+      // Найти соответствующую плитку и скрыть её
+      var containers = document.querySelectorAll('.surv-approvals-chart-container');
+      for (var i=0; i<containers.length; i++) {
+        var h3 = containers[i].querySelector('.surv-approvals-user-title');
+        var titleText = h3 ? (h3.textContent || h3.innerText || '').trim() : '';
+        if (titleText === savedName) {
+          containers[i].classList.add('is-hidden');
+          containers[i].style.display = 'none';
+          hiddenContainerEl = containers[i];
+          break;
+        }
+      }
+      setTimeout(function() {
+        charts.forEach(function(c) { try { c.resize(); } catch(e) {} });
+        if (featuredChart) { try { featuredChart.resize(); } catch(e) {} }
+      }, 0);
+    })();
   }
   
   // Resize all charts when window is resized

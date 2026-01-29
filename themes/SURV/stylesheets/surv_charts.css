@@ -288,20 +288,6 @@ body, html {
   padding: 10px;
   background: #fafafa;
   margin-bottom: 15px;
-  /* Анимация появления */
-  transform-origin: center center;
-  transform: scale(0.85);
-  opacity: 0;
-  transition: transform 0.5s ease, opacity 0.5s ease;
-}
-
-.surv-approvals-featured.is-visible {
-  display: block;
-}
-
-.surv-approvals-featured.is-visible.is-shown {
-  transform: scale(1);
-  opacity: 1;
 }
 
 .surv-approvals-featured .surv-approvals-user-title {
