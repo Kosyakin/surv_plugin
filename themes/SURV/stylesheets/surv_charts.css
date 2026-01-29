@@ -276,6 +276,47 @@ body, html {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+  /* Базовая высота строки сетки под обычные карточки */
+  grid-auto-rows: 260px;
+}
+
+/* Featured (большой) блок сверху */
+.surv-approvals-featured {
+  display: none; /* показываем при выборе */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fafafa;
+  margin-bottom: 15px;
+  /* Анимация появления */
+  transform-origin: center center;
+  transform: scale(0.85);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.surv-approvals-featured.is-visible {
+  display: block;
+}
+
+.surv-approvals-featured.is-visible.is-shown {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.surv-approvals-featured .surv-approvals-user-title {
+  text-align: center;
+  margin: 0 0 10px 0;
+  color: #C53030;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 2px solid #C53030;
+  padding-bottom: 5px;
+}
+
+.surv-approvals-featured-chart {
+  width: 100%;
+  height: 390px; /* 1.5 строки (при 260px базовой) */
 }
 
 /* Chart container for user charts */
@@ -291,6 +332,17 @@ body, html {
 .surv-approvals-chart-container:hover {
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Скрытая плитка (когда отображается вверху дубликат) */
+.surv-approvals-chart-container.is-hidden {
+  display: none;
+}
+
+/* Расширенная карточка: занимает 2x2 ячейки */
+.surv-approvals-chart-container.expanded {
+  grid-column: span 2;
+  grid-row: span 2;
 }
 
 /* User chart title */
@@ -317,6 +369,11 @@ body, html {
 .surv-approvals-user-chart {
   width: 100%;
   height: 260px;
+}
+
+/* Высота графика в расширенной карточке */
+.surv-approvals-chart-container.expanded .surv-approvals-user-chart {
+  height: 540px;
 }
 
 /* CSV export modal */
@@ -408,9 +465,9 @@ body, html {
 .timelog .surv-stats-container {
   margin-top: 15px;
   padding: 12px;
-  //background: #f8f9fa;
-  //border-radius: 4px;
-  //border: 1px solid #e9ecef;
+  /* background: #f8f9fa; */
+  /* border-radius: 4px; */
+  /* border: 1px solid #e9ecef; */
 }
 
 .timelog .surv-stat-item {

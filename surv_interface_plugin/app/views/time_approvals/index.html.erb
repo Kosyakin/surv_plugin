@@ -20,6 +20,11 @@ td.buttons a.icon-del {
   </div>
 
   <div class="surv-approvals-charts">
+    <!-- Большой верхний блок для выбранного графика -->
+    <div class="surv-approvals-featured" id="survFeatured">
+      <h3 class="surv-approvals-user-title" id="survFeaturedTitle"></h3>
+      <div id="survFeaturedChart" class="surv-approvals-featured-chart" style="height: 390px;"></div>
+    </div>
     <!-- Итоги по дням на каждого сотрудника -->
     <% if @user_daily_stats.present? %>
       <div class="surv-approvals-charts-grid">
@@ -89,6 +94,11 @@ td.buttons a.icon-del {
 document.addEventListener('DOMContentLoaded', function() {
   var userDailyStats = <%= raw (@user_daily_stats || []).to_json %>;
   var charts = [];
+  var gridEl = null;
+  var featuredEl = null;
+  var featuredTitleEl = null;
+  var featuredChart = null;
+  var hiddenContainerEl = null;
   
   // Получаем цвет из CSS-класса
   function getColorFromCSS(className) {
@@ -118,6 +128,81 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Столбчатые графики по дням для каждого сотрудника
   if (userDailyStats && userDailyStats.length) {
+    gridEl = document.querySelector('.surv-approvals-charts-grid');
+    featuredEl = document.getElementById('survFeatured');
+    featuredTitleEl = document.getElementById('survFeaturedTitle');
+    var featuredChartDom = document.getElementById('survFeaturedChart');
+    // Явно скрываем featured-блок при загрузке страницы
+    if (featuredEl) {
+      featuredEl.classList.remove('is-visible', 'is-shown');
+      featuredEl.style.display = 'none';
+    }
+
+    function ensureFeaturedChart() {
+      if (!featuredEl || !featuredChartDom) return null;
+      // Гарантируем, что блок видим перед init/resize
+      if (window.getComputedStyle(featuredEl).display === 'none') {
+        // Включаем видимость с классами анимации
+        featuredEl.classList.add('is-visible');
+        featuredEl.classList.remove('is-shown');
+        featuredEl.style.display = 'block';
+        // Форсируем reflow для корректного старта анимации
+        void featuredEl.offsetWidth;
+      } else {
+        // Если уже видим — перезапускаем анимацию
+        featuredEl.classList.add('is-visible');
+        featuredEl.classList.remove('is-shown');
+        void featuredEl.offsetWidth;
+      }
+      // Инициализируем при первом обращении
+      if (!featuredChart) {
+        featuredChart = echarts.init(featuredChartDom);
+      }
+      return featuredChart;
+    }
+
+    function renderFeatured(userChart) {
+      var chart = ensureFeaturedChart();
+      if (!chart || !userChart) return;
+      if (featuredTitleEl) {
+        featuredTitleEl.textContent = userChart.user_name || '';
+      }
+      var names = userChart.dates;
+      var approved = userChart.chart_data.map(function(row) { return row.approved; });
+      var unapproved = userChart.chart_data.map(function(row) { return row.unapproved; });
+      var deficit = userChart.chart_data.map(function(row) { return row.deficit; });
+
+      var option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: function(params) {
+            var title = (params[0] && params[0].axisValue) ? params[0].axisValue : '';
+            var lines = params.map(function(p) {
+              return p.marker + ' ' + p.seriesName + ': ' + formatHoursMinutes(p.value);
+            });
+            return '<strong>' + title + '</strong><br/>' + lines.join('<br/>');
+          }
+        },
+        legend: { data: ['Согласовано', 'Требуется согласование', 'Нужно занести'] },
+        grid: { top: '4%', left: '3%', right: '3%', bottom: '8%', containLabel: true },
+        xAxis: { type: 'category', data: names, axisLabel: { interval: 0, rotate: 20 } },
+        yAxis: { type: 'value', axisLabel: { formatter: function(v){ return formatHoursMinutes(v); } } },
+        series: [
+          { name: 'Согласовано', type: 'bar', stack: 'total', data: approved, itemStyle: { color: getColorFromCSS('chart-approved') } },
+          { name: 'Требуется согласование', type: 'bar', stack: 'total', data: unapproved, itemStyle: { color: getColorFromCSS('chart-unapproved') } },
+          { name: 'Нужно занести', type: 'bar', stack: 'total', data: deficit, itemStyle: { color: getColorFromCSS('chart-deficit') } }
+        ]
+      };
+      chart.setOption(option, true);
+      // После того как блок стал видимым — обязательно ресайз
+      setTimeout(function(){
+        try { chart.resize(); } catch(e) {}
+        // Завершаем анимацию появления
+        featuredEl.classList.add('is-shown');
+      }, 0);
+    }
+
     userDailyStats.forEach(function(userChart, index) {
       var chartDom = document.getElementById('userChart' + index);
       if (!chartDom) { return; }
@@ -154,6 +239,46 @@ document.addEventListener('DOMContentLoaded', function() {
       };
 
       chart.setOption(option);
+
+      // Навешиваем обработчики клика: скрываем плитку внизу, рендерим дубликат вверху
+      var containerEl = chartDom.closest('.surv-approvals-chart-container');
+      if (containerEl) {
+        // Клик по контейнеру (заголовок/пустое место)
+        containerEl.addEventListener('click', function(ev) {
+          // Показать крупный блок и отрисовать график
+          renderFeatured(userChart);
+          // Вернуть предыдущую скрытую плитку, если выбрали новую
+          if (hiddenContainerEl && hiddenContainerEl !== containerEl) {
+            hiddenContainerEl.classList.remove('is-hidden');
+            hiddenContainerEl.style.display = '';
+          }
+          // Скрыть текущую плитку
+          containerEl.classList.add('is-hidden');
+          containerEl.style.display = 'none';
+          hiddenContainerEl = containerEl;
+          setTimeout(function() {
+            charts.forEach(function(c) { try { c.resize(); } catch(e) {} });
+            if (featuredChart) { try { featuredChart.resize(); } catch(e) {} }
+          }, 0);
+        });
+      }
+      // Клик по самому графику (canvas внутри)
+      if (chart && chart.getZr) {
+        chart.getZr().on('click', function() {
+          renderFeatured(userChart);
+          if (hiddenContainerEl && hiddenContainerEl !== containerEl) {
+            hiddenContainerEl.classList.remove('is-hidden');
+            hiddenContainerEl.style.display = '';
+          }
+          containerEl.classList.add('is-hidden');
+          containerEl.style.display = 'none';
+          hiddenContainerEl = containerEl;
+          setTimeout(function() {
+            charts.forEach(function(c) { try { c.resize(); } catch(e) {} });
+            if (featuredChart) { try { featuredChart.resize(); } catch(e) {} }
+          }, 0);
+        });
+      }
     });
   }
   
@@ -162,6 +287,9 @@ document.addEventListener('DOMContentLoaded', function() {
     charts.forEach(function(chart) {
       chart.resize();
     });
+    if (featuredChart) {
+      try { featuredChart.resize(); } catch(e) {}
+    }
   });
 });
 
