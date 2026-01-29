@@ -340,16 +340,19 @@ class TimeApprovalsController < ApplicationController
         end
       end
 
+      # Единый список дат по всем пользователям, у которых есть движения
+      all_dates = daily_data_by_user.values.flat_map(&:keys).uniq.sort
+
       @user_daily_stats = users_with_unapproved.keys.sort_by { |uid| users_with_unapproved[uid].to_s }.map do |user_id|
         user_name = users_with_unapproved[user_id]
         user_days = daily_data_by_user[user_id]
-        dates = user_days.keys.sort
 
         {
           user_name: user_name,
           # Формат: день.месяц(День недели), например: "12.02 (Пн)"
-          dates: dates.map { |d| "#{d.strftime('%d.%m')} (#{day_names[d.wday]})" },
-          chart_data: dates.map do |date|
+          dates: all_dates.map { |d| "#{d.strftime('%d.%m')} (#{day_names[d.wday]})" },
+          chart_data: all_dates.map do |date|
+            # Для отсутствующих дней берем нули и считаем дефицит как дневной план
             approved = user_days[date][:approved].round(2)
             unapproved = user_days[date][:unapproved].round(2)
             total = approved + unapproved
