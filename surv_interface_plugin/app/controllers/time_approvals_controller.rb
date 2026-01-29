@@ -280,13 +280,22 @@ class TimeApprovalsController < ApplicationController
       preload(:project, :user, :activity, :custom_values => :custom_field)
     @unapproved_dates = unapproved_scope.reorder(nil).distinct.pluck(:spent_on)
 
-    # Показываем в списке все трудозатраты, но только по датам, где есть несогласованные
-    @query.filters.delete('cf_2') if @query && @query.filters
+    # ЛЕВАЯ ТАБЛИЦА: показываем ТОЛЬКО несогласованные трудозатраты
+    list_scope = unapproved_scope
 
-    list_scope = time_entry_scope.
+    # Подготовим широкую выборку для графиков: все записи (и согласованные, и нет)
+    # за те даты, где есть несогласованные. Для этого используем копию запроса без cf_2.
+    charts_query = @query.dup
+    if charts_query && charts_query.respond_to?(:filters) && charts_query.filters
+      charts_query.filters = charts_query.filters.dup
+      charts_query.filters.delete('cf_2')
+    end
+    all_entries_for_charts_scope = charts_query.results_scope.
       preload(:issue => [:project, :tracker, :status, :assigned_to, :priority]).
       preload(:project, :user, :activity, :custom_values => :custom_field)
-    list_scope = @unapproved_dates.present? ? list_scope.where(:spent_on => @unapproved_dates) : list_scope.none
+    all_entries_for_charts_scope = @unapproved_dates.present? ? all_entries_for_charts_scope.where(:spent_on => @unapproved_dates) : all_entries_for_charts_scope.none
+
+    # Дополнительные агрегаты (оставляем как было)
     chart_scope = unapproved_scope
 
     # Итоги по дням на каждого пользователя: согласовано/требуется согласование/дефицит
@@ -300,6 +309,9 @@ class TimeApprovalsController < ApplicationController
         val = cv.value
         val == true || val == '1' || val.to_s.strip.downcase.in?(['true','t','yes','y','да','1'])
       end
+
+      # Русские краткие названия дней недели
+      day_names = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб']
 
       get_day_plan = lambda do |date|
         case date.wday
@@ -315,7 +327,7 @@ class TimeApprovalsController < ApplicationController
       daily_data_by_user = Hash.new { |h, k| h[k] = Hash.new { |hh, kk| hh[kk] = { approved: 0.0, unapproved: 0.0 } } }
       users_with_unapproved = {}
 
-      list_scope.to_a.each do |entry|
+      all_entries_for_charts_scope.to_a.each do |entry|
         user = entry.user
         next unless user
         date = entry.spent_on.to_date
@@ -335,14 +347,15 @@ class TimeApprovalsController < ApplicationController
 
         {
           user_name: user_name,
-          dates: dates.map { |d| d.strftime('%Y-%m-%d') },
+          # Формат: день.месяц(День недели), например: "12.02 (Пн)"
+          dates: dates.map { |d| "#{d.strftime('%d.%m')} (#{day_names[d.wday]})" },
           chart_data: dates.map do |date|
             approved = user_days[date][:approved].round(2)
             unapproved = user_days[date][:unapproved].round(2)
             total = approved + unapproved
             deficit = [get_day_plan.call(date) - total, 0.0].max.round(2)
             {
-              date: date.strftime('%Y-%m-%d'),
+              date: "#{date.strftime('%d.%m')} (#{day_names[date.wday]})",
               approved: approved,
               unapproved: unapproved,
               deficit: deficit
