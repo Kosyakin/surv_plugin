@@ -21,7 +21,7 @@ td.buttons a.icon-del {
 
   <div class="surv-approvals-charts">
     <!-- Большой верхний блок для выбранного графика -->
-    <div class="surv-approvals-featured" id="survFeatured">
+    <div class="surv-approvals-featured surv-approvals-chart-container" id="survFeatured">
       <h3 class="surv-approvals-user-title" id="survFeaturedTitle"></h3>
       <div id="survFeaturedChart" class="surv-approvals-featured-chart" style="height: 390px;"></div>
     </div>
@@ -194,8 +194,8 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         },
         legend: { data: ['Согласовано', 'Требуется согласование', 'Нужно занести'] },
-        grid: { top: '4%', left: '3%', right: '3%', bottom: '8%', containLabel: true },
-        xAxis: { type: 'category', data: names, axisLabel: { interval: 0, rotate: 20 } },
+        grid: { top: '4%', left: '3%', right: '3%', bottom: '12%', containLabel: true },
+        xAxis: { type: 'category', data: names, axisLabel: { interval: 0, rotate: 0 } },
         yAxis: { type: 'value', axisLabel: { formatter: function(v){ return formatHoursMinutes(v); } } },
         series: [
           { name: 'Согласовано', type: 'bar', stack: 'total', data: approved, itemStyle: { color: getColorFromCSS('chart-approved') } },
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         },
         legend: { data: ['Согласовано', 'Требуется согласование', 'Нужно занести'] },
-        grid: { top: '4%', left: '3%', right: '3%', bottom: '15%', containLabel: true },
+        grid: { top: '4%', left: '3%', right: '3%', bottom: '22%', containLabel: true },
         xAxis: { type: 'category', data: names, axisLabel: { interval: 0, rotate: 20 } },
         yAxis: { type: 'value', axisLabel: { formatter: function(v){ return formatHoursMinutes(v); } } },
         series: [
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]
       };
 
-      chart.setOption(option);
+      chart.setOption(option,true);
 
       // Навешиваем обработчики клика: скрываем плитку внизу, рендерим дубликат вверху
       var containerEl = chartDom.closest('.surv-approvals-chart-container');
@@ -307,8 +307,8 @@ document.addEventListener('DOMContentLoaded', function() {
       renderFeatured(userChart);
       // Отразить состояние групп
       applyGroupVisibility(savedName);
-      // Найти соответствующую плитку и скрыть её
-      var containers = document.querySelectorAll('.surv-approvals-chart-container');
+      // Найти соответствующую плитку ТОЛЬКО в сетке и скрыть её (не трогаем верхний featured)
+      var containers = document.querySelectorAll('.surv-approvals-charts-grid .surv-approvals-chart-container');
       for (var i=0; i<containers.length; i++) {
         var h3 = containers[i].querySelector('.surv-approvals-user-title');
         var titleText = h3 ? (h3.textContent || h3.innerText || '').trim() : '';
