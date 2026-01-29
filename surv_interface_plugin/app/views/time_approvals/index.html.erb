@@ -99,6 +99,24 @@ document.addEventListener('DOMContentLoaded', function() {
   var featuredTitleEl = null;
   var featuredChart = null;
   var hiddenContainerEl = null;
+  // Управление группами в левой таблице
+  function applyGroupVisibility(selectedName) {
+    try {
+      var groupRows = document.querySelectorAll('.surv-approvals-list tr.group');
+      groupRows.forEach(function(row) {
+        var nameEl = row.querySelector('.name .user') || row.querySelector('.name');
+        var titleText = nameEl ? (nameEl.textContent || nameEl.innerText || '').trim() : '';
+        var expander = row.querySelector('.expander');
+        var shouldOpen = selectedName && titleText === selectedName;
+        var isOpen = row.classList.contains('open');
+        if (shouldOpen && !isOpen && typeof toggleRowGroup === 'function' && expander) {
+          toggleRowGroup(expander);
+        } else if (!shouldOpen && isOpen && typeof toggleRowGroup === 'function' && expander) {
+          toggleRowGroup(expander);
+        }
+      });
+    } catch(e) { /* no-op */ }
+  }
   
   // Получаем цвет из CSS-класса
   function getColorFromCSS(className) {
@@ -136,6 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (featuredEl) {
       featuredEl.style.display = 'none';
     }
+    // По умолчанию свернуть все группы (будет раскрыта выбранная при восстановлении/клике)
+    applyGroupVisibility(null);
 
     function ensureFeaturedChart() {
       if (!featuredEl || !featuredChartDom) return null;
@@ -236,6 +256,8 @@ document.addEventListener('DOMContentLoaded', function() {
           renderFeatured(userChart);
           // Запоминаем выбранного пользователя
           try { sessionStorage.setItem('survFeaturedUserName', userChart.user_name || ''); } catch(e) {}
+          // Применяем видимость групп (раскрыть выбранную, остальные скрыть)
+          applyGroupVisibility(userChart.user_name || null);
           // Вернуть предыдущую скрытую плитку, если выбрали новую
           if (hiddenContainerEl && hiddenContainerEl !== containerEl) {
             hiddenContainerEl.classList.remove('is-hidden');
@@ -257,6 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
           renderFeatured(userChart);
           // Запоминаем выбранного пользователя
           try { sessionStorage.setItem('survFeaturedUserName', userChart.user_name || ''); } catch(e) {}
+          // Применяем видимость групп (раскрыть выбранную, остальные скрыть)
+          applyGroupVisibility(userChart.user_name || null);
           if (hiddenContainerEl && hiddenContainerEl !== containerEl) {
             hiddenContainerEl.classList.remove('is-hidden');
             hiddenContainerEl.style.display = '';
@@ -281,6 +305,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!userChart) return;
       // Отрисовать вверху
       renderFeatured(userChart);
+      // Отразить состояние групп
+      applyGroupVisibility(savedName);
       // Найти соответствующую плитку и скрыть её
       var containers = document.querySelectorAll('.surv-approvals-chart-container');
       for (var i=0; i<containers.length; i++) {
