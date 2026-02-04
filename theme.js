@@ -45,10 +45,10 @@ $(document).ready(function() {
         
         // Используем стандартную структуру Redmine для подсказок
         // В подсказке показываем только текст из скобок, без самих скобок
-        // Вместо (...) используем маленький знак вопроса в верхней части
+        // Вместо (...) используем маленькую звездочку в верхней части
         $cell.addClass('tooltip');
         $cell.html(
-          '<span class="cf-visible">' + visibleText + ' <sup style="font-size: 0.7em; color: #666;">?</sup></span>' +
+          '<span class="cf-visible">' + visibleText + '<sup style="font-size: 0.7em; color: #666;">*</sup></span>' +
           '<span class="tip">' + hiddenText + '</span>'
         );
         $cell.css('cursor', 'help');
